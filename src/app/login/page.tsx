@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 const FAMILY_AUTH_DOMAIN = "hanjalearning.local";
@@ -19,6 +20,7 @@ function normalizeLoginId(value: string) {
 }
 
 export default function LoginPage() {
+  const router = useRouter();
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -60,7 +62,8 @@ export default function LoginPage() {
       { onConflict: "user_id", ignoreDuplicates: true },
     );
 
-    window.location.assign("/");
+    router.replace("/");
+    router.refresh();
   }
 
   return (
