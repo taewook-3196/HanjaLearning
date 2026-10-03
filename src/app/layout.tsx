@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import ServiceWorkerRegister from "@/components/service-worker-register";
 
 export const metadata: Metadata = {
   title: "한자배움",
@@ -25,7 +26,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body><ServiceWorkerRegister />{children}</body>
     </html>
   );
 }
