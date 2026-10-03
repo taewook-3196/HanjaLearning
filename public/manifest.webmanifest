@@ -1,0 +1,11 @@
+{
+  "name": "한자배움",
+  "short_name": "한자배움",
+  "description": "가족과 함께 사용하는 광고 없는 한자 학습 앱",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f7f2",
+  "theme_color": "#ffffff",
+  "lang": "ko",
+  "orientation": "any"
+}
