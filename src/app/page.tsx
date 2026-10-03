@@ -16,11 +16,13 @@ export default async function Home() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("nickname, target_grade")
+    .select("nickname, target_provider, target_grade")
     .eq("user_id", user.id)
     .maybeSingle();
 
-  const nickname = profile?.nickname ?? "학습자";
+  if (!profile?.target_provider || !profile?.target_grade) redirect("/onboarding");
+
+  const nickname = profile.nickname ?? "학습자";
   const targetGrade = profile?.target_grade ?? "5급";
 
   return (
