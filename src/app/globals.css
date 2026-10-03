@@ -225,3 +225,5 @@ button {
 
 .speak-button { width:auto; min-height:40px; margin:14px auto 0; padding:0 14px; background:var(--surface); color:var(--accent); border:1px solid var(--line); }
 .answer-box strong { display:block; }
+
+.quiz-choices{display:grid;gap:.75rem}.quiz-choices button{min-height:56px;border:1px solid #ddd;border-radius:16px;background:white;font:inherit;font-weight:700;padding:12px 16px;text-align:left}.quiz-choices button:disabled{opacity:.7}
