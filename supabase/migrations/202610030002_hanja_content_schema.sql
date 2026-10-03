@@ -126,3 +126,16 @@ create policy "authenticated read published relations" on public.hanja_relations
     exists (select 1 from public.hanja h where h.id = from_hanja_id and h.content_status = 'PUBLISHED')
     and exists (select 1 from public.hanja h where h.id = to_hanja_id and h.content_status = 'PUBLISHED')
   );
+
+
+-- Per-user content filter.
+-- NULL provider_id means "ALL providers". A specific provider limits grades/content to that provider.
+alter table public.user_settings
+  add column if not exists exam_provider_id bigint
+  references public.exam_providers(id) on delete set null;
+
+comment on column public.user_settings.exam_provider_id is
+  'Selected exam provider. NULL means ALL providers.';
+
+create index if not exists idx_user_settings_exam_provider
+  on public.user_settings(exam_provider_id);
