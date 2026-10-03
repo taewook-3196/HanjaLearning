@@ -1,0 +1,14 @@
+"use client";
+import Link from "next/link";
+import { useEffect,useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+type Q={id:number;character:string;correct:string;choices:string[]};
+export default function ExamPage(){
+ const [qs,setQs]=useState<Q[]>([]),[i,setI]=useState(0),[score,setScore]=useState(0),[loading,setLoading]=useState(true),[done,setDone]=useState(false);
+ useEffect(()=>{(async()=>{const s=createClient();const {data:{user}}=await s.auth.getUser();if(!user){setLoading(false);return}const {data:p}=await s.from("profiles").select("target_grade").eq("user_id",user.id).maybeSingle();const {data:st}=await s.from("user_settings").select("exam_provider_id").eq("user_id",user.id).maybeSingle();let gq=s.from("exam_grades").select("id").eq("code",p?.target_grade??"5");if(st?.exam_provider_id)gq=gq.eq("provider_id",st.exam_provider_id);const {data:g}=await gq.limit(1).maybeSingle();if(!g){setLoading(false);return}const {data:maps}=await s.from("grade_hanja").select("hanja_id").eq("grade_id",g.id);const ids=(maps??[]).map(x=>x.hanja_id);const {data:h}=await s.from("hanja").select("id,character").in("id",ids);const {data:r}=await s.from("hanja_readings").select("hanja_id,reading,meaning").in("hanja_id",ids).eq("is_primary",true);const cm=new Map((h??[]).map(x=>[x.id,x.character]));const pool=(r??[]).filter(x=>x.meaning&&x.reading&&cm.has(x.hanja_id)).map(x=>({id:x.hanja_id,character:cm.get(x.hanja_id)!,answer:x.meaning+" · "+x.reading}));const picked=pool.slice().sort(()=>Math.random()-.5).slice(0,10);setQs(picked.map(x=>{const wrong=[...new Set(pool.filter(y=>y.id!==x.id&&y.answer!==x.answer).sort(()=>Math.random()-.5).map(y=>y.answer))].slice(0,3);return{id:x.id,character:x.character,correct:x.answer,choices:[x.answer,...wrong].sort(()=>Math.random()-.5)}}).filter(x=>x.choices.length===4));setLoading(false)})()},[]);
+ const choose=(v:string)=>{const q=qs[i];if(!q)return;if(v===q.correct)setScore(s=>s+1);if(i+1>=qs.length)setDone(true);else setI(n=>n+1)};
+ if(loading)return <main className="app-shell"><section className="study-card"><h1>모의시험 준비 중…</h1></section></main>;
+ if(!qs.length)return <main className="app-shell"><section className="study-card"><h1>모의시험</h1><p>출제할 한자 자료가 부족해요.</p><Link href="/">홈으로</Link></section></main>;
+ if(done)return <main className="app-shell"><section className="study-card"><p className="eyebrow">모의시험 완료</p><h1>{qs.length}문제 중 {score}문제 정답</h1><p>틀린 문제는 학습 기록을 바꾸지 않아요. 연습 결과로만 확인하세요.</p><Link className="primary-link" href="/">홈으로</Link></section></main>;
+ const q=qs[i];return <main className="app-shell"><section className="study-card"><p className="eyebrow">모의시험 · {i+1}/{qs.length}</p><h1 style={{fontSize:"5rem",textAlign:"center"}}>{q.character}</h1><p>알맞은 뜻과 소리를 고르세요.</p><div className="quiz-choices">{q.choices.map(v=><button key={v} onClick={()=>choose(v)}>{v}</button>)}</div></section></main>
+}
