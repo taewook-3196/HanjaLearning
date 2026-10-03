@@ -3,9 +3,9 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 export default async function StatsPage(){
  const s=await createClient();const {data:{user}}=await s.auth.getUser();if(!user)redirect("/login");
- const since=new Date(Date.now()-7*86400000).toISOString();
+ const since=new Date(); since.setUTCDate(since.getUTCDate()-7); const sinceIso=since.toISOString();
  const [{data:history},{data:progress}]=await Promise.all([
-  s.from("review_history").select("result,created_at").eq("user_id",user.id).gte("created_at",since).order("created_at",{ascending:false}),
+  s.from("review_history").select("result,created_at").eq("user_id",user.id).gte("created_at",sinceIso).order("created_at",{ascending:false}),
   s.from("user_hanja_progress").select("mastery_score,study_count,wrong_streak").eq("user_id",user.id).gt("study_count",0)
  ]);
  const attempts=history??[];const correct=attempts.filter(x=>x.result==="CORRECT"||x.result==="KNOWN").length;const accuracy=attempts.length?Math.round(correct/attempts.length*100):0;
