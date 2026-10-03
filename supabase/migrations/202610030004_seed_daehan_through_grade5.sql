@@ -15,7 +15,7 @@ declare
   pos integer;
 begin
   select id into v_provider_id from public.exam_providers where code = 'DAEHAN';
-  if v_provider_id is null then/ raise exception 'DAEHAN provider is missing'; end if;
+  if v_provider_id is null then raise exception 'DAEHAN provider is missing'; end if;
 
   select id into grade8_id from public.exam_grades where exam_grades.provider_id=v_provider_id and code='8';
   select id into grade7_id from public.exam_grades where exam_grades.provider_id=v_provider_id and code='7';
