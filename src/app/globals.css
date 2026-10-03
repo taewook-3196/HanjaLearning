@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f7f2;
+  --surface: #ffffff;
+  --text: #20231f;
+  --muted: #6b7168;
+  --line: #e7e9e2;
+  --accent: #315c45;
+  --accent-soft: #e9f1eb;
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--background); }
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font-family: Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+}
+
+button, input { font: inherit; }
+
+.app-shell {
+  width: min(100%, 720px);
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 24px 18px 104px;
+}
+
+.hero-card, .study-card, .progress-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.hero-card { padding-top: 34px; padding-bottom: 34px; }
+
+.eyebrow {
+  margin: 0 0 7px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+h1, h2, p { margin-top: 0; }
+
+h1 { margin-bottom: 8px; font-size: clamp(34px, 9vw, 48px); letter-spacing: -0.06em; }
+h2 { margin-bottom: 0; font-size: 21px; letter-spacing: -0.035em; }
+.subtitle, .progress-card > p { color: var(--muted); margin-bottom: 0; line-height: 1.6; }
+
+.study-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+  margin: 20px 0;
+}
+
+.study-item {
+  min-width: 0;
+  padding: 15px 8px;
+  border-radius: 16px;
+  background: var(--accent-soft);
+  text-align: center;
+}
+
+.study-item span { display: block; color: var(--muted); font-size: 12px; }
+.study-item strong { display: block; margin-top: 6px; font-size: 19px; }
+
+button {
+  width: 100%;
+  min-height: 52px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--accent);
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.progress-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.progress-track {
+  height: 10px;
+  margin: 18px 0 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eceee9;
+}
+
+.progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.bottom-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  width: min(calc(100% - 24px), 696px);
+  padding: 9px 8px calc(9px + env(safe-area-inset-bottom));
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 10px 35px rgba(35, 40, 34, .10);
+  backdrop-filter: blur(16px);
+}
+
+.bottom-nav span {
+  padding: 8px 2px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.bottom-nav .active { color: var(--accent); }
+
+@media (min-width: 640px) {
+  .app-shell { padding-top: 40px; }
+  .hero-card, .study-card, .progress-card { padding: 30px; }
+}
