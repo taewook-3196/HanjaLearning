@@ -226,7 +226,7 @@ button {
 .speak-button { width:auto; min-height:40px; margin:14px auto 0; padding:0 14px; background:var(--surface); color:var(--accent); border:1px solid var(--line); }
 .answer-box strong { display:block; }
 
-.quiz-choices{display:grid;gap:.75rem}.quiz-choices button{min-height:56px;border:1px solid #ddd;border-radius:16px;background:white;font:inherit;font-weight:700;padding:12px 16px;text-align:left}.quiz-choices button:disabled{opacity:.7}
+.quiz-choices{display:grid;gap:.75rem}.quiz-choices button{min-height:56px;border:1px solid #ddd;border-radius:16px;background:white;color:#1f2521;-webkit-text-fill-color:#1f2521;opacity:1;font:inherit;font-weight:700;padding:12px 16px;text-align:left;appearance:none;-webkit-appearance:none}.quiz-choices button:disabled{opacity:.7}
 
 .collection-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.hanja-tile{min-height:132px;border:1px solid var(--line);border-radius:18px;background:var(--surface);padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center}.hanja-tile strong{font-size:2.5rem}.hanja-tile span,.hanja-tile small{font-size:.8rem}.hanja-tile.locked{opacity:.42}.hanja-tile.learned{box-shadow:0 8px 24px rgba(0,0,0,.05)}@media(min-width:700px){.collection-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
 
