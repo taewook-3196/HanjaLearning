@@ -4,7 +4,7 @@
 
 do $$
 declare
-  provider_id bigint;
+  v_provider_id bigint;
   grade8_id bigint;
   grade7_id bigint;
   grade6_id bigint;
@@ -14,14 +14,14 @@ declare
   ch text;
   pos integer;
 begin
-  select id into provider_id from public.exam_providers where code = 'DAEHAN';
-  if provider_id is null then raise exception 'DAEHAN provider is missing'; end if;
+  select id into v_provider_id from public.exam_providers where code = 'DAEHAN';
+  if v_provider_id is null then/ raise exception 'DAEHAN provider is missing'; end if;
 
-  select id into grade8_id from public.exam_grades where provider_id=provider_id and code='8';
-  select id into grade7_id from public.exam_grades where provider_id=provider_id and code='7';
-  select id into grade6_id from public.exam_grades where provider_id=provider_id and code='6';
-  select id into pre5_id from public.exam_grades where provider_id=provider_id and code='PRE5';
-  select id into grade5_id from public.exam_grades where provider_id=provider_id and code='5';
+  select id into grade8_id from public.exam_grades where exam_grades.provider_id=v_provider_id and code='8';
+  select id into grade7_id from public.exam_grades where exam_grades.provider_id=v_provider_id and code='7';
+  select id into grade6_id from public.exam_grades where exam_grades.provider_id=v_provider_id and code='6';
+  select id into pre5_id from public.exam_grades where exam_grades.provider_id=v_provider_id and code='PRE5';
+  select id into grade5_id from public.exam_grades where exam_grades.provider_id=v_provider_id and code='5';
 
   chars := string_to_array('九 金 南 男 女 東 六 母 木 門 父 北 四 三 西 水 十 五 月 二 人 日 一 子 弟 七 土 八 兄 火',' ');
   for pos in 1..array_length(chars,1) loop
