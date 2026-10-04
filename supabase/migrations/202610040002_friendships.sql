@@ -33,7 +33,7 @@ begin
     raise exception 'invalid friendship transition';
   end if;
   return new;
-end; $;
+end; $tag$;
 
 drop trigger if exists validate_friendship_update_trigger on public.friendships;
 create trigger validate_friendship_update_trigger
@@ -54,7 +54,8 @@ as $tag$
  select a.user_id,a.login_id,coalesce(p.nickname,a.nickname,a.login_id),p.target_grade
  from public.account_status a
  left join public.profiles p on p.user_id=a.user_id
- where a.status='ACTIVE'
+ where exists(select 1 from public.account_status me where me.user_id=(select auth.uid()) and me.status='ACTIVE')
+   and a.status='ACTIVE'
    and not exists(select 1 from public.admin_users ad where ad.user_id=a.user_id)
  order by coalesce(p.nickname,a.nickname,a.login_id);
 $tag$;
