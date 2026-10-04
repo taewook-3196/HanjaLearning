@@ -32,6 +32,7 @@ export default function TurnstileChallenge({ onToken }: Props) {
   const widgetId = useRef<string | null>(null);
   const [status, setStatus] = useState<Status>("loading");
   const [errorCode, setErrorCode] = useState("");
+  const [challengeFailures, setChallengeFailures] = useState(0);
 
   const fail = useCallback((code: string) => {
     onToken(null);
@@ -59,7 +60,14 @@ export default function TurnstileChallenge({ onToken }: Props) {
           if (widgetId.current) window.turnstile?.reset(widgetId.current);
         },
         "error-callback": (code) => {
-          fail(code || "unknown");
+          const value = code || "unknown";
+          if (value.startsWith("300") && widgetId.current && challengeFailures < 1) {
+            setChallengeFailures(1);
+            onToken(null);
+            window.setTimeout(() => window.turnstile?.reset(widgetId.current || undefined), 300);
+            return true;
+          }
+          fail(value);
           return true;
         },
         "timeout-callback": () => fail("timeout"),
@@ -68,7 +76,7 @@ export default function TurnstileChallenge({ onToken }: Props) {
     } catch {
       fail("render-error");
     }
-  }, [elementId, fail, onToken, siteKey]);
+  }, [challengeFailures, elementId, fail, onToken, siteKey]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -87,6 +95,7 @@ export default function TurnstileChallenge({ onToken }: Props) {
 
   const retry = () => {
     setErrorCode("");
+    setChallengeFailures(0);
     setStatus("loading");
     onToken(null);
     if (widgetId.current && window.turnstile) {
@@ -115,9 +124,9 @@ export default function TurnstileChallenge({ onToken }: Props) {
       {status === "loading" ? <p className="field-note">보안 확인을 불러오는 중입니다…</p> : null}
       {status === "error" ? (
         <div className="form-message" role="alert">
-          <p>보안 확인을 완료하지 못했습니다. 오류 코드: <strong>{errorCode}</strong></p>
+          <p>{errorCode.startsWith("300") ? "Chrome에서 보안 확인에 실패했습니다. 다시 시도해 주세요." : "보안 확인을 완료하지 못했습니다."} 오류 코드: <strong>{errorCode}</strong></p>
           <button type="button" onClick={retry}>보안 확인 다시 시도</button>
-          <p className="field-note">계속 실패하면 Chrome에서 새로고침하거나 다른 네트워크에서 다시 시도해 주세요.</p>
+          <p className="field-note">계속 실패하면 Chrome을 최신 버전으로 업데이트하고, VPN·광고 차단·보안 DNS를 잠시 끄거나 Wi-Fi와 모바일 데이터 중 다른 네트워크에서 다시 시도해 주세요.</p>
         </div>
       ) : null}
     </div>
