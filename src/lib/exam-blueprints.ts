@@ -8,7 +8,8 @@ export type ExamQuestionType =
   | "CHARACTER_USAGE"
   | "SPECIAL_READING"
   | "DICTIONARY_LOOKUP"
-  | "SYNONYM_ANTONYM"
+  | "CHAR_SYNONYM_ANTONYM"
+  | "WORD_SYNONYM_ANTONYM"
   | "COMMON_CHARACTER"
   | "WORD_READING"
   | "WORD_MEANING"
@@ -30,7 +31,8 @@ export const EXAM_TYPE_REQUIREMENTS:Record<ExamQuestionType,ExamDataRequirement[
   CHARACTER_USAGE:["HANJA_READING"],
   SPECIAL_READING:["HANJA_READING"],
   DICTIONARY_LOOKUP:["CHARACTER_METADATA"],
-  SYNONYM_ANTONYM:["RELATIONS"],
+  CHAR_SYNONYM_ANTONYM:["RELATIONS"],
+  WORD_SYNONYM_ANTONYM:["WORDS","RELATIONS"],
   COMMON_CHARACTER:["WORDS"],
   WORD_READING:["WORDS"],
   WORD_MEANING:["WORDS"],
@@ -58,57 +60,57 @@ export const DAEHAN_FIELD_BLUEPRINTS:Record<string,ExamBlueprint>={
   "6":{gradeCode:"6",questionCount:50,status:"VERIFIED_111_112",items:[
     {type:"HANJA_TO_READING_MEANING",count:10},{type:"READING_MEANING_TO_HANJA",count:10},
     {type:"CHARACTER_PRINCIPLE",count:1},{type:"CHARACTER_USAGE",count:1},{type:"DICTIONARY_LOOKUP",count:1},
-    {type:"SYNONYM_ANTONYM",count:1},{type:"WORD_READING",count:5},{type:"WORD_MEANING",count:4},
+    {type:"CHAR_SYNONYM_ANTONYM",count:1},{type:"WORD_READING",count:5},{type:"WORD_MEANING",count:4},
     {type:"WORD_TO_HANJA",count:4},{type:"CONTEXT_READING",count:7},{type:"CONTEXT_TO_HANJA",count:2},
-    {type:"SYNONYM_ANTONYM",count:1},{type:"COMMON_CHARACTER",count:1},{type:"IDIOM",count:1},
+    {type:"WORD_SYNONYM_ANTONYM",count:1},{type:"COMMON_CHARACTER",count:1},{type:"IDIOM",count:1},
     {type:"CULTURE_ETIQUETTE",count:1}
   ]},
   "PRE5":{gradeCode:"PRE5",questionCount:50,status:"VERIFIED_111_112",items:[
     {type:"HANJA_TO_READING_MEANING",count:10},{type:"READING_MEANING_TO_HANJA",count:10},
     {type:"CHARACTER_PRINCIPLE",count:1},{type:"CHARACTER_USAGE",count:1},{type:"DICTIONARY_LOOKUP",count:1},
-    {type:"SYNONYM_ANTONYM",count:1},{type:"WORD_READING",count:5},{type:"WORD_MEANING",count:4},
+    {type:"CHAR_SYNONYM_ANTONYM",count:1},{type:"WORD_READING",count:5},{type:"WORD_MEANING",count:4},
     {type:"WORD_TO_HANJA",count:4},{type:"CONTEXT_READING",count:7},{type:"CONTEXT_TO_HANJA",count:2},
-    {type:"SYNONYM_ANTONYM",count:1},{type:"COMMON_CHARACTER",count:1},{type:"IDIOM",count:1},
+    {type:"WORD_SYNONYM_ANTONYM",count:1},{type:"COMMON_CHARACTER",count:1},{type:"IDIOM",count:1},
     {type:"CULTURE_ETIQUETTE",count:1}
   ]},
   "5":{gradeCode:"5",questionCount:50,status:"VERIFIED_111_112",items:[
     {type:"HANJA_TO_READING_MEANING",count:8},{type:"READING_MEANING_TO_HANJA",count:7},
     {type:"CHARACTER_PRINCIPLE",count:1},{type:"SPECIAL_READING",count:2},{type:"DICTIONARY_LOOKUP",count:1},
-    {type:"SYNONYM_ANTONYM",count:2},{type:"COMMON_CHARACTER",count:1},{type:"WORD_READING",count:9},
+    {type:"CHAR_SYNONYM_ANTONYM",count:2},{type:"COMMON_CHARACTER",count:1},{type:"WORD_READING",count:9},
     {type:"WORD_MEANING",count:3},{type:"WORD_TO_HANJA",count:3},{type:"CONTEXT_READING",count:4},
-    {type:"CONTEXT_TO_HANJA",count:3},{type:"WORD_STRUCTURE",count:1},{type:"SYNONYM_ANTONYM",count:2},
+    {type:"CONTEXT_TO_HANJA",count:3},{type:"WORD_STRUCTURE",count:1},{type:"WORD_SYNONYM_ANTONYM",count:2},
     {type:"IDIOM",count:1},{type:"CULTURE_ETIQUETTE",count:2}
   ]},
   "PRE4":{gradeCode:"PRE4",questionCount:50,status:"VERIFIED_111_112",items:[
     {type:"HANJA_TO_READING_MEANING",count:8},{type:"READING_MEANING_TO_HANJA",count:7},
     {type:"CHARACTER_PRINCIPLE",count:1},{type:"SPECIAL_READING",count:2},{type:"DICTIONARY_LOOKUP",count:1},
-    {type:"SYNONYM_ANTONYM",count:2},{type:"COMMON_CHARACTER",count:1},{type:"WORD_READING",count:9},
+    {type:"CHAR_SYNONYM_ANTONYM",count:2},{type:"COMMON_CHARACTER",count:1},{type:"WORD_READING",count:9},
     {type:"WORD_MEANING",count:3},{type:"WORD_TO_HANJA",count:3},{type:"CONTEXT_READING",count:4},
-    {type:"CONTEXT_TO_HANJA",count:3},{type:"WORD_STRUCTURE",count:1},{type:"SYNONYM_ANTONYM",count:2},
+    {type:"CONTEXT_TO_HANJA",count:3},{type:"WORD_STRUCTURE",count:1},{type:"WORD_SYNONYM_ANTONYM",count:2},
     {type:"IDIOM",count:1},{type:"CULTURE_ETIQUETTE",count:2}
   ]},
   "4":{gradeCode:"4",questionCount:50,status:"VERIFIED_111_112",items:[
     {type:"HANJA_TO_READING_MEANING",count:8},{type:"READING_MEANING_TO_HANJA",count:7},
     {type:"CHARACTER_PRINCIPLE",count:1},{type:"SPECIAL_READING",count:2},{type:"DICTIONARY_LOOKUP",count:1},
-    {type:"SYNONYM_ANTONYM",count:2},{type:"COMMON_CHARACTER",count:1},{type:"WORD_READING",count:9},
+    {type:"CHAR_SYNONYM_ANTONYM",count:2},{type:"COMMON_CHARACTER",count:1},{type:"WORD_READING",count:9},
     {type:"WORD_MEANING",count:3},{type:"WORD_TO_HANJA",count:3},{type:"CONTEXT_READING",count:4},
-    {type:"CONTEXT_TO_HANJA",count:3},{type:"WORD_STRUCTURE",count:1},{type:"SYNONYM_ANTONYM",count:2},
+    {type:"CONTEXT_TO_HANJA",count:3},{type:"WORD_STRUCTURE",count:1},{type:"WORD_SYNONYM_ANTONYM",count:2},
     {type:"IDIOM",count:1},{type:"CULTURE_ETIQUETTE",count:2}
   ]},
   "PRE3":{gradeCode:"PRE3",questionCount:50,status:"VERIFIED_111_112",items:[
     {type:"HANJA_TO_READING_MEANING",count:8},{type:"READING_MEANING_TO_HANJA",count:7},
     {type:"CHARACTER_PRINCIPLE",count:1},{type:"SPECIAL_READING",count:2},{type:"DICTIONARY_LOOKUP",count:1},
-    {type:"SYNONYM_ANTONYM",count:2},{type:"COMMON_CHARACTER",count:1},{type:"WORD_READING",count:9},
+    {type:"CHAR_SYNONYM_ANTONYM",count:2},{type:"COMMON_CHARACTER",count:1},{type:"WORD_READING",count:9},
     {type:"WORD_MEANING",count:3},{type:"WORD_TO_HANJA",count:3},{type:"CONTEXT_READING",count:4},
-    {type:"CONTEXT_TO_HANJA",count:3},{type:"WORD_STRUCTURE",count:1},{type:"SYNONYM_ANTONYM",count:2},
+    {type:"CONTEXT_TO_HANJA",count:3},{type:"WORD_STRUCTURE",count:1},{type:"WORD_SYNONYM_ANTONYM",count:2},
     {type:"IDIOM",count:1},{type:"CULTURE_ETIQUETTE",count:2}
   ]},
   "3":{gradeCode:"3",questionCount:50,status:"PENDING_FINAL_CHECK",items:[
     {type:"HANJA_TO_READING_MEANING",count:10},{type:"READING_MEANING_TO_HANJA",count:10},
     {type:"CHARACTER_PRINCIPLE",count:1},{type:"SPECIAL_READING",count:2},{type:"DICTIONARY_LOOKUP",count:1},
-    {type:"SYNONYM_ANTONYM",count:2},{type:"COMMON_CHARACTER",count:1},{type:"WORD_READING",count:7},
+    {type:"CHAR_SYNONYM_ANTONYM",count:2},{type:"COMMON_CHARACTER",count:1},{type:"WORD_READING",count:7},
     {type:"WORD_MEANING",count:3},{type:"WORD_TO_HANJA",count:2},{type:"CONTEXT_READING",count:3},
-    {type:"CONTEXT_TO_HANJA",count:2},{type:"WORD_STRUCTURE",count:1},{type:"SYNONYM_ANTONYM",count:2},
+    {type:"CONTEXT_TO_HANJA",count:2},{type:"WORD_STRUCTURE",count:1},{type:"WORD_SYNONYM_ANTONYM",count:2},
     {type:"IDIOM",count:2},{type:"CULTURE_ETIQUETTE",count:1}
   ]}
 };
