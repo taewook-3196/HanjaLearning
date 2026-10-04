@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import TurnstileChallenge from "@/components/turnstile-challenge";
 
 const AUTH_DOMAIN = "hanjalearning.local";
 const ID_PATTERN = /^[a-z0-9][a-z0-9_-]{2,19}$/;
@@ -18,6 +19,7 @@ export default function SignupPage() {
   const [message,setMessage]=useState("");
   const [loading,setLoading]=useState(false);
   const [privacyConfirmed,setPrivacyConfirmed]=useState(false);
+  const [captchaToken,setCaptchaToken]=useState<string|null>(null);
 
   async function handleSignup(event:FormEvent<HTMLFormElement>){
     event.preventDefault();
@@ -29,10 +31,11 @@ export default function SignupPage() {
     if(password.length<8){setMessage("비밀번호는 8자 이상으로 만들어 주세요.");return;}
     if(password!==confirm){setMessage("비밀번호가 서로 달라요.");return;}
     if(!privacyConfirmed){setMessage("개인정보 안내를 확인해 주세요.");return;}
+    if(!captchaToken){setMessage("보안 확인을 완료해 주세요.");return;}
     setLoading(true);
     const supabase=createClient();
     const email=`${id}@${AUTH_DOMAIN}`;
-    const {data,error}=await supabase.auth.signUp({email,password,options:{data:{login_id:id,nickname:name,application_message:applicationMessage.trim()}}});
+    const {data,error}=await supabase.auth.signUp({email,password,options:{captchaToken,data:{login_id:id,nickname:name,application_message:applicationMessage.trim()}}});
     if(error||!data.user){
       setMessage(error?.message?.toLowerCase().includes("already")?"이미 사용 중인 아이디예요.":"회원가입을 완료하지 못했어요. 잠시 후 다시 시도해 주세요.");
       setLoading(false);return;
@@ -62,8 +65,9 @@ export default function SignupPage() {
       <label><span>비밀번호</span><input type="password" autoComplete="new-password" minLength={8} value={password} onChange={e=>setPassword(e.target.value)} required /></label>
       <label><span>비밀번호 확인</span><input type="password" autoComplete="new-password" minLength={8} value={confirm} onChange={e=>setConfirm(e.target.value)} required /></label>
       <label className="privacy-confirm"><input type="checkbox" checked={privacyConfirmed} onChange={e=>setPrivacyConfirmed(e.target.checked)} required /><span><Link href="/privacy" target="_blank">개인정보 안내</Link>를 확인했고, 실명·전화번호·학교명·주소 등 불필요한 개인정보를 입력하지 않겠습니다.</span></label>
+      <TurnstileChallenge onToken={setCaptchaToken} />
       {message?<p className="form-message" role="alert">{message}</p>:null}
-      <button type="submit" disabled={loading}>{loading?"가입 중...":"회원가입"}</button>
+      <button type="submit" disabled={loading||!captchaToken}>{loading?"가입 중...":"회원가입"}</button>
     </form>
     <p className="auth-note">이미 계정이 있나요? <Link href="/login">로그인</Link></p>
   </section></main>;
