@@ -1,5 +1,12 @@
-const CACHE = "hanja-public-shell-v2";
-const PUBLIC_SHELL = ["/login", "/manifest.webmanifest"];
+const CACHE = "hanja-public-shell-v3";
+const PUBLIC_SHELL = [
+  "/login",
+  "/manifest.webmanifest",
+  "/icon-192.png",
+  "/icon-512.png",
+  "/icon-maskable-512.png",
+  "/apple-touch-icon.png",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PUBLIC_SHELL)));
@@ -23,7 +30,11 @@ self.addEventListener("fetch", (event) => {
 
   const isStaticAsset =
     url.pathname.startsWith("/_next/static/") ||
-    url.pathname === "/manifest.webmanifest";
+    url.pathname === "/manifest.webmanifest" ||
+    url.pathname === "/icon-192.png" ||
+    url.pathname === "/icon-512.png" ||
+    url.pathname === "/icon-maskable-512.png" ||
+    url.pathname === "/apple-touch-icon.png";
 
   if (isStaticAsset) {
     event.respondWith(
