@@ -80,6 +80,12 @@ create policy "authenticated read words of published common character sets" on p
  for select to authenticated using (
   exists(select 1 from public.hanja_common_character_sets s where s.id=set_id and s.content_status='PUBLISHED')
   and exists(select 1 from public.hanja_words w where w.id=word_id and w.content_status='PUBLISHED')
+  and exists(
+    select 1 from public.hanja_word_map m
+    join public.hanja_common_character_sets s on s.id=set_id
+    where m.word_id=hanja_common_character_words.word_id
+      and m.hanja_id=s.common_hanja_id
+  )
  );
 
 comment on table public.hanja_word_contexts is 'Original reviewed example sentences for context-style exam questions; not copied past-paper text.';
