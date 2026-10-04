@@ -7,12 +7,13 @@ begin
   select id into v_daehan from public.exam_providers where code='DAEHAN';
   if v_daehan is null then raise exception 'DAEHAN provider is missing'; end if;
 
+  -- Do not assume optional timestamp columns exist in older databases.
   update public.user_settings
-  set exam_provider_id=v_daehan, updated_at=now()
+  set exam_provider_id=v_daehan
   where exam_provider_id is null;
 
   update public.profiles
-  set target_provider='DAEHAN', updated_at=now()
+  set target_provider='DAEHAN'
   where target_provider is null or target_provider='ALL';
 end $$;
 
