@@ -80,5 +80,5 @@ begin
  left join public.user_hanja_progress pr on pr.user_id=p.user_id and pr.study_count>0
  where p.user_id=friend_user_id
  group by p.target_grade;
-end; $$;
+end; $tag$;
 grant execute on function public.friend_progress(uuid) to authenticated;
