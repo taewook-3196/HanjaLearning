@@ -7,6 +7,23 @@ export type PublishedWord={id:number;word:string;reading:string|null;meaning:str
 export type Relation={from_hanja_id:number;to_hanja_id:number;relation_type:string};
 export type Metadata={hanja_id:number;radical:string|null;total_strokes:number|null;formation_type:string|null};
 
+
+export function validateExamQuestions(questions:ExamQuestion[],expectedCount:number){
+ const errors:string[]=[];
+ if(questions.length!==expectedCount)errors.push(`expected ${expectedCount} questions, got ${questions.length}`);
+ const ids=new Set<number>();
+ questions.forEach((q,index)=>{
+  const label=`question ${index+1}`;
+  if(ids.has(q.id))errors.push(`${label}: duplicate id ${q.id}`); else ids.add(q.id);
+  if(!q.stem.trim())errors.push(`${label}: empty stem`);
+  if(!q.prompt.trim())errors.push(`${label}: empty prompt`);
+  if(q.choices.length!==4)errors.push(`${label}: expected 4 choices, got ${q.choices.length}`);
+  if(new Set(q.choices).size!==q.choices.length)errors.push(`${label}: duplicate choices`);
+  if(!q.choices.includes(q.correct))errors.push(`${label}: correct answer is missing from choices`);
+ });
+ return errors;
+}
+
 export function shuffle<T>(items:T[]):T[]{const a=[...items];for(let n=a.length-1;n>0;n--){const j=Math.floor(Math.random()*(n+1));[a[n],a[j]]=[a[j],a[n]]}return a}
 
 const formationLabels:Record<string,string>={PICTOGRAPH:"상형",IDEOGRAPH:"지사",COMPOUND_IDEOGRAPH:"회의",PHONO_SEMANTIC:"형성",LOAN:"가차",DERIVATIVE:"전주"};
