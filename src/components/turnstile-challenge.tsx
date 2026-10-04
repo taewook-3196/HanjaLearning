@@ -74,8 +74,9 @@ export default function TurnstileChallenge({ onToken }: Props) {
     const timer = window.setTimeout(() => {
       if (!widgetId.current) fail(window.turnstile ? "widget-not-rendered" : "script-not-loaded");
     }, 8000);
-    renderWidget();
+    const renderTimer = window.setTimeout(renderWidget, 0);
     return () => {
+      window.clearTimeout(renderTimer);
       window.clearTimeout(timer);
       if (widgetId.current && window.turnstile) {
         window.turnstile.remove(widgetId.current);
