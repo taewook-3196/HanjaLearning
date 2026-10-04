@@ -33,9 +33,9 @@ language sql
 stable
 security definer
 set search_path = public
-as $
+as $tag$
   select exists(select 1 from public.admin_users where user_id = (select auth.uid()));
-$;
+$tag$;
 
 grant execute on function public.is_app_admin() to authenticated;
 
@@ -55,7 +55,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $tag$
 declare
   requested_login_id text;
 begin
@@ -74,7 +74,7 @@ begin
 
   return new;
 end;
-$$;
+$tag$;
 
 drop trigger if exists on_auth_user_created_account_status on auth.users;
 create trigger on_auth_user_created_account_status

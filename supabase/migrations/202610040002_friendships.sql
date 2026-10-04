@@ -21,7 +21,7 @@ create policy "friendships_participant_select" on public.friendships for select 
 create policy "friendships_request_insert" on public.friendships for insert to authenticated
  with check ((select auth.uid())=requester_id and status='PENDING');
 create or replace function public.validate_friendship_update()
-returns trigger language plpgsql security definer set search_path=public as $
+returns trigger language plpgsql security definer set search_path=public as $tag$
 begin
   if old.requester_id <> new.requester_id or old.addressee_id <> new.addressee_id then
     raise exception 'friend participants cannot change';
@@ -50,20 +50,20 @@ create policy "friendships_participant_delete" on public.friendships for delete 
 create or replace function public.list_active_learners()
 returns table(user_id uuid,login_id text,nickname text,target_grade text)
 language sql stable security definer set search_path=public
-as $$
+as $tag$
  select a.user_id,a.login_id,coalesce(p.nickname,a.nickname,a.login_id),p.target_grade
  from public.account_status a
  left join public.profiles p on p.user_id=a.user_id
  where a.status='ACTIVE'
    and not exists(select 1 from public.admin_users ad where ad.user_id=a.user_id)
  order by coalesce(p.nickname,a.nickname,a.login_id);
-$$;
+$tag$;
 grant execute on function public.list_active_learners() to authenticated;
 
 create or replace function public.friend_progress(friend_user_id uuid)
 returns table(learned_count bigint,target_count integer,progress_percent integer,target_grade text)
 language plpgsql stable security definer set search_path=public
-as $$
+as $tag$
 begin
  if not exists(
    select 1 from public.friendships f
@@ -80,5 +80,5 @@ begin
  left join public.user_hanja_progress pr on pr.user_id=p.user_id and pr.study_count>0
  where p.user_id=friend_user_id
  group by p.target_grade;
-end; $$;
+end; $tag$;
 grant execute on function public.friend_progress(uuid) to authenticated;
