@@ -34,7 +34,7 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
  const reverseCount=blueprint?.items.filter(x=>x.type==="READING_MEANING_TO_HANJA").reduce((n,x)=>n+x.count,0)??0;
  const wordReadingCount=blueprint?.items.filter(x=>x.type==="WORD_READING").reduce((n,x)=>n+x.count,0)??0;
  const wordHanjaCount=blueprint?.items.filter(x=>x.type==="WORD_TO_HANJA").reduce((n,x)=>n+x.count,0)??0;
- const relationCount=blueprint?.items.filter(x=>x.type==="SYNONYM_ANTONYM").reduce((n,x)=>n+x.count,0)??0;
+ const relationCount=blueprint?.items.filter(x=>x.type==="CHAR_SYNONYM_ANTONYM").reduce((n,x)=>n+x.count,0)??0;
  const principleCount=blueprint?.items.filter(x=>x.type==="CHARACTER_PRINCIPLE").reduce((n,x)=>n+x.count,0)??0;
  const dictionaryCount=blueprint?.items.filter(x=>x.type==="DICTIONARY_LOOKUP").reduce((n,x)=>n+x.count,0)??0;
  const forward=(items:HanjaPoolItem[],count:number)=>shuffle(items).slice(0,count).map(x=>{const wrong=[...new Set(shuffle(pool.filter(y=>y.id!==x.id&&y.answer!==x.answer)).map(y=>y.answer))].slice(0,3);return{id:`hanja-forward:${x.id}`,stem:x.character,prompt:"알맞은 뜻과 소리를 고르세요.",correct:x.answer,choices:shuffle([x.answer,...wrong]),examples:x.examples}}).filter(x=>x.choices.length===4);
@@ -53,7 +53,7 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
   READING_MEANING_TO_HANJA:[...second],
   WORD_READING:[...wordReading],
   WORD_TO_HANJA:[...wordHanja],
-  SYNONYM_ANTONYM:[...relationQs],
+  CHAR_SYNONYM_ANTONYM:[...relationQs],
   CHARACTER_PRINCIPLE:[...principleQs],
   DICTIONARY_LOOKUP:[...dictionaryQs]
  };
