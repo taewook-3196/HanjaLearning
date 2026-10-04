@@ -127,7 +127,11 @@ export const IMPLEMENTED_EXAM_TYPES=new Set<ExamQuestionType>([
   "WORD_READING",
   "WORD_MEANING",
   "WORD_TO_HANJA",
-  "WORD_SYNONYM_ANTONYM"
+  "WORD_SYNONYM_ANTONYM",
+  "COMMON_CHARACTER",
+  "CONTEXT_READING",
+  "CONTEXT_TO_HANJA",
+  "WORD_STRUCTURE"
 ]);
 
 export function unsupportedBlueprintItems(blueprint:ExamBlueprint){
