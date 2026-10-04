@@ -13,6 +13,7 @@ export default function SignupPage() {
   const [loginId,setLoginId]=useState("");
   const [nickname,setNickname]=useState("");
   const [password,setPassword]=useState("");
+  const [applicationMessage,setApplicationMessage]=useState("");
   const [confirm,setConfirm]=useState("");
   const [message,setMessage]=useState("");
   const [loading,setLoading]=useState(false);
@@ -29,7 +30,7 @@ export default function SignupPage() {
     setLoading(true);
     const supabase=createClient();
     const email=`${id}@${AUTH_DOMAIN}`;
-    const {data,error}=await supabase.auth.signUp({email,password,options:{data:{login_id:id,nickname:name}}});
+    const {data,error}=await supabase.auth.signUp({email,password,options:{data:{login_id:id,nickname:name,application_message:applicationMessage.trim()}}});
     if(error||!data.user){
       setMessage(error?.message?.toLowerCase().includes("already")?"이미 사용 중인 아이디예요.":"회원가입을 완료하지 못했어요. 잠시 후 다시 시도해 주세요.");
       setLoading(false);return;
@@ -55,6 +56,7 @@ export default function SignupPage() {
     <form className="auth-form" onSubmit={handleSignup}>
       <label><span>아이디</span><input type="text" autoComplete="username" autoCapitalize="none" spellCheck={false} placeholder="예: hanja123" value={loginId} onChange={e=>setLoginId(e.target.value)} required /></label>
       <label><span>별명</span><input type="text" autoComplete="nickname" maxLength={30} placeholder="앱에서 사용할 이름" value={nickname} onChange={e=>setNickname(e.target.value)} required /></label>
+      <label><span>운영자에게 남길 메시지</span><textarea maxLength={300} placeholder="예: 민준이 아빠입니다. 5급 한자 공부를 위해 신청합니다." value={applicationMessage} onChange={e=>setApplicationMessage(e.target.value)} required /></label>
       <label><span>비밀번호</span><input type="password" autoComplete="new-password" minLength={8} value={password} onChange={e=>setPassword(e.target.value)} required /></label>
       <label><span>비밀번호 확인</span><input type="password" autoComplete="new-password" minLength={8} value={confirm} onChange={e=>setConfirm(e.target.value)} required /></label>
       {message?<p className="form-message" role="alert">{message}</p>:null}
