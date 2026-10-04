@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";\nimport { speakKorean, type SpeechVoicePreference } from "@/lib/speech";
+import { createClient } from "@/lib/supabase/client";
+import { speakKorean, type SpeechVoicePreference } from "@/lib/speech";
 type Card={id:number;character:string;reading:string;meaning:string};
 export default function LearnPage(){
  const router=useRouter(); const [mode]=useState(()=>typeof window==="undefined"?"today":new URLSearchParams(window.location.search).get("mode")??"today"); const [cards,setCards]=useState<Card[]>([]); const [index,setIndex]=useState(0); const [revealed,setRevealed]=useState(false); const [loading,setLoading]=useState(true); const [message,setMessage]=useState(""); const [saveError,setSaveError]=useState(""); const [soundEnabled,setSoundEnabled]=useState(true); const [speechVoice,setSpeechVoice]=useState("DAD"); const [answering,setAnswering]=useState(false); const answerLock=useRef(false);
