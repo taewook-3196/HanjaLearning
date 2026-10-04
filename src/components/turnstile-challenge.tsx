@@ -10,7 +10,9 @@ declare global {
         sitekey: string;
         callback: (token: string) => void;
         "expired-callback": () => void;
-        "error-callback": (errorCode?: string) => boolean | void;\n        "timeout-callback"?: () => void;\n        "unsupported-callback"?: () => void;
+        "error-callback": (errorCode?: string) => boolean | void;
+        "timeout-callback"?: () => void;
+        "unsupported-callback"?: () => void;
         theme?: "light" | "dark" | "auto";
       }) => string;
       reset: (widgetId?: string) => void;
@@ -27,7 +29,9 @@ export default function TurnstileChallenge({ onToken }: Props) {
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const reactId = useId();
   const elementId = `turnstile-${reactId.replace(/:/g, "")}`;
-  const widgetId = useRef<string | null>(null);\n  const [status, setStatus] = useState<"loading"|"ready"|"error">("loading");\n  const [errorCode, setErrorCode] = useState("");
+  const widgetId = useRef<string | null>(null);
+  const [status, setStatus] = useState<"loading"|"ready"|"error">("loading");
+  const [errorCode, setErrorCode] = useState("");
 
   const renderWidget = useCallback(() => {
     if (!siteKey || !window.turnstile || widgetId.current) return;
