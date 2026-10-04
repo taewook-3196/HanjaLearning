@@ -18,11 +18,15 @@ create table if not exists public.hanja_special_readings (
   hanja_id bigint not null references public.hanja(id) on delete cascade,
   reading text not null,
   meaning text not null,
-  usage_note text,
+  usage_note text not null,
+  choice_a text not null, choice_b text not null, choice_c text not null, choice_d text not null,
+  correct_choice smallint not null check (correct_choice between 1 and 4),
   content_status text not null default 'DRAFT'
     check (content_status in ('DRAFT','REVIEWED','SOURCE_VERIFIED','PUBLISHED')),
   source_note text,
-  unique(hanja_id,reading,meaning)
+  unique(hanja_id,reading,meaning),
+  check (length(trim(usage_note))>0),
+  check (choice_a<>choice_b and choice_a<>choice_c and choice_a<>choice_d and choice_b<>choice_c and choice_b<>choice_d and choice_c<>choice_d)
 );
 
 create table if not exists public.hanja_image_items (
@@ -34,7 +38,9 @@ create table if not exists public.hanja_image_items (
   content_status text not null default 'DRAFT'
     check (content_status in ('DRAFT','REVIEWED','SOURCE_VERIFIED','PUBLISHED')),
   source_note text,
-  unique(asset_path)
+  unique(asset_path),
+  check (asset_path like '/exam-images/%'),
+  check (length(trim(alt_text))>0)
 );
 
 alter table public.hanja_usage_items enable row level security;
