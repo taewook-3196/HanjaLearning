@@ -46,7 +46,7 @@ export default function SignupPage() {
       setMessage("계정은 만들어졌지만 학습 프로필 준비에 실패했어요. 다시 로그인해 주세요.");
       setLoading(false);return;
     }
-    router.replace("/onboarding");router.refresh();
+    router.replace("/pending");router.refresh();
   }
 
   return <main className="auth-shell"><section className="auth-card">
