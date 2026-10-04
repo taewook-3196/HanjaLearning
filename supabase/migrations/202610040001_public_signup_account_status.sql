@@ -4,14 +4,20 @@
 create table if not exists public.account_status (
   user_id uuid primary key references auth.users(id) on delete cascade,
   login_id text not null unique,
-  status text not null default 'PENDING' check (status in ('PENDING','ACTIVE','SUSPENDED')),
+  status text not null default 'PENDING' check (status in ('PENDING','ACTIVE','REJECTED','SUSPENDED')),
   nickname text,
   application_message text not null default '' check (char_length(application_message) <= 300),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.admin_users (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
 alter table public.account_status enable row level security;
+alter table public.admin_users enable row level security;
 
 create policy "account_status_select_own"
   on public.account_status for select to authenticated
@@ -19,6 +25,30 @@ create policy "account_status_select_own"
 
 revoke all on table public.account_status from anon;
 grant select on table public.account_status to authenticated;
+revoke all on table public.admin_users from anon, authenticated;
+
+create or replace function public.is_app_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $
+  select exists(select 1 from public.admin_users where user_id = (select auth.uid()));
+$;
+
+grant execute on function public.is_app_admin() to authenticated;
+
+create policy "account_status_admin_select"
+  on public.account_status for select to authenticated
+  using (public.is_app_admin());
+
+create policy "account_status_admin_update"
+  on public.account_status for update to authenticated
+  using (public.is_app_admin())
+  with check (public.is_app_admin());
+
+grant update on table public.account_status to authenticated;
 
 create or replace function public.handle_new_public_user()
 returns trigger
