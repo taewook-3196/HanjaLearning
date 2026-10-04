@@ -1,7 +1,8 @@
 "use client";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";\nimport { speakKorean, type SpeechVoicePreference } from "@/lib/speech";
+import { createClient } from "@/lib/supabase/client";
+import { speakKorean, type SpeechVoicePreference } from "@/lib/speech";
 type Provider={id:number;code:string;name:string};
 type Grade={id:number;provider_id:number;code:string;name:string;cumulative_hanja_count:number|null;sort_order:number};
 export default function SettingsPage(){
