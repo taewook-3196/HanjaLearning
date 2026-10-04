@@ -120,7 +120,14 @@ export function blueprintCount(blueprint:ExamBlueprint){return blueprint.items.r
 
 export const IMPLEMENTED_EXAM_TYPES=new Set<ExamQuestionType>([
   "HANJA_TO_READING_MEANING",
-  "READING_MEANING_TO_HANJA"
+  "READING_MEANING_TO_HANJA",
+  "CHARACTER_PRINCIPLE",
+  "DICTIONARY_LOOKUP",
+  "CHAR_SYNONYM_ANTONYM",
+  "WORD_READING",
+  "WORD_MEANING",
+  "WORD_TO_HANJA",
+  "WORD_SYNONYM_ANTONYM"
 ]);
 
 export function unsupportedBlueprintItems(blueprint:ExamBlueprint){
