@@ -133,7 +133,9 @@ export const IMPLEMENTED_EXAM_TYPES=new Set<ExamQuestionType>([
   "CONTEXT_TO_HANJA",
   "WORD_STRUCTURE",
   "IDIOM",
-  "CULTURE_ETIQUETTE"
+  "CULTURE_ETIQUETTE",
+  "CHARACTER_USAGE",
+  "SPECIAL_READING"
 ]);
 
 export function unsupportedBlueprintItems(blueprint:ExamBlueprint){
