@@ -20,6 +20,26 @@ create policy "friendships_participant_select" on public.friendships for select 
  using ((select auth.uid()) in (requester_id,addressee_id));
 create policy "friendships_request_insert" on public.friendships for insert to authenticated
  with check ((select auth.uid())=requester_id and status='PENDING');
+create or replace function public.validate_friendship_update()
+returns trigger language plpgsql security definer set search_path=public as $
+begin
+  if old.requester_id <> new.requester_id or old.addressee_id <> new.addressee_id then
+    raise exception 'friend participants cannot change';
+  end if;
+  if (select auth.uid()) <> old.addressee_id then
+    raise exception 'only recipient can decide';
+  end if;
+  if old.status <> 'PENDING' or new.status not in ('ACCEPTED','REJECTED','BLOCKED') then
+    raise exception 'invalid friendship transition';
+  end if;
+  return new;
+end; $;
+
+drop trigger if exists validate_friendship_update_trigger on public.friendships;
+create trigger validate_friendship_update_trigger
+before update on public.friendships
+for each row execute procedure public.validate_friendship_update();
+
 create policy "friendships_addressee_update" on public.friendships for update to authenticated
  using ((select auth.uid())=addressee_id)
  with check ((select auth.uid())=addressee_id);
