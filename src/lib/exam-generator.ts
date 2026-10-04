@@ -35,6 +35,7 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
  const reverseCount=blueprint?.items.filter(x=>x.type==="READING_MEANING_TO_HANJA").reduce((n,x)=>n+x.count,0)??0;
  const wordReadingCount=blueprint?.items.filter(x=>x.type==="WORD_READING").reduce((n,x)=>n+x.count,0)??0;
  const wordHanjaCount=blueprint?.items.filter(x=>x.type==="WORD_TO_HANJA").reduce((n,x)=>n+x.count,0)??0;
+ const wordMeaningCount=blueprint?.items.filter(x=>x.type==="WORD_MEANING").reduce((n,x)=>n+x.count,0)??0;
  const relationCount=blueprint?.items.filter(x=>x.type==="CHAR_SYNONYM_ANTONYM").reduce((n,x)=>n+x.count,0)??0;
  const wordRelationCount=blueprint?.items.filter(x=>x.type==="WORD_SYNONYM_ANTONYM").reduce((n,x)=>n+x.count,0)??0;
  const principleCount=blueprint?.items.filter(x=>x.type==="CHARACTER_PRINCIPLE").reduce((n,x)=>n+x.count,0)??0;
@@ -47,6 +48,7 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
  const goodWords=words.filter(w=>w.word&&w.reading&&w.meaning);
  const wordReading=goodWords.length<4?[]:shuffle(goodWords).slice(0,wordReadingCount).map(w=>{const wrong=[...new Set(shuffle(goodWords.filter(x=>x.id!==w.id&&x.reading!==w.reading)).map(x=>x.reading).filter((x):x is string=>Boolean(x)))].slice(0,3);return{id:`word-reading:${w.id}`,stem:w.word,prompt:"이 한자어를 바르게 읽은 것을 고르세요.",correct:w.reading!,choices:shuffle([w.reading!,...wrong]),examples:[]}}).filter(q=>q.choices.length===4);
  const wordHanja=goodWords.length<4?[]:shuffle(goodWords).slice(0,wordHanjaCount).map(w=>{const wrong=[...new Set(shuffle(goodWords.filter(x=>x.id!==w.id&&x.word!==w.word)).map(x=>x.word))].slice(0,3);return{id:`word-hanja:${w.id}`,stem:`${w.reading} · ${w.meaning}`,prompt:"뜻과 읽기에 맞는 한자어를 고르세요.",correct:w.word,choices:shuffle([w.word,...wrong]),examples:[]}}).filter(q=>q.choices.length===4);
+ const wordMeaning=goodWords.length<4?[]:shuffle(goodWords).filter(w=>{const meanings=new Set(goodWords.filter(x=>x.id!==w.id&&x.meaning!==w.meaning).map(x=>x.meaning));return meanings.size>=3}).slice(0,wordMeaningCount).map(w=>{const wrong=[...new Set(shuffle(goodWords.filter(x=>x.id!==w.id&&x.meaning!==w.meaning)).map(x=>x.meaning))].slice(0,3);return{id:`word-meaning:${w.id}`,stem:w.word,prompt:"이 한자어의 뜻으로 알맞은 것을 고르세요.",correct:w.meaning,choices:shuffle([w.meaning,...wrong]),examples:[]}}).filter(q=>q.choices.length===4);
  const relationQs=shuffle(relations).filter(r=>characterById.has(r.from_hanja_id)&&characterById.has(r.to_hanja_id)).slice(0,relationCount).map(r=>{const stem=characterById.get(r.from_hanja_id)!,correct=characterById.get(r.to_hanja_id)!;const wrong=[...new Set(shuffle(pool.filter(x=>x.character!==stem&&x.character!==correct)).map(x=>x.character))].slice(0,3);return{id:`relation:${r.relation_type}:${r.from_hanja_id}:${r.to_hanja_id}`,stem,prompt:`이 한자의 ${r.relation_type==="SIMILAR"?"유의자":"반의자"}를 고르세요.`,correct,choices:shuffle([correct,...wrong]),examples:[]}}).filter(q=>q.choices.length===4);
  const wordById=new Map(goodWords.map(w=>[w.id,w]));const wordRelationQs=shuffle(wordRelations).filter(r=>wordById.has(r.from_word_id)&&wordById.has(r.to_word_id)).slice(0,wordRelationCount).map(r=>{const from=wordById.get(r.from_word_id)!,to=wordById.get(r.to_word_id)!;const wrong=[...new Set(shuffle(goodWords.filter(w=>w.id!==from.id&&w.id!==to.id&&w.word!==to.word)).map(w=>w.word))].slice(0,3);return{id:`word-relation:${r.relation_type}:${r.from_word_id}:${r.to_word_id}`,stem:from.word,prompt:`이 한자어의 ${r.relation_type==="SIMILAR"?"유의어":"반의어"}를 고르세요.`,correct:to.word,choices:shuffle([to.word,...wrong]),examples:[]}}).filter(q=>q.choices.length===4);
  const principleQs:ExamQuestion[]=[];for(const m of shuffle(metadata.filter(x=>Boolean(x.formation_type)))){if(principleQs.length>=principleCount)break;const stem=characterById.get(m.hanja_id),correct=m.formation_type?formationLabels[m.formation_type]:undefined;if(!stem||!correct)continue;const wrong=shuffle(Object.entries(formationLabels).filter(([k])=>k!==m.formation_type).map(([,v])=>v)).slice(0,3);if(wrong.length===3)principleQs.push({id:`formation:${m.hanja_id}`,stem,prompt:"이 한자의 만들어진 원리로 알맞은 것을 고르세요.",correct,choices:shuffle([correct,...wrong]),examples:[]})}
@@ -56,6 +58,7 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
   READING_MEANING_TO_HANJA:[...second],
   WORD_READING:[...wordReading],
   WORD_TO_HANJA:[...wordHanja],
+  WORD_MEANING:[...wordMeaning],
   CHAR_SYNONYM_ANTONYM:[...relationQs],
   WORD_SYNONYM_ANTONYM:[...wordRelationQs],
   CHARACTER_PRINCIPLE:[...principleQs],
