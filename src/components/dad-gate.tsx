@@ -5,13 +5,12 @@ import { useEffect, useState } from "react";
 const KEY = "appa-hanja-family-choice";
 
 export default function DadGate({ children }: { children: React.ReactNode }) {
-  const [ready, setReady] = useState(false);
-  const [dadChosen, setDadChosen] = useState(false);
+  const [dadChosen, setDadChosen] = useState<boolean | null>(null);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    setDadChosen(window.localStorage.getItem(KEY) === "dad");
-    setReady(true);
+    const saved = window.localStorage.getItem(KEY) === "dad";
+    queueMicrotask(() => setDadChosen(saved));
   }, []);
 
   function chooseDad() {
@@ -19,7 +18,7 @@ export default function DadGate({ children }: { children: React.ReactNode }) {
     setDadChosen(true);
   }
 
-  if (!ready) return null;
+  if (dadChosen === null) return null;
   if (dadChosen) return <>{children}</>;
 
   return (
