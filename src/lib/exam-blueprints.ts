@@ -18,7 +18,8 @@ export type ExamQuestionType =
   | "CONTEXT_TO_HANJA"
   | "WORD_STRUCTURE"
   | "IDIOM"
-  | "CULTURE_ETIQUETTE";
+  | "CULTURE_ETIQUETTE"
+  | "VARIABLE_VERIFIED";
 
 export type ExamBlueprintItem={type:ExamQuestionType;count:number};
 export type ExamDataRequirement="HANJA_READING"|"WORDS"|"RELATIONS"|"CHARACTER_METADATA"|"WORD_CONTEXTS"|"WORD_STRUCTURES"|"COMMON_CHARACTER_SETS"|"USAGE_ITEMS"|"SPECIAL_READINGS"|"ORIGINAL_IMAGES"|"IDIOMS"|"CULTURE_CONTENT";
@@ -41,7 +42,8 @@ export const EXAM_TYPE_REQUIREMENTS:Record<ExamQuestionType,ExamDataRequirement[
   CONTEXT_TO_HANJA:["WORDS","WORD_CONTEXTS"],
   WORD_STRUCTURE:["WORDS","WORD_STRUCTURES"],
   IDIOM:["IDIOMS"],
-  CULTURE_ETIQUETTE:["CULTURE_CONTENT"]
+  CULTURE_ETIQUETTE:["CULTURE_CONTENT"],
+  VARIABLE_VERIFIED:[]
 };
 export type ExamBlueprint={gradeCode:string;questionCount:number;items:ExamBlueprintItem[];status:"VERIFIED_111_112"|"PENDING_FINAL_CHECK"};
 
@@ -70,7 +72,7 @@ export const DAEHAN_FIELD_BLUEPRINTS:Record<string,ExamBlueprint>={
     {type:"CHARACTER_PRINCIPLE",count:1},{type:"CHARACTER_USAGE",count:1},{type:"DICTIONARY_LOOKUP",count:1},
     {type:"CHAR_SYNONYM_ANTONYM",count:1},{type:"WORD_READING",count:5},{type:"WORD_MEANING",count:4},
     {type:"WORD_TO_HANJA",count:4},{type:"CONTEXT_READING",count:7},{type:"CONTEXT_TO_HANJA",count:2},
-    {type:"WORD_SYNONYM_ANTONYM",count:1},{type:"COMMON_CHARACTER",count:1},{type:"IDIOM",count:1},
+    {type:"WORD_SYNONYM_ANTONYM",count:1},{type:"COMMON_CHARACTER",count:1},{type:"VARIABLE_VERIFIED",count:1},
     {type:"CULTURE_ETIQUETTE",count:1}
   ]},
   "5":{gradeCode:"5",questionCount:50,status:"VERIFIED_111_112",items:[
@@ -103,7 +105,7 @@ export const DAEHAN_FIELD_BLUEPRINTS:Record<string,ExamBlueprint>={
     {type:"CHAR_SYNONYM_ANTONYM",count:2},{type:"COMMON_CHARACTER",count:1},{type:"WORD_READING",count:9},
     {type:"WORD_MEANING",count:3},{type:"WORD_TO_HANJA",count:3},{type:"CONTEXT_READING",count:4},
     {type:"CONTEXT_TO_HANJA",count:3},{type:"WORD_STRUCTURE",count:1},{type:"WORD_SYNONYM_ANTONYM",count:2},
-    {type:"IDIOM",count:1},{type:"CULTURE_ETIQUETTE",count:2}
+    {type:"IDIOM",count:1},{type:"CULTURE_ETIQUETTE",count:1},{type:"VARIABLE_VERIFIED",count:1}
   ]},
   "3":{gradeCode:"3",questionCount:50,status:"PENDING_FINAL_CHECK",items:[
     {type:"HANJA_TO_READING_MEANING",count:10},{type:"READING_MEANING_TO_HANJA",count:10},
@@ -136,7 +138,8 @@ export const IMPLEMENTED_EXAM_TYPES=new Set<ExamQuestionType>([
   "CULTURE_ETIQUETTE",
   "CHARACTER_USAGE",
   "SPECIAL_READING",
-  "IMAGE_RECOGNITION"
+  "IMAGE_RECOGNITION",
+  "VARIABLE_VERIFIED"
 ]);
 
 export function unsupportedBlueprintItems(blueprint:ExamBlueprint){
