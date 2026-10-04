@@ -16,7 +16,7 @@ export default function SignupPage() {
   const [applicationMessage,setApplicationMessage]=useState("");
   const [confirm,setConfirm]=useState("");
   const [message,setMessage]=useState("");
-  const [loading,setLoading]=useState(false);
+  const [loading,setLoading]=useState(false);\n  const [privacyConfirmed,setPrivacyConfirmed]=useState(false);
 
   async function handleSignup(event:FormEvent<HTMLFormElement>){
     event.preventDefault();
@@ -26,7 +26,7 @@ export default function SignupPage() {
     if(!ID_PATTERN.test(id)){setMessage("아이디는 영문 소문자·숫자·_·-로 3~20자 입력해 주세요.");return;}
     if(name.length<1||name.length>30){setMessage("별명은 1~30자로 입력해 주세요.");return;}
     if(password.length<8){setMessage("비밀번호는 8자 이상으로 만들어 주세요.");return;}
-    if(password!==confirm){setMessage("비밀번호가 서로 달라요.");return;}
+    if(password!==confirm){setMessage("비밀번호가 서로 달라요.");return;}\n    if(!privacyConfirmed){setMessage("개인정보 안내를 확인해 주세요.");return;}
     setLoading(true);
     const supabase=createClient();
     const email=`${id}@${AUTH_DOMAIN}`;
@@ -58,7 +58,7 @@ export default function SignupPage() {
       <label><span>별명</span><input type="text" autoComplete="nickname" maxLength={30} placeholder="앱에서 사용할 이름" value={nickname} onChange={e=>setNickname(e.target.value)} required /></label>
       <label><span>운영자에게 남길 메시지</span><textarea maxLength={300} placeholder="예: 5급 한자 공부를 위해 신청합니다." value={applicationMessage} onChange={e=>setApplicationMessage(e.target.value)} required /><small className="field-note">실명, 전화번호, 학교명, 주소, 계정 비밀번호 등 개인정보나 민감한 정보는 적지 마세요.</small></label>
       <label><span>비밀번호</span><input type="password" autoComplete="new-password" minLength={8} value={password} onChange={e=>setPassword(e.target.value)} required /></label>
-      <label><span>비밀번호 확인</span><input type="password" autoComplete="new-password" minLength={8} value={confirm} onChange={e=>setConfirm(e.target.value)} required /></label>
+      <label><span>비밀번호 확인</span><input type="password" autoComplete="new-password" minLength={8} value={confirm} onChange={e=>setConfirm(e.target.value)} required /></label>\n      <label className="privacy-confirm"><input type="checkbox" checked={privacyConfirmed} onChange={e=>setPrivacyConfirmed(e.target.checked)} required /><span><Link href="/privacy" target="_blank">개인정보 안내</Link>를 확인했고, 실명·전화번호·학교명·주소 등 불필요한 개인정보를 입력하지 않겠습니다.</span></label>
       {message?<p className="form-message" role="alert">{message}</p>:null}
       <button type="submit" disabled={loading}>{loading?"가입 중...":"회원가입"}</button>
     </form>
