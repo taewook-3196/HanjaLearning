@@ -102,7 +102,7 @@ export default function LoginPage() {
           <button type="submit" disabled={loading}>{loading ? "로그인 중..." : "로그인"}</button>
         </form>
 
-        <p className="auth-note">처음인가요? <Link href="/signup">회원가입</Link></p>
+        <p className="auth-note">비밀번호를 잊었나요? 운영자에게 복구 코드를 받은 뒤 <Link href="/password-reset">비밀번호 재설정</Link></p>\n        <p className="auth-note">처음인가요? <Link href="/signup">회원가입</Link></p>
       </section>
     </main>
   );
