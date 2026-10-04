@@ -4,7 +4,7 @@
 create table if not exists public.account_status (
   user_id uuid primary key references auth.users(id) on delete cascade,
   login_id text not null unique,
-  status text not null default 'ACTIVE' check (status in ('ACTIVE','SUSPENDED')),
+  status text not null default 'PENDING' check (status in ('PENDING','ACTIVE','SUSPENDED')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
