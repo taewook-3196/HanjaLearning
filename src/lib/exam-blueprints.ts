@@ -42,10 +42,24 @@ export const EXAM_TYPE_REQUIREMENTS:Record<ExamQuestionType,ExamDataRequirement[
 export type ExamBlueprint={gradeCode:string;questionCount:number;items:ExamBlueprintItem[];status:"VERIFIED_111_112"|"PENDING_FINAL_CHECK"};
 
 export const DAEHAN_FIELD_BLUEPRINTS:Record<string,ExamBlueprint>={
+  "8":{gradeCode:"8",questionCount:25,status:"VERIFIED_111_112",items:[
+    {type:"IMAGE_RECOGNITION",count:3},{type:"HANJA_TO_READING_MEANING",count:5},
+    {type:"READING_MEANING_TO_HANJA",count:10},{type:"WORD_READING",count:2},
+    {type:"WORD_TO_HANJA",count:2},{type:"CONTEXT_READING",count:2},{type:"CONTEXT_TO_HANJA",count:1}
+  ]},
+
   "7":{gradeCode:"7",questionCount:25,status:"VERIFIED_111_112",items:[
     {type:"IMAGE_RECOGNITION",count:1},{type:"HANJA_TO_READING_MEANING",count:7},
     {type:"READING_MEANING_TO_HANJA",count:10},{type:"WORD_READING",count:2},
     {type:"WORD_MEANING",count:2},{type:"CONTEXT_READING",count:2},{type:"WORD_TO_HANJA",count:1}
+  ]},
+  "5":{gradeCode:"5",questionCount:50,status:"VERIFIED_111_112",items:[
+    {type:"HANJA_TO_READING_MEANING",count:8},{type:"READING_MEANING_TO_HANJA",count:7},
+    {type:"CHARACTER_PRINCIPLE",count:1},{type:"SPECIAL_READING",count:2},{type:"DICTIONARY_LOOKUP",count:1},
+    {type:"SYNONYM_ANTONYM",count:2},{type:"COMMON_CHARACTER",count:1},{type:"WORD_READING",count:9},
+    {type:"WORD_MEANING",count:3},{type:"WORD_TO_HANJA",count:3},{type:"CONTEXT_READING",count:4},
+    {type:"CONTEXT_TO_HANJA",count:3},{type:"WORD_STRUCTURE",count:1},{type:"SYNONYM_ANTONYM",count:2},
+    {type:"IDIOM",count:1},{type:"CULTURE_ETIQUETTE",count:2}
   ]},
   "PRE4":{gradeCode:"PRE4",questionCount:50,status:"VERIFIED_111_112",items:[
     {type:"HANJA_TO_READING_MEANING",count:8},{type:"READING_MEANING_TO_HANJA",count:7},
