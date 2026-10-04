@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { requireActiveUser } from "@/lib/auth/require-active-user";
 export default async function StatsPage(){
- const s=await createClient();const {data:{user}}=await s.auth.getUser();if(!user)redirect("/login");
+ const {supabase:s,user}=await requireActiveUser();
  const since=new Date(); since.setUTCDate(since.getUTCDate()-7); const sinceIso=since.toISOString();
  const [{data:history},{data:progress}]=await Promise.all([
   s.from("review_history").select("result,created_at").eq("user_id",user.id).gte("created_at",sinceIso).order("created_at",{ascending:false}),
