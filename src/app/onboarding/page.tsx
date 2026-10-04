@@ -23,6 +23,8 @@ export default function OnboardingPage() {
       const s = createClient();
       const { data: { user } } = await s.auth.getUser();
       if (!user) { router.replace("/login"); return; }
+      const { data: account } = await s.from("account_status").select("status").eq("user_id", user.id).maybeSingle();
+      if (account?.status !== "ACTIVE") { router.replace("/pending"); return; }
       const [{ data: p }, { data: st }, { data: ps }, { data: gs }] = await Promise.all([
         s.from("profiles").select("nickname,target_provider,target_grade").eq("user_id", user.id).maybeSingle(),
         s.from("user_settings").select("exam_provider_id").eq("user_id", user.id).maybeSingle(),

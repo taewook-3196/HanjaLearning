@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 const FAMILY_AUTH_DOMAIN = "hanjalearning.local";
@@ -69,7 +70,7 @@ export default function LoginPage() {
   return (
     <main className="auth-shell">
       <section className="auth-card">
-        <p className="eyebrow">가족 학습 공간</p>
+        <p className="eyebrow">아빠한자</p>
         <h1>로그인</h1>
         <p className="subtitle">내 아이디로 로그인하면 내 학습 기록만 안전하게 저장돼요.</p>
 
@@ -101,7 +102,7 @@ export default function LoginPage() {
           <button type="submit" disabled={loading}>{loading ? "로그인 중..." : "로그인"}</button>
         </form>
 
-        <p className="auth-note">비밀번호 원문은 앱 DB에 저장하지 않습니다.</p>
+        <p className="auth-note">처음인가요? <Link href="/signup">회원가입</Link></p>
       </section>
     </main>
   );
