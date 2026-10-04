@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import TurnstileChallenge from "@/components/turnstile-challenge";
 
 const FAMILY_AUTH_DOMAIN = "hanjalearning.local";
 
@@ -26,15 +27,21 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setMessage("");
+    if (!captchaToken) {
+      setMessage("보안 확인을 완료해 주세요.");
+      setLoading(false);
+      return;
+    }
 
     const { email, nickname } = normalizeLoginId(loginId);
     const supabase = createClient();
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password, options: { captchaToken } });
 
     if (error || !data.user) {
       setMessage("아이디 또는 비밀번호를 확인해 주세요.");
@@ -98,8 +105,9 @@ export default function LoginPage() {
               required
             />
           </label>
+          <TurnstileChallenge onToken={setCaptchaToken} />
           {message ? <p className="form-message" role="alert">{message}</p> : null}
-          <button type="submit" disabled={loading}>{loading ? "로그인 중..." : "로그인"}</button>
+          <button type="submit" disabled={loading || !captchaToken}>{loading ? "로그인 중..." : "로그인"}</button>
         </form>
 
         <p className="auth-note">비밀번호를 잊었나요? 운영자에게 복구 코드를 받은 뒤 <Link href="/password-reset">비밀번호 재설정</Link></p>
