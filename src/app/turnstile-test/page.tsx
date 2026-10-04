@@ -3,21 +3,6 @@
 import Script from "next/script";
 import { useCallback, useRef, useState } from "react";
 
-declare global {
-  interface Window {
-    turnstile?: {
-      render: (target: string | HTMLElement, options: {
-        sitekey: string;
-        callback: (token: string) => void;
-        "error-callback": (code?: string) => boolean | void;
-        theme?: "light" | "dark" | "auto";
-        size?: "normal" | "flexible" | "compact";
-      }) => string;
-      remove: (widgetId: string) => void;
-    };
-  }
-}
-
 type Result = "idle" | "running" | "success" | "error";
 
 export default function TurnstileDiagnosticPage() {
@@ -42,6 +27,7 @@ export default function TurnstileDiagnosticPage() {
       theme: "auto",
       size: "flexible",
       callback: () => setTestResult("success"),
+      "expired-callback": () => setTestResult("error"),
       "error-callback": code => {
         setTestError(code || "unknown");
         setTestResult("error");
@@ -55,6 +41,7 @@ export default function TurnstileDiagnosticPage() {
         theme: "auto",
         size: "flexible",
         callback: () => setProductionResult("success"),
+        "expired-callback": () => setProductionResult("error"),
         "error-callback": code => {
           setProductionError(code || "unknown");
           setProductionResult("error");
