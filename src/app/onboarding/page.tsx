@@ -25,15 +25,17 @@ export default function OnboardingPage() {
       if (!user) { router.replace("/login"); return; }
       const { data: account } = await s.from("account_status").select("status").eq("user_id", user.id).maybeSingle();
       if (account?.status !== "ACTIVE") { router.replace("/pending"); return; }
-      const [{ data: p }, { data: st }, { data: ps }, { data: gs }] = await Promise.all([
+      const [{ data: p }, { data: st }, { data: ps }, { data: gs }, { data: links }] = await Promise.all([
         s.from("profiles").select("nickname,target_provider,target_grade").eq("user_id", user.id).maybeSingle(),
         s.from("user_settings").select("exam_provider_id").eq("user_id", user.id).maybeSingle(),
         s.from("exam_providers").select("id,code,name").order("id"),
         s.from("exam_grades").select("id,provider_id,code,name,cumulative_hanja_count,sort_order").order("sort_order"),
+        s.from("grade_hanja").select("grade_id"),
       ]);
       setNickname(p?.nickname ?? "");
       setProviders(ps ?? []);
-      setGrades(gs ?? []);
+      const available = new Set((links ?? []).map((row) => row.grade_id));
+      setGrades((gs ?? []).filter((g) => available.has(g.id)));
       if (st?.exam_provider_id) setProvider(String(st.exam_provider_id));
       else if (p?.target_provider === "ALL") setProvider("ALL");
       if (p?.target_grade) setGrade(p.target_grade);
