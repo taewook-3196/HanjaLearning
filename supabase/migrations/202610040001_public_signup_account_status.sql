@@ -5,6 +5,8 @@ create table if not exists public.account_status (
   user_id uuid primary key references auth.users(id) on delete cascade,
   login_id text not null unique,
   status text not null default 'PENDING' check (status in ('PENDING','ACTIVE','SUSPENDED')),
+  nickname text,
+  application_message text not null default '' check (char_length(application_message) <= 300),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -32,8 +34,13 @@ begin
     raise exception 'invalid login id';
   end if;
 
-  insert into public.account_status(user_id, login_id)
-  values (new.id, requested_login_id);
+  insert into public.account_status(user_id, login_id, nickname, application_message)
+  values (
+    new.id,
+    requested_login_id,
+    nullif(new.raw_user_meta_data ->> 'nickname', ''),
+    left(coalesce(new.raw_user_meta_data ->> 'application_message', ''), 300)
+  );
 
   return new;
 end;
@@ -44,8 +51,8 @@ create trigger on_auth_user_created_account_status
   after insert on auth.users
   for each row execute procedure public.handle_new_public_user();
 
-insert into public.account_status(user_id, login_id)
-select id, lower(split_part(email, '@', 1))
+insert into public.account_status(user_id, login_id, nickname, application_message)
+select id, lower(split_part(email, '@', 1)), coalesce(raw_user_meta_data ->> 'nickname', split_part(email, '@', 1)), '기존 계정'
 from auth.users
 where email is not null
 on conflict (user_id) do nothing;
