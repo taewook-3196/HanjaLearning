@@ -137,3 +137,7 @@ export function validateBlueprints(blueprints:Record<string,ExamBlueprint>){
 }
 
 export const DAEHAN_FIELD_BLUEPRINT_ERRORS=validateBlueprints(DAEHAN_FIELD_BLUEPRINTS);
+
+if(DAEHAN_FIELD_BLUEPRINT_ERRORS.length){
+ throw new Error(`Invalid DAEHAN field exam blueprints: ${DAEHAN_FIELD_BLUEPRINT_ERRORS.join("; ")}`);
+}
