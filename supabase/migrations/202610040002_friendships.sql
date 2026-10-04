@@ -48,10 +48,10 @@ create policy "friendships_participant_delete" on public.friendships for delete 
 
 -- Safe public directory: active learners only, no application messages or private auth data.
 create or replace function public.list_active_learners()
-returns table(user_id uuid,login_id text,nickname text,target_grade text)
+returns table(user_id uuid,nickname text,target_grade text)
 language sql stable security definer set search_path=public
 as $tag$
- select a.user_id,a.login_id,coalesce(p.nickname,a.nickname,a.login_id),p.target_grade
+ select a.user_id,coalesce(nullif(btrim(p.nickname),''),a.nickname),p.target_grade
  from public.account_status a
  left join public.profiles p on p.user_id=a.user_id
  where exists(select 1 from public.account_status me where me.user_id=(select auth.uid()) and me.status='ACTIVE')
