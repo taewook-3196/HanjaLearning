@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { requireActiveUser } from "@/lib/auth/require-active-user";
 export default async function CollectionPage(){
- const s=await createClient();const {data:{user}}=await s.auth.getUser();if(!user)redirect("/login");
+ const {supabase:s,user}=await requireActiveUser();
  const {data:p}=await s.from("profiles").select("target_grade").eq("user_id",user.id).maybeSingle();
  const {data:st}=await s.from("user_settings").select("exam_provider_id").eq("user_id",user.id).maybeSingle();
  let gq=s.from("exam_grades").select("id,name").eq("code",p?.target_grade??"5");if(st?.exam_provider_id)gq=gq.eq("provider_id",st.exam_provider_id);

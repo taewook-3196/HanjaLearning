@@ -1,12 +1,14 @@
 "use client";
 import {useEffect,useState} from "react";
+import {useRouter} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
 type Learner={user_id:string;nickname:string;target_grade:string|null};
 type F={id:number;requester_id:string;addressee_id:string;status:string};
 type Progress={learned_count:number;target_count:number;progress_percent:number;target_grade:string|null};
 export default function FriendsPage(){
+ const router=useRouter();
  const [me,setMe]=useState("");const [people,setPeople]=useState<Learner[]>([]);const [friends,setFriends]=useState<F[]>([]);const [progress,setProgress]=useState<Record<string,Progress>>({});const [msg,setMsg]=useState("");
- async function load(){const s=createClient();const {data:{user}}=await s.auth.getUser();if(!user)return;setMe(user.id);const [{data:p},{data:f}]=await Promise.all([s.rpc("list_active_learners"),s.from("friendships").select("*")]);const fs:F[]=f??[];setPeople((p??[]).filter((x:Learner)=>x.user_id!==user.id));setFriends(fs);const accepted=fs.filter(x=>x.status==="ACCEPTED");const pairs=await Promise.all(accepted.map(async x=>{const id=x.requester_id===user.id?x.addressee_id:x.requester_id;const {data}=await s.rpc("friend_progress",{friend_user_id:id});return [id,data?.[0]??null] as const;}));setProgress(Object.fromEntries(pairs.filter(x=>x[1])));}
+ async function load(){const s=createClient();const {data:{user}}=await s.auth.getUser();if(!user){router.replace("/login");return;}const {data:account}=await s.from("account_status").select("status").eq("user_id",user.id).maybeSingle();if(account?.status!=="ACTIVE"){router.replace("/pending");return;}setMe(user.id);const [{data:p},{data:f}]=await Promise.all([s.rpc("list_active_learners"),s.from("friendships").select("*")]);const fs:F[]=f??[];setPeople((p??[]).filter((x:Learner)=>x.user_id!==user.id));setFriends(fs);const accepted=fs.filter(x=>x.status==="ACCEPTED");const pairs=await Promise.all(accepted.map(async x=>{const id=x.requester_id===user.id?x.addressee_id:x.requester_id;const {data}=await s.rpc("friend_progress",{friend_user_id:id});return [id,data?.[0]??null] as const;}));setProgress(Object.fromEntries(pairs.filter(x=>x[1])));}
  useEffect(()=>{queueMicrotask(()=>{void load();});},[]);
  const relation=(id:string)=>friends.find(f=>f.requester_id===id||f.addressee_id===id);
  async function request(id:string){const s=createClient();const {error}=await s.from("friendships").insert({requester_id:me,addressee_id:id});if(error)setMsg("친구 신청을 보내지 못했어요.");else{setMsg("친구 신청을 보냈어요.");await load();}}
