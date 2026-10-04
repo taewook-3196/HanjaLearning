@@ -124,3 +124,16 @@ export const IMPLEMENTED_EXAM_TYPES=new Set<ExamQuestionType>([
 export function unsupportedBlueprintItems(blueprint:ExamBlueprint){
   return blueprint.items.filter(item=>!IMPLEMENTED_EXAM_TYPES.has(item.type));
 }
+
+export function validateBlueprints(blueprints:Record<string,ExamBlueprint>){
+ const errors:string[]=[];
+ for(const [key,b] of Object.entries(blueprints)){
+  const total=blueprintCount(b);
+  if(key!==b.gradeCode)errors.push(`${key}: gradeCode is ${b.gradeCode}`);
+  if(total!==b.questionCount)errors.push(`${key}: expected ${b.questionCount}, got ${total}`);
+  if(b.items.some(item=>item.count<=0))errors.push(`${key}: item count must be positive`);
+ }
+ return errors;
+}
+
+export const DAEHAN_FIELD_BLUEPRINT_ERRORS=validateBlueprints(DAEHAN_FIELD_BLUEPRINTS);
