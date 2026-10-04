@@ -81,8 +81,8 @@ create trigger on_auth_user_created_account_status
   after insert on auth.users
   for each row execute procedure public.handle_new_public_user();
 
-insert into public.account_status(user_id, login_id, nickname, application_message)
-select id, lower(split_part(email, '@', 1)), coalesce(raw_user_meta_data ->> 'nickname', split_part(email, '@', 1)), '기존 계정'
+insert into public.account_status(user_id, login_id, status, nickname, application_message)
+select id, lower(split_part(email, '@', 1)), 'ACTIVE', coalesce(raw_user_meta_data ->> 'nickname', split_part(email, '@', 1)), '기존 계정'
 from auth.users
 where email is not null
 on conflict (user_id) do nothing;
