@@ -5,6 +5,7 @@ export type ExamQuestionType =
   | "HANJA_TO_READING_MEANING"
   | "READING_MEANING_TO_HANJA"
   | "CHARACTER_PRINCIPLE"
+  | "CHARACTER_USAGE"
   | "SPECIAL_READING"
   | "DICTIONARY_LOOKUP"
   | "SYNONYM_ANTONYM"
@@ -26,6 +27,7 @@ export const EXAM_TYPE_REQUIREMENTS:Record<ExamQuestionType,ExamDataRequirement[
   HANJA_TO_READING_MEANING:["HANJA_READING"],
   READING_MEANING_TO_HANJA:["HANJA_READING"],
   CHARACTER_PRINCIPLE:["CHARACTER_METADATA"],
+  CHARACTER_USAGE:["HANJA_READING"],
   SPECIAL_READING:["HANJA_READING"],
   DICTIONARY_LOOKUP:["CHARACTER_METADATA"],
   SYNONYM_ANTONYM:["RELATIONS"],
@@ -52,6 +54,22 @@ export const DAEHAN_FIELD_BLUEPRINTS:Record<string,ExamBlueprint>={
     {type:"IMAGE_RECOGNITION",count:1},{type:"HANJA_TO_READING_MEANING",count:7},
     {type:"READING_MEANING_TO_HANJA",count:10},{type:"WORD_READING",count:2},
     {type:"WORD_MEANING",count:2},{type:"CONTEXT_READING",count:2},{type:"WORD_TO_HANJA",count:1}
+  ]},
+  "6":{gradeCode:"6",questionCount:50,status:"VERIFIED_111_112",items:[
+    {type:"HANJA_TO_READING_MEANING",count:10},{type:"READING_MEANING_TO_HANJA",count:10},
+    {type:"CHARACTER_PRINCIPLE",count:1},{type:"CHARACTER_USAGE",count:1},{type:"DICTIONARY_LOOKUP",count:1},
+    {type:"SYNONYM_ANTONYM",count:1},{type:"WORD_READING",count:5},{type:"WORD_MEANING",count:4},
+    {type:"WORD_TO_HANJA",count:4},{type:"CONTEXT_READING",count:7},{type:"CONTEXT_TO_HANJA",count:2},
+    {type:"SYNONYM_ANTONYM",count:1},{type:"COMMON_CHARACTER",count:1},{type:"IDIOM",count:1},
+    {type:"CULTURE_ETIQUETTE",count:1}
+  ]},
+  "PRE5":{gradeCode:"PRE5",questionCount:50,status:"VERIFIED_111_112",items:[
+    {type:"HANJA_TO_READING_MEANING",count:10},{type:"READING_MEANING_TO_HANJA",count:10},
+    {type:"CHARACTER_PRINCIPLE",count:1},{type:"CHARACTER_USAGE",count:1},{type:"DICTIONARY_LOOKUP",count:1},
+    {type:"SYNONYM_ANTONYM",count:1},{type:"WORD_READING",count:5},{type:"WORD_MEANING",count:4},
+    {type:"WORD_TO_HANJA",count:4},{type:"CONTEXT_READING",count:7},{type:"CONTEXT_TO_HANJA",count:2},
+    {type:"SYNONYM_ANTONYM",count:1},{type:"COMMON_CHARACTER",count:1},{type:"IDIOM",count:1},
+    {type:"CULTURE_ETIQUETTE",count:1}
   ]},
   "5":{gradeCode:"5",questionCount:50,status:"VERIFIED_111_112",items:[
     {type:"HANJA_TO_READING_MEANING",count:8},{type:"READING_MEANING_TO_HANJA",count:7},
