@@ -20,9 +20,9 @@ create policy "friendships_participant_select" on public.friendships for select 
  using ((select auth.uid()) in (requester_id,addressee_id));
 create policy "friendships_request_insert" on public.friendships for insert to authenticated
  with check ((select auth.uid())=requester_id and status='PENDING');
-create policy "friendships_participant_update" on public.friendships for update to authenticated
- using ((select auth.uid()) in (requester_id,addressee_id))
- with check ((select auth.uid()) in (requester_id,addressee_id));
+create policy "friendships_addressee_update" on public.friendships for update to authenticated
+ using ((select auth.uid())=addressee_id)
+ with check ((select auth.uid())=addressee_id);
 create policy "friendships_participant_delete" on public.friendships for delete to authenticated
  using ((select auth.uid()) in (requester_id,addressee_id));
 
