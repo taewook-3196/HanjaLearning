@@ -46,7 +46,20 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
  const wordHanja=goodWords.length<4?[]:shuffle(goodWords).slice(0,wordHanjaCount).map(w=>{const wrong=[...new Set(shuffle(goodWords.filter(x=>x.id!==w.id&&x.word!==w.word)).map(x=>x.word))].slice(0,3);return{id:`word-hanja:${w.id}`,stem:`${w.reading} · ${w.meaning}`,prompt:"뜻과 읽기에 맞는 한자어를 고르세요.",correct:w.word,choices:shuffle([w.word,...wrong]),examples:[]}}).filter(q=>q.choices.length===4);
  const relationQs=shuffle(relations).filter(r=>characterById.has(r.from_hanja_id)&&characterById.has(r.to_hanja_id)).slice(0,relationCount).map(r=>{const stem=characterById.get(r.from_hanja_id)!,correct=characterById.get(r.to_hanja_id)!;const wrong=[...new Set(shuffle(pool.filter(x=>x.character!==stem&&x.character!==correct)).map(x=>x.character))].slice(0,3);return{id:`relation:${r.relation_type}:${r.from_hanja_id}:${r.to_hanja_id}`,stem,prompt:`이 한자의 ${r.relation_type==="SIMILAR"?"유의자":"반의자"}를 고르세요.`,correct,choices:shuffle([correct,...wrong]),examples:[]}}).filter(q=>q.choices.length===4);
  const metadataQs:ExamQuestion[]=[];for(const m of shuffle(metadata)){if(metadataQs.length>=metadataCount)break;const stem=characterById.get(m.hanja_id);if(!stem)continue;if(m.total_strokes){const nums=[...new Set(metadata.map(x=>x.total_strokes).filter((x):x is number=>typeof x==="number"&&x!==m.total_strokes))];if(nums.length>=3){const correct=`${m.total_strokes}획`;metadataQs.push({id:`strokes:${m.hanja_id}`,stem,prompt:"이 한자의 총획으로 알맞은 것을 고르세요.",correct,choices:shuffle([correct,...shuffle(nums).slice(0,3).map(x=>`${x}획`)]),examples:[]});continue}}if(m.formation_type&&formationLabels[m.formation_type]){const correct=formationLabels[m.formation_type],wrong=shuffle(Object.entries(formationLabels).filter(([k])=>k!==m.formation_type).map(([,v])=>v)).slice(0,3);metadataQs.push({id:`formation:${m.hanja_id}`,stem,prompt:"이 한자의 만들어진 원리로 알맞은 것을 고르세요.",correct,choices:shuffle([correct,...wrong]),examples:[]})}}
- const supported=[...first,...second,...wordReading,...wordHanja,...relationQs,...metadataQs];
+ const buckets:Partial<Record<string,ExamQuestion[]>>={
+  HANJA_TO_READING_MEANING:[...first],
+  READING_MEANING_TO_HANJA:[...second],
+  WORD_READING:[...wordReading],
+  WORD_TO_HANJA:[...wordHanja],
+  SYNONYM_ANTONYM:[...relationQs],
+  CHARACTER_PRINCIPLE:[...metadataQs],
+  DICTIONARY_LOOKUP:[]
+ };
+ const supported:ExamQuestion[]=[];
+ for(const item of blueprint.items){
+  const bucket=buckets[item.type]??[];
+  supported.push(...bucket.splice(0,item.count));
+ }
  const usedHanja=new Set([...first,...second].map(q=>Number(q.id.split(":").at(-1))));for(const r of relationQs){const parts=r.id.split(":");usedHanja.add(Number(parts.at(-2)));usedHanja.add(Number(parts.at(-1)))}for(const m of metadataQs)usedHanja.add(Number(m.id.split(":").at(-1)));const remainingPool=pool.filter(x=>!usedHanja.has(x.id));
  return [...supported,...forward(remainingPool,questionCount-supported.length)];
 }
