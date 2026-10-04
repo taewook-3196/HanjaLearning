@@ -100,11 +100,31 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
   SPECIAL_READING:[...specialQs],
   IMAGE_RECOGNITION:[...imageQs]
  };
- const supported:ExamQuestion[]=[];
+ const ordered:ExamQuestion[]=[];
+ const usedIds=new Set<string>();
+ const fallbackPool=shuffle(pool);
+ let fallbackCursor=0;
+ const nextFallback=()=>{
+  while(fallbackCursor<fallbackPool.length){
+   const h=fallbackPool[fallbackCursor++];
+   const q=forward([h,...pool.filter(x=>x.id!==h.id)],1)[0];
+   if(q&&!usedIds.has(q.id)){usedIds.add(q.id);return q}
+  }
+  return undefined;
+ };
  for(const item of blueprint.items){
   const bucket=buckets[item.type]??[];
-  supported.push(...bucket.splice(0,item.count));
+  let placed=0;
+  while(bucket.length&&placed<item.count){
+   const q=bucket.shift()!;
+   if(usedIds.has(q.id))continue;
+   usedIds.add(q.id);ordered.push(q);placed++;
+  }
+  while(placed<item.count){
+   const fallback=nextFallback();
+   if(!fallback)break;
+   ordered.push(fallback);placed++;
+  }
  }
- const usedHanja=new Set([...first,...second].map(q=>Number(q.id.split(":").at(-1))));for(const r of relationQs){const parts=r.id.split(":");usedHanja.add(Number(parts.at(-2)));usedHanja.add(Number(parts.at(-1)))}for(const m of [...principleQs,...dictionaryQs])usedHanja.add(Number(m.id.split(":").at(-1)));const remainingPool=pool.filter(x=>!usedHanja.has(x.id));
- return [...supported,...forward(remainingPool,questionCount-supported.length)];
+ return ordered.slice(0,questionCount);
 }
