@@ -1,8 +1,8 @@
-const CACHE = "hanja-shell-v1";
-const SHELL = ["/", "/login", "/manifest.webmanifest"];
+const CACHE = "hanja-public-shell-v2";
+const PUBLIC_SHELL = ["/login", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)));
+  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PUBLIC_SHELL)));
   self.skipWaiting();
 });
 
@@ -21,15 +21,35 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/auth/")) return;
 
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        const copy = response.clone();
-        if (response.ok) {
-          caches.open(CACHE).then((cache) => cache.put(event.request, copy));
-        }
-        return response;
-      })
-      .catch(() => caches.match(event.request).then((cached) => cached || caches.match("/"))),
-  );
+  const isStaticAsset =
+    url.pathname.startsWith("/_next/static/") ||
+    url.pathname === "/manifest.webmanifest";
+
+  if (isStaticAsset) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        return fetch(event.request).then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE).then((cache) => cache.put(event.request, copy));
+          }
+          return response;
+        });
+      }),
+    );
+    return;
+  }
+
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        if (url.pathname === "/login") return caches.match("/login");
+        return new Response(
+          "<!doctype html><html lang=\"ko\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>오프라인</title><body><main><h1>인터넷 연결이 필요해요</h1><p>학습 기록을 안전하게 불러오기 위해 다시 연결한 뒤 시도해 주세요.</p></main></body></html>",
+          { headers: { "Content-Type": "text/html; charset=utf-8" } },
+        );
+      }),
+    );
+  }
 });
