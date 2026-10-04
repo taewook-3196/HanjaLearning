@@ -19,6 +19,7 @@ export default function SignupPage() {
   const [message,setMessage]=useState("");
   const [loading,setLoading]=useState(false);
   const [privacyConfirmed,setPrivacyConfirmed]=useState(false);
+  const [termsConfirmed,setTermsConfirmed]=useState(false);
   const [captchaToken,setCaptchaToken]=useState<string|null>(null);
 
   async function handleSignup(event:FormEvent<HTMLFormElement>){
@@ -31,6 +32,7 @@ export default function SignupPage() {
     if(password.length<8){setMessage("비밀번호는 8자 이상으로 만들어 주세요.");return;}
     if(password!==confirm){setMessage("비밀번호가 서로 달라요.");return;}
     if(!privacyConfirmed){setMessage("개인정보 안내를 확인해 주세요.");return;}
+    if(!termsConfirmed){setMessage("이용 안내 및 약관을 확인해 주세요.");return;}
     if(!captchaToken){setMessage("보안 확인을 완료해 주세요.");return;}
     setLoading(true);
     const supabase=createClient();
@@ -65,6 +67,7 @@ export default function SignupPage() {
       <label><span>비밀번호</span><input type="password" autoComplete="new-password" minLength={8} value={password} onChange={e=>setPassword(e.target.value)} required /></label>
       <label><span>비밀번호 확인</span><input type="password" autoComplete="new-password" minLength={8} value={confirm} onChange={e=>setConfirm(e.target.value)} required /></label>
       <label className="privacy-confirm"><input type="checkbox" checked={privacyConfirmed} onChange={e=>setPrivacyConfirmed(e.target.checked)} required /><span><Link href="/privacy" target="_blank">개인정보 안내</Link>를 확인했고, 실명·전화번호·학교명·주소 등 불필요한 개인정보를 입력하지 않겠습니다.</span></label>
+      <label className="privacy-confirm"><input type="checkbox" checked={termsConfirmed} onChange={e=>setTermsConfirmed(e.target.checked)} required /><span><Link href="/terms" target="_blank">이용 안내 및 약관</Link>을 확인하고 동의합니다.</span></label>
       <TurnstileChallenge onToken={setCaptchaToken} />
       {message?<p className="form-message" role="alert">{message}</p>:null}
       <button type="submit" disabled={loading||!captchaToken}>{loading?"가입 중...":"회원가입"}</button>
