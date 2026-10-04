@@ -34,6 +34,9 @@ export default async function Home() {
       learnedCount=learned??0; reviewCount=review??0; wrongCount=wrong??0;
     }
   }
+  if (targetCount === 0) {
+    return <main className="app-shell"><section className="hero-card appa-hero"><div className="hero-actions"><div><p className="eyebrow">{profile.nickname}님의 학습 설정</p><h1>아빠한자</h1><p className="subtitle">선택한 목표급수의 학습 콘텐츠를 아직 준비 중이에요.</p></div><div className="hero-mascot" aria-hidden="true">👨‍👧<span>漢</span></div></div><LogoutButton /></section><section className="study-card"><div><p className="eyebrow">목표급수 확인</p><h2>{profile.target_grade}은(는) 아직 학습할 수 없어요.</h2><p className="subtitle">지금 학습 가능한 급수로 목표를 바꿔 주세요. 기존 학습 기록은 그대로 남습니다.</p></div><Link className="primary-link" href="/settings">학습 가능한 급수 선택하기</Link></section></main>;
+  }
   const newCount=Math.min(5,Math.max(0,targetCount-learnedCount));
   const percent=targetCount?Math.min(100,Math.round((learnedCount/targetCount)*100)):0;
   const providerLabel=profile.target_provider==="ALL"?"전체":profile.target_provider;
