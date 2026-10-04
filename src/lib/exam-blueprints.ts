@@ -19,6 +19,26 @@ export type ExamQuestionType =
   | "CULTURE_ETIQUETTE";
 
 export type ExamBlueprintItem={type:ExamQuestionType;count:number};
+export type ExamDataRequirement="HANJA_READING"|"WORDS"|"RELATIONS"|"CHARACTER_METADATA"|"IDIOMS"|"CULTURE_CONTENT";
+
+export const EXAM_TYPE_REQUIREMENTS:Record<ExamQuestionType,ExamDataRequirement[]>={
+  IMAGE_RECOGNITION:["HANJA_READING"],
+  HANJA_TO_READING_MEANING:["HANJA_READING"],
+  READING_MEANING_TO_HANJA:["HANJA_READING"],
+  CHARACTER_PRINCIPLE:["CHARACTER_METADATA"],
+  SPECIAL_READING:["HANJA_READING"],
+  DICTIONARY_LOOKUP:["CHARACTER_METADATA"],
+  SYNONYM_ANTONYM:["RELATIONS"],
+  COMMON_CHARACTER:["WORDS"],
+  WORD_READING:["WORDS"],
+  WORD_MEANING:["WORDS"],
+  WORD_TO_HANJA:["WORDS"],
+  CONTEXT_READING:["WORDS"],
+  CONTEXT_TO_HANJA:["WORDS"],
+  WORD_STRUCTURE:["WORDS"],
+  IDIOM:["IDIOMS"],
+  CULTURE_ETIQUETTE:["CULTURE_CONTENT"]
+};
 export type ExamBlueprint={gradeCode:string;questionCount:number;items:ExamBlueprintItem[];status:"VERIFIED_111_112"|"PENDING_FINAL_CHECK"};
 
 export const DAEHAN_FIELD_BLUEPRINTS:Record<string,ExamBlueprint>={
@@ -62,3 +82,13 @@ export const DAEHAN_FIELD_BLUEPRINTS:Record<string,ExamBlueprint>={
 };
 
 export function blueprintCount(blueprint:ExamBlueprint){return blueprint.items.reduce((sum,item)=>sum+item.count,0)}
+
+
+export const IMPLEMENTED_EXAM_TYPES=new Set<ExamQuestionType>([
+  "HANJA_TO_READING_MEANING",
+  "READING_MEANING_TO_HANJA"
+]);
+
+export function unsupportedBlueprintItems(blueprint:ExamBlueprint){
+  return blueprint.items.filter(item=>!IMPLEMENTED_EXAM_TYPES.has(item.type));
+}
