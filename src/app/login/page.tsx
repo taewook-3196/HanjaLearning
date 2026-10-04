@@ -107,7 +107,7 @@ export default function LoginPage() {
           </label>
           <TurnstileChallenge onToken={setCaptchaToken} />
           {message ? <p className="form-message" role="alert">{message}</p> : null}
-          <button type="submit" disabled={loading || !captchaToken}>{loading ? "로그인 중..." : "로그인"}</button>
+          <button type="submit" disabled={loading} aria-disabled={!captchaToken}>{loading ? "로그인 중..." : "로그인"}</button>
         </form>
 
         <p className="auth-note">비밀번호를 잊었나요? 운영자에게 복구 코드를 받은 뒤 <Link href="/password-reset">비밀번호 재설정</Link></p>

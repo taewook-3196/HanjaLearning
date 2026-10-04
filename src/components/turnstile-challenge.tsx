@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import { useCallback, useEffect, useId, useRef } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 declare global {
   interface Window {
@@ -10,7 +10,9 @@ declare global {
         sitekey: string;
         callback: (token: string) => void;
         "expired-callback": () => void;
-        "error-callback": () => void;
+        "error-callback": (errorCode?: string) => boolean | void;
+        "timeout-callback"?: () => void;
+        "unsupported-callback"?: () => void;
         theme?: "light" | "dark" | "auto";
       }) => string;
       reset: (widgetId?: string) => void;
@@ -28,6 +30,8 @@ export default function TurnstileChallenge({ onToken }: Props) {
   const reactId = useId();
   const elementId = `turnstile-${reactId.replace(/:/g, "")}`;
   const widgetId = useRef<string | null>(null);
+  const [status, setStatus] = useState<"loading"|"ready"|"error">("loading");
+  const [errorCode, setErrorCode] = useState("");
 
   const renderWidget = useCallback(() => {
     if (!siteKey || !window.turnstile || widgetId.current) return;

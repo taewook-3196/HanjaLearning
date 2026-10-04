@@ -70,7 +70,7 @@ export default function SignupPage() {
       <label className="privacy-confirm"><input type="checkbox" checked={termsConfirmed} onChange={e=>setTermsConfirmed(e.target.checked)} required /><span><Link href="/terms" target="_blank">이용 안내 및 약관</Link>을 확인하고 동의합니다.</span></label>
       <TurnstileChallenge onToken={setCaptchaToken} />
       {message?<p className="form-message" role="alert">{message}</p>:null}
-      <button type="submit" disabled={loading||!captchaToken}>{loading?"가입 중...":"회원가입"}</button>
+      <button type="submit" disabled={loading} aria-disabled={!captchaToken}>{loading?"가입 중...":"회원가입"}</button>
     </form>
     <p className="auth-note">이미 계정이 있나요? <Link href="/login">로그인</Link></p>
   </section></main>;
