@@ -27,8 +27,8 @@ export default async function Home() {
       const now = new Date().toISOString();
       const [{ count: learned }, { count: review }, { count: wrong }] = await Promise.all([
         supabase.from("user_hanja_progress").select("*",{count:"exact",head:true}).eq("user_id",user.id).in("hanja_id",ids).gt("study_count",0),
-        supabase.from("user_hanja_progress").select("*",{count:"exact",head:true}).eq("user_id",user.id).in("hanja_id",ids).lte("next_review_at",now),
-        supabase.from("user_hanja_progress").select("*",{count:"exact",head:true}).eq("user_id",user.id).in("hanja_id",ids).gt("wrong_streak",0),
+        supabase.from("user_hanja_progress").select("*",{count:"exact",head:true}).eq("user_id",user.id).in("hanja_id",ids).gt("study_count",0).lte("next_review_at",now),
+        supabase.from("user_hanja_progress").select("*",{count:"exact",head:true}).eq("user_id",user.id).in("hanja_id",ids).gt("study_count",0).gt("wrong_streak",0),
       ]);
       learnedCount=learned??0; reviewCount=review??0; wrongCount=wrong??0;
     }
