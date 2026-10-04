@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import ServiceWorkerRegister from "@/components/service-worker-register";
 import DadGate from "@/components/dad-gate";
+import ActivityTracker from "@/components/activity-tracker";
 
 export const metadata: Metadata = {
   title: "아빠한자",
@@ -27,7 +28,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ko">
-      <body><ServiceWorkerRegister /><DadGate>{children}</DadGate></body>
+      <body><ServiceWorkerRegister /><ActivityTracker /><DadGate>{children}</DadGate></body>
     </html>
   );
 }
