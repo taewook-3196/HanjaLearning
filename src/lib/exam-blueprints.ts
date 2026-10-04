@@ -1,0 +1,64 @@
+// Abstract question-type distribution derived from the user-provided official
+// 대한검정회 111회·112회 papers. Do not store or reproduce copyrighted questions here.
+export type ExamQuestionType =
+  | "IMAGE_RECOGNITION"
+  | "HANJA_TO_READING_MEANING"
+  | "READING_MEANING_TO_HANJA"
+  | "CHARACTER_PRINCIPLE"
+  | "SPECIAL_READING"
+  | "DICTIONARY_LOOKUP"
+  | "SYNONYM_ANTONYM"
+  | "COMMON_CHARACTER"
+  | "WORD_READING"
+  | "WORD_MEANING"
+  | "WORD_TO_HANJA"
+  | "CONTEXT_READING"
+  | "CONTEXT_TO_HANJA"
+  | "WORD_STRUCTURE"
+  | "IDIOM"
+  | "CULTURE_ETIQUETTE";
+
+export type ExamBlueprintItem={type:ExamQuestionType;count:number};
+export type ExamBlueprint={gradeCode:string;questionCount:number;items:ExamBlueprintItem[];status:"VERIFIED_111_112"|"PENDING_FINAL_CHECK"};
+
+export const DAEHAN_FIELD_BLUEPRINTS:Record<string,ExamBlueprint>={
+  "7":{gradeCode:"7",questionCount:25,status:"VERIFIED_111_112",items:[
+    {type:"IMAGE_RECOGNITION",count:1},{type:"HANJA_TO_READING_MEANING",count:7},
+    {type:"READING_MEANING_TO_HANJA",count:10},{type:"WORD_READING",count:2},
+    {type:"WORD_MEANING",count:2},{type:"CONTEXT_READING",count:2},{type:"WORD_TO_HANJA",count:1}
+  ]},
+  "PRE4":{gradeCode:"PRE4",questionCount:50,status:"VERIFIED_111_112",items:[
+    {type:"HANJA_TO_READING_MEANING",count:8},{type:"READING_MEANING_TO_HANJA",count:7},
+    {type:"CHARACTER_PRINCIPLE",count:1},{type:"SPECIAL_READING",count:2},{type:"DICTIONARY_LOOKUP",count:1},
+    {type:"SYNONYM_ANTONYM",count:2},{type:"COMMON_CHARACTER",count:1},{type:"WORD_READING",count:9},
+    {type:"WORD_MEANING",count:3},{type:"WORD_TO_HANJA",count:3},{type:"CONTEXT_READING",count:4},
+    {type:"CONTEXT_TO_HANJA",count:3},{type:"WORD_STRUCTURE",count:1},{type:"SYNONYM_ANTONYM",count:2},
+    {type:"IDIOM",count:1},{type:"CULTURE_ETIQUETTE",count:2}
+  ]},
+  "4":{gradeCode:"4",questionCount:50,status:"VERIFIED_111_112",items:[
+    {type:"HANJA_TO_READING_MEANING",count:8},{type:"READING_MEANING_TO_HANJA",count:7},
+    {type:"CHARACTER_PRINCIPLE",count:1},{type:"SPECIAL_READING",count:2},{type:"DICTIONARY_LOOKUP",count:1},
+    {type:"SYNONYM_ANTONYM",count:2},{type:"COMMON_CHARACTER",count:1},{type:"WORD_READING",count:9},
+    {type:"WORD_MEANING",count:3},{type:"WORD_TO_HANJA",count:3},{type:"CONTEXT_READING",count:4},
+    {type:"CONTEXT_TO_HANJA",count:3},{type:"WORD_STRUCTURE",count:1},{type:"SYNONYM_ANTONYM",count:2},
+    {type:"IDIOM",count:1},{type:"CULTURE_ETIQUETTE",count:2}
+  ]},
+  "PRE3":{gradeCode:"PRE3",questionCount:50,status:"VERIFIED_111_112",items:[
+    {type:"HANJA_TO_READING_MEANING",count:8},{type:"READING_MEANING_TO_HANJA",count:7},
+    {type:"CHARACTER_PRINCIPLE",count:1},{type:"SPECIAL_READING",count:2},{type:"DICTIONARY_LOOKUP",count:1},
+    {type:"SYNONYM_ANTONYM",count:2},{type:"COMMON_CHARACTER",count:1},{type:"WORD_READING",count:9},
+    {type:"WORD_MEANING",count:3},{type:"WORD_TO_HANJA",count:3},{type:"CONTEXT_READING",count:4},
+    {type:"CONTEXT_TO_HANJA",count:3},{type:"WORD_STRUCTURE",count:1},{type:"SYNONYM_ANTONYM",count:2},
+    {type:"IDIOM",count:1},{type:"CULTURE_ETIQUETTE",count:2}
+  ]},
+  "3":{gradeCode:"3",questionCount:50,status:"PENDING_FINAL_CHECK",items:[
+    {type:"HANJA_TO_READING_MEANING",count:10},{type:"READING_MEANING_TO_HANJA",count:10},
+    {type:"CHARACTER_PRINCIPLE",count:1},{type:"SPECIAL_READING",count:2},{type:"DICTIONARY_LOOKUP",count:1},
+    {type:"SYNONYM_ANTONYM",count:2},{type:"COMMON_CHARACTER",count:1},{type:"WORD_READING",count:7},
+    {type:"WORD_MEANING",count:3},{type:"WORD_TO_HANJA",count:2},{type:"CONTEXT_READING",count:3},
+    {type:"CONTEXT_TO_HANJA",count:2},{type:"WORD_STRUCTURE",count:1},{type:"SYNONYM_ANTONYM",count:2},
+    {type:"IDIOM",count:2},{type:"CULTURE_ETIQUETTE",count:1}
+  ]}
+};
+
+export function blueprintCount(blueprint:ExamBlueprint){return blueprint.items.reduce((sum,item)=>sum+item.count,0)}
