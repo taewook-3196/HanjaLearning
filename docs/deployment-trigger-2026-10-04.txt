@@ -1,0 +1,1 @@
+Deployment trigger after configuring the server-only Supabase secret in Vercel.
