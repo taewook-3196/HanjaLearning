@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f7f2;
+  --background: #fffaf2;
   --surface: #ffffff;
-  --text: #20231f;
-  --muted: #6b7168;
-  --line: #e7e9e2;
-  --accent: #315c45;
-  --accent-soft: #e9f1eb;
+  --text: #172033;
+  --muted: #687386;
+  --line: #e8edf5;
+  --accent: #1688e8;
+  --accent-soft: #eaf5ff;
 }
 
 * { box-sizing: border-box; }
@@ -236,3 +236,5 @@ button {
 
 
 .dad-gate{display:grid;min-height:100dvh;place-items:center;padding:24px 18px}.dad-gate-card{width:min(100%,480px);padding:32px 26px;border:1px solid var(--line);border-radius:28px;background:var(--surface);text-align:center;box-shadow:0 18px 55px rgba(35,40,34,.08)}.dad-gate-card h1{margin:16px 0;font-size:clamp(36px,10vw,54px);line-height:1.18}.dad-gate-actions{display:grid;gap:10px;margin-top:28px}.dad-gate-actions .secondary-button{margin-top:0}.dad-gate-message{margin:18px 0 0;color:var(--accent);font-weight:800}
+
+.appa-hero{background:linear-gradient(135deg,#eaf5ff 0%,#fff 58%,#fff3c7 100%);border-color:#dcecff}.hero-actions{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.hero-mascot{position:relative;flex:0 0 auto;font-size:3.5rem;line-height:1}.hero-mascot span{position:absolute;right:-4px;bottom:-8px;display:grid;width:34px;height:34px;place-items:center;border-radius:10px;background:#1688e8;color:white;font-family:serif;font-size:20px;font-weight:800;box-shadow:0 6px 14px rgba(22,136,232,.24)}.dad-gate{background:radial-gradient(circle at 15% 15%,#dff3ff 0 11%,transparent 12%),radial-gradient(circle at 85% 20%,#ffe3ec 0 9%,transparent 10%),linear-gradient(180deg,#fffdf8,#fff8e8)}.dad-gate-card{border-color:#e6edf7;box-shadow:0 22px 70px rgba(38,94,145,.13)}.dad-gate-mark{display:grid;width:92px;height:92px;margin:0 auto 18px;place-items:center;border-radius:26px;background:linear-gradient(145deg,#1688e8,#45a9ff);color:white;font-family:serif;font-size:54px;font-weight:900;box-shadow:0 12px 28px rgba(22,136,232,.25)}.dad-gate-actions button{font-size:17px}.mom-choice{background:#ffedf3;color:#e44d82}.dad-gate-message{padding:14px;border-radius:16px;background:#fff1c9;color:#7b5b00}
