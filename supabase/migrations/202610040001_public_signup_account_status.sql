@@ -5,7 +5,7 @@ create table if not exists public.account_status (
   user_id uuid primary key references auth.users(id) on delete cascade,
   login_id text not null unique,
   status text not null default 'PENDING' check (status in ('PENDING','ACTIVE','REJECTED','SUSPENDED')),
-  nickname text,
+  nickname text not null check (char_length(btrim(nickname)) between 1 and 30),
   application_message text not null default '' check (char_length(application_message) <= 300),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -68,7 +68,7 @@ begin
   values (
     new.id,
     requested_login_id,
-    nullif(new.raw_user_meta_data ->> 'nickname', ''),
+    btrim(new.raw_user_meta_data ->> 'nickname'),
     left(coalesce(new.raw_user_meta_data ->> 'application_message', ''), 300)
   );
 
