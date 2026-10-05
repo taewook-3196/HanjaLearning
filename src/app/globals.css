@@ -291,3 +291,10 @@ button {
 .collection-examples h3{margin:0 0 8px}
 .collection-example{margin:10px 0;line-height:1.55}
 @media (max-width:600px){.collection-detail{padding:22px 18px}.collection-detail .hanja-character{font-size:6rem}}
+
+
+.collection-cell{min-width:0}
+.collection-cell.detail-open{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.collection-cell.detail-open>.hanja-tile{grid-column:auto}
+.collection-cell.detail-open>.collection-detail{grid-column:1/-1;width:100%;margin-top:0}
+@media(min-width:700px){.collection-cell.detail-open{grid-template-columns:repeat(5,minmax(0,1fr))}}
