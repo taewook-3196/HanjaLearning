@@ -52,7 +52,9 @@ export default async function Home() {
   const newCount=plan.newCount;
   const todayTotal=plan.total;
   const estimatedMinutes=Math.max(1,Math.ceil(todayTotal*0.9));
-  const percent=targetCount?Math.min(100,Math.round((learnedCount/targetCount)*100)):0;\n  const masteryPercent=targetCount?Math.min(100,Math.round((masteredCount/targetCount)*100)):0;\n  const needsMastery=Math.max(0,targetCount-masteredCount);
+  const percent=targetCount?Math.min(100,Math.round((learnedCount/targetCount)*100)):0;
+  const masteryPercent=targetCount?Math.min(100,Math.round((masteredCount/targetCount)*100)):0;
+  const needsMastery=Math.max(0,targetCount-masteredCount);
   const providerLabel=profile.target_provider==="ALL"?"전체":profile.target_provider;
 
   return <main className="app-shell">
