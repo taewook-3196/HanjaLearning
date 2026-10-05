@@ -43,7 +43,7 @@ export default function OnboardingPage() {
     })();
   }, [router]);
 
-  const visible = provider === "ALL" ? grades : grades.filter((g) => String(g.provider_id) === provider);
+  const visible = grades.filter((g) => String(g.provider_id) === provider);
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -68,7 +68,7 @@ export default function OnboardingPage() {
     <p className="subtitle">내 이름과 목표를 고르면 바로 시작할 수 있어요.</p>
     <form className="auth-form" onSubmit={save}>
       <label><span>이름</span><input value={nickname} maxLength={30} onChange={(e) => setNickname(e.target.value)} placeholder="예: 민준" required /></label>
-      <label><span>시험기관</span><select value={provider} onChange={(e) => { setProvider(e.target.value); setGrade(""); }} required><option value="">골라 주세요</option><option value="ALL">전체</option>{providers.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
+      <label><span>시험기관</span><select value={provider} onChange={(e) => { setProvider(e.target.value); setGrade(""); }} required><option value="">골라 주세요</option>{providers.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
       <label><span>목표급수</span><select value={grade} onChange={(e) => setGrade(e.target.value)} required disabled={!provider}><option value="">골라 주세요</option>{visible.map((g) => <option key={g.id} value={g.code}>{g.name}{g.cumulative_hanja_count ? " · " + g.cumulative_hanja_count + "자" : ""}</option>)}</select></label>
       {message ? <p className="form-message" role="alert">{message}</p> : null}
       <button disabled={saving}>{saving ? "저장 중..." : "공부 시작하기"}</button>
