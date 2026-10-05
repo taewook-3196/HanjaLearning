@@ -14,6 +14,7 @@ export default function OnboardingPage() {
   const [grades, setGrades] = useState<Grade[]>([]);
   const [provider, setProvider] = useState("");
   const [grade, setGrade] = useState("");
+  const [examDate, setExamDate] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -27,7 +28,7 @@ export default function OnboardingPage() {
       if (account?.status !== "ACTIVE") { router.replace("/pending"); return; }
       const [{ data: p }, { data: st }, { data: ps }, { data: gs }, { data: links }] = await Promise.all([
         s.from("profiles").select("nickname,target_provider,target_grade").eq("user_id", user.id).maybeSingle(),
-        s.from("user_settings").select("exam_provider_id").eq("user_id", user.id).maybeSingle(),
+        s.from("user_settings").select("exam_provider_id,target_exam_date").eq("user_id", user.id).maybeSingle(),
         s.from("exam_providers").select("id,code,name").order("id"),
         s.from("exam_grades").select("id,provider_id,code,name,cumulative_hanja_count,sort_order").order("sort_order"),
         s.from("grade_hanja").select("grade_id"),
@@ -39,6 +40,7 @@ export default function OnboardingPage() {
       if (st?.exam_provider_id) setProvider(String(st.exam_provider_id));
       else if (p?.target_provider === "ALL") setProvider("ALL");
       if (p?.target_grade) setGrade(p.target_grade);
+      if (st?.target_exam_date) setExamDate(st.target_exam_date);
       setLoading(false);
     })();
   }, [router]);
@@ -56,7 +58,7 @@ export default function OnboardingPage() {
     const providerId = provider === "ALL" ? null : Number(provider);
     const targetProvider = provider === "ALL" ? "ALL" : selected?.code ?? null;
     const { error: a } = await s.from("profiles").update({ nickname: nickname.trim(), target_provider: targetProvider, target_grade: grade, updated_at: new Date().toISOString() }).eq("user_id", user.id);
-    const { error: b } = await s.from("user_settings").update({ exam_provider_id: providerId, updated_at: new Date().toISOString() }).eq("user_id", user.id);
+    const { error: b } = await s.from("user_settings").update({ exam_provider_id: providerId, target_exam_date: examDate || null, updated_at: new Date().toISOString() }).eq("user_id", user.id);
     if (a || b) { setMessage("설정을 저장하지 못했습니다. 다시 시도해 주세요."); setSaving(false); return; }
     router.replace("/"); router.refresh();
   }
@@ -70,6 +72,7 @@ export default function OnboardingPage() {
       <label><span>이름</span><input value={nickname} maxLength={30} onChange={(e) => setNickname(e.target.value)} placeholder="예: 민준" required /></label>
       <label><span>시험기관</span><select value={provider} onChange={(e) => { setProvider(e.target.value); setGrade(""); }} required><option value="">골라 주세요</option>{providers.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
       <label><span>목표급수</span><select value={grade} onChange={(e) => setGrade(e.target.value)} required disabled={!provider}><option value="">골라 주세요</option>{visible.map((g) => <option key={g.id} value={g.code}>{g.name}{g.cumulative_hanja_count ? " · " + g.cumulative_hanja_count + "자" : ""}</option>)}</select></label>
+      <label><span>시험 날짜 (선택)</span><input type="date" value={examDate} min={new Date().toISOString().slice(0,10)} onChange={(e) => setExamDate(e.target.value)} /><small>날짜를 정하면 시험 전에 복습·숙달 기간이 남도록 학습량을 맞춰요.</small></label>
       {message ? <p className="form-message" role="alert">{message}</p> : null}
       <button disabled={saving}>{saving ? "저장 중..." : "공부 시작하기"}</button>
     </form>
