@@ -60,6 +60,11 @@ export const VERIFIED_VARIABLE_PATTERNS:Partial<Record<string,VerifiedVariablePa
   "6":[
     {sessions:[108,109,110,112],types:["CHARACTER_USAGE"],supported:true},
     {sessions:[111],types:["COMMON_CHARACTER"],supported:true}
+  ],
+  "PRE3":[
+    {sessions:[108,109,112],types:["CULTURE_ETIQUETTE"],supported:true},
+    {sessions:[110],types:["CHARACTER_PRINCIPLE"],supported:true},
+    {sessions:[111],types:["STROKE_ORDER"],supported:false}
   ]
 };
 
