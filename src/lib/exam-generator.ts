@@ -1,4 +1,4 @@
-import type { ExamBlueprint } from "@/lib/exam-blueprints";
+import { VERIFIED_VARIABLE_PATTERNS, type ExamBlueprint, type ExamQuestionType } from "@/lib/exam-blueprints";
 
 export type ExampleWord={word:string;reading:string|null;meaning:string;child_explanation:string|null};
 export type ExamQuestion={id:string;type?:string;stem:string;prompt:string;correct:string;choices:string[];examples:ExampleWord[];image?:{src:string;alt:string}};
@@ -62,8 +62,8 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
  const pre5Variable=blueprint?.gradeCode==="PRE5"&&variableCount===2;
  const grade6Variable=blueprint?.gradeCode==="6"&&variableCount===1;
  const commonCount=baseCommonCount+(grade6Variable?1:0);
- const idiomCount=(blueprint?.items.filter(x=>x.type==="IDIOM").reduce((n,x)=>n+x.count,0)??0)+(pre5Variable?1:0);
- const cultureCount=blueprint?.items.filter(x=>x.type==="CULTURE_ETIQUETTE").reduce((n,x)=>n+x.count,0)??0;
+ const idiomCount=(blueprint?.items.filter(x=>x.type==="IDIOM").reduce((n,x)=>n+x.count,0)??0)+(pre5Variable?2:0);
+ const cultureCount=(blueprint?.items.filter(x=>x.type==="CULTURE_ETIQUETTE").reduce((n,x)=>n+x.count,0)??0)+(pre5Variable?1:0);
  const usageCount=(blueprint?.items.filter(x=>x.type==="CHARACTER_USAGE").reduce((n,x)=>n+x.count,0)??0)+(pre5Variable?1:0)+(grade6Variable?1:0);
  const specialReadingCount=blueprint?.items.filter(x=>x.type==="SPECIAL_READING").reduce((n,x)=>n+x.count,0)??0;
  const imageCount=blueprint?.items.filter(x=>x.type==="IMAGE_RECOGNITION").reduce((n,x)=>n+x.count,0)??0;
@@ -120,11 +120,25 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
   buckets.VARIABLE_VERIFIED=shuffle(candidates).slice(0,1).map(q=>({...q,id:`variable-grade6:${q.id}`}));
  }
  if(blueprint.gradeCode==="PRE5"&&blueprint.items.some(x=>x.type==="VARIABLE_VERIFIED")){
-  const fixedUsageCount=blueprint.items.filter(x=>x.type==="CHARACTER_USAGE").reduce((n,x)=>n+x.count,0);
-  const usage=usageQs[fixedUsageCount],idiom=idiomQs[0];
-  buckets.VARIABLE_VERIFIED=usage&&idiom
-   ? [{...usage,id:`variable-112:${usage.id}`},{...idiom,id:`variable-112:${idiom.id}`}]
-   : [];
+  const fixedCounts=(type:ExamQuestionType)=>blueprint.items.filter(x=>x.type===type).reduce((n,x)=>n+x.count,0);
+  const source:Partial<Record<ExamQuestionType,ExamQuestion[]>>={
+   CHARACTER_USAGE:usageQs,IDIOM:idiomQs,CULTURE_ETIQUETTE:cultureQs,COMMON_CHARACTER:commonQs
+  };
+  const supported=VERIFIED_VARIABLE_PATTERNS.PRE5?.filter(pattern=>pattern.supported)??[];
+  const viable=supported.filter(pattern=>{
+   const needed=new Map<ExamQuestionType,number>();
+   for(const type of pattern.types)needed.set(type,(needed.get(type)??0)+1);
+   return [...needed].every(([type,count])=>(source[type]?.length??0)>=fixedCounts(type)+count);
+  });
+  const pattern=shuffle(viable)[0];
+  if(pattern){
+   const offsets=new Map<ExamQuestionType,number>();
+   buckets.VARIABLE_VERIFIED=pattern.types.map(type=>{
+    const offset=offsets.get(type)??0;offsets.set(type,offset+1);
+    const q=source[type]?.[fixedCounts(type)+offset];
+    return q?{...q,id:`variable-pre5-${pattern.sessions.join("-")}:${q.id}`}:null;
+   }).filter((q):q is ExamQuestion=>Boolean(q));
+  }else buckets.VARIABLE_VERIFIED=[];
  }
  const typedBuckets=Object.entries(buckets) as [string,ExamQuestion[]][];
  for(const [type,items] of typedBuckets)for(const q of items)q.type=type;
