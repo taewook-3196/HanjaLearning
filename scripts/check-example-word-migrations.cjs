@@ -6,10 +6,9 @@ const base = process.env.MIGRATION_CHECK_BASE || "HEAD^";
 let changed = [];
 try {
   changed = execFileSync("git", ["diff", "--name-only", "--diff-filter=AM", base + "...HEAD"], { encoding: "utf8" })
-    .split(/\r?
-/)
-    .filter((name) => /^supabase\/migrations\/.*\.sql$/.test(name));
-} catch (error) {
+    .split(/\\r?\\n/)
+    .filter((name) => /^supabase\\/migrations\\/.*\\.sql$/.test(name));
+} catch {
   console.error("Could not determine changed migrations from " + base);
   process.exit(1);
 }
@@ -20,13 +19,13 @@ for (const file of changed) {
   if (!fs.existsSync(fullPath)) continue;
   const sql = fs.readFileSync(fullPath, "utf8");
   if (!/hanja_words/i.test(sql) || !/hanja_word_map/i.test(sql)) continue;
-  const mapInsert = /insert\s+into\s+public\.hanja_word_map/i.exec(sql);
+  const mapInsert = /insert\\s+into\\s+public\\.hanja_word_map/i.exec(sql);
   if (!mapInsert) continue;
   const beforeMap = sql.slice(0, mapInsert.index);
   const withIndex = beforeMap.toLowerCase().lastIndexOf("with words");
   if (withIndex < 0) continue;
   const mappingSection = beforeMap.slice(withIndex);
-  if (/with\s+words[\s\S]*?as\s*\(\s*values\s*\)/i.test(mappingSection)) {
+  if (/with\\s+words[\\s\\S]*?as\\s*\\(\\s*values\\s*\\)/i.test(mappingSection)) {
     failures.push(file + ": hanja_word_map mapping words VALUES is empty");
   }
 }
