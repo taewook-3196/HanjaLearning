@@ -322,3 +322,17 @@ button {
 .compact-writing-nudge .secondary-button{min-height:38px;margin-top:6px}
 .compact-learn .writing-complete{margin:3px 0 0;font-size:12px}
 @media(max-height:740px){.stroke-practice.compact svg{max-height:170px}.compact-flash-card{padding-top:8px;padding-bottom:8px}.compact-examples p:nth-child(n+2){display:none}}
+
+/* One-screen meaning-first learning flow */
+.compact-learning-details{margin:2px auto 5px;max-width:360px;padding:5px 8px;border-radius:12px;background:var(--accent-soft);text-align:left}
+.compact-learning-details .compact-answer-heading{min-height:30px}
+.compact-learning-details .compact-answer-heading>strong{font-size:17px}
+.compact-learning-details .compact-examples{margin-top:2px}
+.compact-learning-details .compact-examples p{margin:2px 0;font-size:12px;line-height:1.2}
+.compact-no-example{margin:2px 0!important;font-size:12px!important}
+.compact-learn .stroke-practice.compact{display:flex;flex-direction:column;gap:2px}
+.compact-learn .stroke-practice.compact>p{order:0}
+.compact-learn .stroke-practice.compact>div[aria-label]{order:1}
+.compact-learn .stroke-practice.compact>.reveal-button,.compact-learn .stroke-practice.compact>.compact-learning-details{order:2}
+.compact-learn .stroke-practice.compact>div:last-child{order:3}
+@media(max-height:760px){.compact-learn{padding-top:8px}.compact-learn .learn-top{margin-bottom:5px}.compact-flash-card{padding:8px 10px}.stroke-practice.compact>p{display:none}.compact-learning-details .compact-examples p:nth-child(n+2){display:none}}
