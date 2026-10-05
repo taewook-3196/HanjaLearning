@@ -35,7 +35,7 @@ create table if not exists public.hanja_idiom_map (
 
 -- Validate each idiom mapping against the actual character at its position.
 create or replace function public.validate_hanja_idiom_map()
-returns trigger language plpgsql set search_path=public as $
+returns trigger language plpgsql set search_path=public as $body$
 declare
   v_idiom text;
   v_character text;
@@ -46,7 +46,7 @@ begin
     raise exception 'Idiom mapping does not match the idiom character at position %', new.position;
   end if;
   return new;
-end $;
+end $body$;
 
 drop trigger if exists trg_validate_hanja_idiom_map on public.hanja_idiom_map;
 create trigger trg_validate_hanja_idiom_map
