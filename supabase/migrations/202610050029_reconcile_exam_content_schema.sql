@@ -98,6 +98,25 @@ drop trigger if exists trg_validate_hanja_idiom_map on public.hanja_idiom_map;
 create trigger trg_validate_hanja_idiom_map before insert or update on public.hanja_idiom_map
 for each row execute function public.validate_hanja_idiom_map();
 
+-- Do not VALIDATE the NOT VALID constraints here: invalid legacy rows are
+-- intentionally retained for editor repair. PostgreSQL still enforces these
+-- constraints for all new/updated rows.
+
+drop policy if exists "authenticated read published idiom maps" on public.hanja_idiom_map;
+create policy "authenticated read published idiom maps" on public.hanja_idiom_map
+for select to authenticated using (
+  position between 1 and 4
+  and exists (
+    select 1
+    from public.hanja_idioms i
+    join public.hanja h on h.id=hanja_id
+    where i.id=idiom_id
+      and i.content_status='PUBLISHED'
+      and h.content_status='PUBLISHED'
+      and substring(i.idiom from position for 1)=h.character
+  )
+);
+
 drop policy if exists "authenticated read published culture items" on public.exam_culture_items;
 create policy "authenticated read published culture items" on public.exam_culture_items
 for select to authenticated using (
