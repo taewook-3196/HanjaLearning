@@ -15,6 +15,7 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
  const target=useRef<HTMLDivElement>(null);
  const writer=useRef<HanziWriter|null>(null);
  const [mode,setMode]=useState<"LOADING"|"WATCH"|"TRACE"|"DONE"|"ERROR">("LOADING");
+ const [stage,setStage]=useState<1|2|3>(1);
  const [message,setMessage]=useState("획순을 준비하고 있어요.");
 
  useEffect(()=>{
@@ -30,7 +31,7 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
     if(!active)return;
     writer.current=null;onAvailabilityChange?.(false);setMode("ERROR");setMessage("이 글자의 획순 자료를 불러오지 못했어요. 뜻과 소리 학습은 계속할 수 있어요.");
    },
-   onLoadCharDataSuccess:()=>{if(active){onAvailabilityChange?.(true);setMode("WATCH");setMessage("먼저 획순을 보고 따라 써 보세요.");}},
+   onLoadCharDataSuccess:()=>{if(active){onAvailabilityChange?.(true);setStage(1);setMode("WATCH");setMessage("1단계 · 글자를 보면서 따라 써 보세요.");}},
   });
   return()=>{active=false;writer.current=null;if(target.current)target.current.innerHTML="";};
  },[character,onAvailabilityChange]);
@@ -43,24 +44,31 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
   if(!writer.current||mode==="LOADING"||mode==="ERROR")return;
   writer.current.cancelQuiz();setMode("WATCH");setMessage("획순을 천천히 살펴보세요.");writer.current.animateCharacter();
  }
- function practice(){
+ function practice(targetStage:1|2|3=stage){
   if(!writer.current||mode==="LOADING"||mode==="ERROR")return;
-  writer.current.cancelQuiz();setMode("TRACE");setMessage("화면의 획순대로 손가락이나 펜으로 써 보세요.");
+  writer.current.cancelQuiz();setStage(targetStage);setMode("TRACE");
+  if(targetStage===1){writer.current.showCharacter();writer.current.showOutline();setMessage("1단계 · 글자를 보면서 따라 써 보세요.");}
+  else if(targetStage===2){writer.current.hideCharacter();writer.current.showOutline();setMessage("2단계 · 흐린 윤곽을 힌트로 써 보세요.");}
+  else {writer.current.hideCharacter();writer.current.hideOutline();setMessage("3단계 · 가이드 없이 기억해서 써 보세요.");}
   writer.current.quiz({
-   showHintAfterMisses:2,
+   showHintAfterMisses:targetStage===3?3:2,
    highlightOnComplete:true,
-   onComplete:()=>{setMode("DONE");setMessage("잘 썼어요. 이제 뜻과 소리를 기억했는지 확인해 보세요.");onPracticeComplete?.();}
+   onComplete:()=>{
+    if(targetStage<3){const next=(targetStage+1) as 2|3;setMode("DONE");setMessage(targetStage===1?"좋아요. 이제 힌트만 보고 써 보세요.":"좋아요. 마지막은 가이드 없이 기억해서 써 보세요.");setTimeout(()=>practice(next),450);}
+    else {setMode("DONE");setMessage("3단계 쓰기 완료! 기억해서 잘 썼어요.");onPracticeComplete?.();}
+   }
   });
  }
 
  const disabled=mode==="LOADING"||mode==="ERROR";
  return <section className="stroke-practice">
   {!compact?<h2>획순 · 쓰기 연습</h2>:null}
+  <div className="writing-stage-indicator" aria-label={"쓰기 "+stage+"단계"}><span className={stage>=1?"active":""}>1 따라쓰기</span><span className={stage>=2?"active":""}>2 힌트쓰기</span><span className={stage>=3?"active":""}>3 기억쓰기</span></div>
   <p role={mode==="ERROR"?"alert":undefined}>{message}</p>
   <div ref={target} aria-label={character+" 획순과 쓰기 연습"} style={{width:compact?190:260,height:compact?190:260,margin:"0 auto",touchAction:"none"}}/>
   {details}\n  {!disabled&&controlsEnabled?<div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
    <button type="button" className="secondary-button" onClick={animate}>▶ 획순 보기</button>
-   <button type="button" onClick={practice}>{mode==="DONE"?"한 번 더 쓰기":"✍️ 따라 쓰기"}</button>
+   <button type="button" onClick={()=>practice(stage)}>{stage===1?"✍️ 따라 쓰기":stage===2?"✍️ 힌트 쓰기":mode==="DONE"?"한 번 더 기억쓰기":"✍️ 기억 쓰기"}</button>
   </div>:null}
  </section>;
 }
