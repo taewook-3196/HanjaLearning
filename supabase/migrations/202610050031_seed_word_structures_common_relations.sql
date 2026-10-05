@@ -40,13 +40,12 @@ inserted as (
   select 1 from public.hanja_common_character_sets s
   where s.common_hanja_id=h.id and s.prompt_summary=d.prompt_summary
  )
- returning id
+ returning id,common_hanja_id
 ),
 sets as (
- select s.id,h.character
- from public.hanja_common_character_sets s
- join public.hanja h on h.id=s.common_hanja_id
- where s.source_note='교육용 공통 한자 세트 검토 · 2026-10-05'
+ select i.id,h.character
+ from inserted i
+ join public.hanja h on h.id=i.common_hanja_id
 ),
 links(common_char,word) as (
  values

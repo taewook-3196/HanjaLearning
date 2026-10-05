@@ -25,17 +25,13 @@ with words(word, reading, meaning, child_explanation, chars) as (
  ('내부','내부','안쪽 부분','어떤 것의 안쪽',array['內','部']),
  ('학년','학년','학교에서 나눈 교육 단계','학교에서 같은 단계로 공부하는 한 해의 단위',array['學','年']),
  ('대학','대학','고등교육을 하는 학교','고등학교 다음 단계에서 공부하는 학교',array['大','學']),
- ('목표','목표','이루려고 하는 대상','앞으로 이루고자 정한 것',array['目','標']),
  ('백색','백색','흰색','하얀 색',array['白','色']),
  ('등산','등산','산에 오름','운동이나 구경을 위해 산에 오르는 일',array['登','山']),
  ('상하','상하','위와 아래','위쪽과 아래쪽',array['上','下']),
  ('소형','소형','작은 크기','크기가 작은 것',array['小','形']),
- ('악수','악수','서로 손을 잡아 인사함','인사할 때 서로 손을 잡는 일',array['握','手']),
  ('외국','외국','자기 나라가 아닌 다른 나라','우리나라가 아닌 다른 나라',array['外','國']),
- ('우측','우측','오른쪽','오른쪽 방향이나 부분',array['右','側']),
  ('입학','입학','학교에 들어가 학생이 됨','새 학교에 들어가 공부를 시작하는 일',array['入','學']),
  ('족구','족구','발로 공을 넘기는 운동','발을 주로 사용해 공을 넘기는 운동',array['足','球']),
- ('좌측','좌측','왼쪽','왼쪽 방향이나 부분',array['左','側']),
  ('중앙','중앙','한가운데','가운데 부분',array['中','央']),
  ('청색','청색','푸른색','파란빛을 띠는 색',array['靑','色']),
  ('출구','출구','나가는 곳','건물이나 장소에서 밖으로 나가는 곳',array['出','口']),
@@ -44,7 +40,6 @@ with words(word, reading, meaning, child_explanation, chars) as (
  ('백일','백일','백 날','날짜를 세어 백 번째가 되는 날',array['百','日']),
  ('생일','생일','태어난 날을 해마다 기념하는 날','자기가 태어난 날',array['生','日']),
  ('선생','선생','학생을 가르치는 사람을 높여 이르는 말','학생을 가르쳐 주는 분',array['先','生']),
- ('심장','심장','피를 온몸으로 보내는 기관','몸속에서 피를 온몸으로 보내는 중요한 기관',array['心','臟']),
  ('지구','지구','우리가 사는 행성','사람과 여러 생물이 살아가는 행성',array['地','球']),
  ('천국','천국','아주 평화롭고 행복한 곳을 비유하는 말','매우 평화롭고 행복한 곳을 이르는 말',array['天','國']),
  ('천원','천원','천 원의 돈','우리나라 돈 천 원',array['千','元']),
@@ -76,12 +71,12 @@ upserted as (
    child_explanation=excluded.child_explanation,
    content_status='PUBLISHED',
    source_note=excluded.source_note
- returning id
+ returning id,word,reading,meaning
 )
 insert into public.hanja_word_map(word_id,hanja_id,position)
 select hw.id,h.id,u.ord::integer
 from words w
-join public.hanja_words hw on hw.word=w.word and hw.reading=w.reading and hw.meaning=w.meaning
+join upserted hw on hw.word=w.word and hw.reading=w.reading and hw.meaning=w.meaning
 cross join lateral unnest(w.chars) with ordinality as u(ch,ord)
 join public.hanja h on h.character=u.ch
 on conflict do nothing;
@@ -91,13 +86,11 @@ declare v_words integer; v_bad integer;
 begin
  select count(*) into v_words from public.hanja_words
  where source_note='초등 학습용 대표 어휘 1차 · 앱 자체 쉬운 뜻풀이 · 2026-10-05';
- if v_words<>61 then raise exception 'Expected 61 batch-1 example words, got %',v_words; end if;
+ if v_words<>56 then raise exception 'Expected 56 batch-1 example words, got %',v_words; end if;
 
  select count(*) into v_bad
  from public.hanja_words w
  where w.source_note='초등 학습용 대표 어휘 1차 · 앱 자체 쉬운 뜻풀이 · 2026-10-05'
-   and (select count(*) from public.hanja_word_map m where m.word_id=w.id)<>cardinality(
-     (select x.chars from words x where x.word=w.word and x.reading=w.reading and x.meaning=w.meaning)
-   );
+   and (select count(*) from public.hanja_word_map m where m.word_id=w.id)<>char_length(w.word);
  if v_bad<>0 then raise exception 'Batch-1 example word mapping integrity failure: %',v_bad; end if;
 end $body$;
