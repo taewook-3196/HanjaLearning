@@ -9,7 +9,9 @@ export function buildStudyPlan(input:{unseen:number;dueReviews:number;weakNotDue
  const isTight=idealNew>MAX_NEW||(days<=masteryDays&&unseen>0),phase=days===0?"EXAM":isTight?"CATCH_UP":days<=masteryDays?"MASTER":"LEARN";
  const requestedNew=phase==="CATCH_UP"?Math.max(1,catchUpNew):idealNew;
  // Keep the relaxed 8-card rhythm when possible, but grow gradually for a deadline instead of assigning every due review at once.
- const deadlineReviewBoost=(phase==="MASTER"||phase==="CATCH_UP")?Math.min(4,weak):0;\n const targetTotal=Math.min(MAX_TOTAL,Math.max(base,Math.min(MAX_TOTAL,due+Math.min(unseen,requestedNew)+deadlineReviewBoost)));\n const newCount=Math.min(unseen,MAX_NEW,requestedNew,Math.max(0,targetTotal-Math.min(due,targetTotal)));
+ const deadlineReviewBoost=(phase==="MASTER"||phase==="CATCH_UP")?Math.min(4,weak):0;
+ const targetTotal=Math.min(MAX_TOTAL,Math.max(base,Math.min(MAX_TOTAL,due+Math.min(unseen,requestedNew)+deadlineReviewBoost)));
+ const newCount=Math.min(unseen,MAX_NEW,requestedNew,Math.max(0,targetTotal-Math.min(due,targetTotal)));
  const reviewCount=Math.min(due,targetTotal-newCount);
  const spare=Math.max(0,targetTotal-newCount-reviewCount);
  const extraMasteryReviews=(phase==="MASTER"||phase==="CATCH_UP"||days<=Math.max(14,masteryDays*2))?Math.min(weak,spare||Math.max(0,Math.min(4,MAX_TOTAL-newCount-reviewCount))):0;
