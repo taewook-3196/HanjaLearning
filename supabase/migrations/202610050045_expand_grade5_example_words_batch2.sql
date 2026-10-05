@@ -100,8 +100,9 @@ declare v_words integer;v_bad integer;
 begin
  select count(*) into v_words from public.hanja_words where source_note='초등 학습용 대표 어휘 2차 · 앱 자체 쉬운 뜻풀이 · 2026-10-05';
  if v_words<>72 then raise exception 'Expected 72 batch-2 example words, got %',v_words;end if;
- select count(*) into v_bad from public.hanja_words w
+ select count(*) into v_bad
+ from public.hanja_words w
  where w.source_note='초등 학습용 대표 어휘 2차 · 앱 자체 쉬운 뜻풀이 · 2026-10-05'
- and not exists(select 1 from public.hanja_word_map m where m.word_id=w.id);
- if v_bad<>0 then raise exception 'Batch-2 example word mapping missing: %',v_bad;end if;
+   and (select count(*) from public.hanja_word_map m where m.word_id=w.id)<>char_length(w.word);
+ if v_bad<>0 then raise exception 'Batch-2 example word mapping incomplete: %',v_bad;end if;
 end $body$;
