@@ -19,12 +19,38 @@ with words(word,reading,meaning,child_explanation,chars) as (values
 ('도서','도서','책','읽거나 공부할 수 있는 책',array['圖','書']),
 ('명랑','명랑','밝고 활발함','마음이나 성격이 밝고 즐거운 모습',array['明','朗']),
 ('영토','영토','한 나라의 땅','한 나라가 다스리는 땅의 범위',array['領','土']),
-('목장','목장','가축을 기르는 곳','소나 말 같은 가축을 넓은 곳에서 기르는 장소',array['牧','場']),
+('목장','목장','가축을 기르는 곳','소나 말 같은 가축을 넓은 곳에서 기르는 장소',array['牧','場'])
 )
 insert into public.hanja_words(word,reading,meaning,child_explanation,content_status,source_note)
 select word,reading,meaning,child_explanation,'PUBLISHED','4급 예시어 3차 · 앱 자체 쉬운 뜻풀이 · 2026-10-05' from words
 on conflict(word,reading,meaning) do update set child_explanation=excluded.child_explanation,content_status='PUBLISHED',source_note=excluded.source_note;
+
 with words(word,reading,meaning,chars) as (values
+('감미','감미','달콤한 맛',array['甘','味']),
+('거수','거수','손을 들어 표시함',array['擧','手']),
+('경치','경치','자연이나 주변의 아름다운 모습',array['景','致']),
+('골격','골격','몸을 이루는 뼈대',array['骨','格']),
+('구비','구비','필요한 것을 갖춤',array['具','備']),
+('구경','구경','흥미 있는 것을 보고 즐김',array['具','景']),
+('영구','영구','아주 오래 계속됨',array['永','久']),
+('국면','국면','일이 진행되는 한때의 상황',array['局','面']),
+('군주','군주','나라를 다스리는 임금',array['君','主']),
+('극한','극한','더 나아갈 수 없는 끝',array['極','限']),
+('급식','급식','학교 등에서 식사를 제공함',array['給','食']),
+('기타','기타','그 밖의 것',array['其','他']),
+('기차','기차','철길을 달리는 여러 칸의 차',array['汽','車']),
+('기본','기본','바탕이 되는 것',array['基','本']),
+('기념','기념','뜻깊은 일을 오래 기억함',array['記','念']),
+('단정','단정','바르고 깔끔함',array['端','正']),
+('도서','도서','책',array['圖','書']),
+('명랑','명랑','밝고 활발함',array['明','朗']),
+('영토','영토','한 나라의 땅',array['領','土']),
+('목장','목장','가축을 기르는 곳',array['牧','場'])
 )
 insert into public.hanja_word_map(word_id,hanja_id,position)
-select hw.id,h.id,u.ord::integer from words w join public.hanja_words hw on hw.word=w.word and hw.reading=w.reading and hw.meaning=w.meaning cross join lateral unnest(w.chars) with ordinality u(ch,ord) join public.hanja h on h.character=u.ch on conflict do nothing;
+select hw.id,h.id,u.ord::integer
+from words w
+join public.hanja_words hw on hw.word=w.word and hw.reading=w.reading and hw.meaning=w.meaning
+cross join lateral unnest(w.chars) with ordinality u(ch,ord)
+join public.hanja h on h.character=u.ch
+on conflict do nothing;
