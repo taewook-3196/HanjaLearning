@@ -4,9 +4,12 @@ import HanziWriter from "hanzi-writer";
 
 type Props={character:string;onPracticeComplete?:()=>void;onAvailabilityChange?:(available:boolean)=>void};
 
-// Compatibility/variant forms need separate Korean-form verification before enabling.
-export const UNSAFE_COMPATIBILITY_FORMS=new Set(["六","車","不","樂"]);
-export function supportsStrokePractice(character:string){return !UNSAFE_COMPATIBILITY_FORMS.has(character);}
+// CJK compatibility ideographs need separate Korean-form verification before enabling.
+export function isCompatibilityIdeograph(character:string){
+ const cp=character.codePointAt(0);
+ return cp!==undefined&&((cp>=0xf900&&cp<=0xfaff)||(cp>=0x2f800&&cp<=0x2fa1f));
+}
+export function supportsStrokePractice(character:string){return !isCompatibilityIdeograph(character);}
 
 export default function StrokePractice({character,onPracticeComplete,onAvailabilityChange}:Props){
  const target=useRef<HTMLDivElement>(null);
