@@ -5,7 +5,8 @@ import HanziWriter from "hanzi-writer";
 type Props={character:string;onPracticeComplete?:()=>void};
 
 // Compatibility/variant forms need separate Korean-form verification before enabling.
-const UNSAFE_COMPATIBILITY_FORMS=new Set(["六","車","不","樂"]);
+export const UNSAFE_COMPATIBILITY_FORMS=new Set(["六","車","不","樂"]);
+export function supportsStrokePractice(character:string){return !UNSAFE_COMPATIBILITY_FORMS.has(character);}
 
 export default function StrokePractice({character,onPracticeComplete}:Props){
  const target=useRef<HTMLDivElement>(null);
@@ -14,7 +15,7 @@ export default function StrokePractice({character,onPracticeComplete}:Props){
  const [message,setMessage]=useState("");
 
  useEffect(()=>{
-  if(!target.current||UNSAFE_COMPATIBILITY_FORMS.has(character))return;
+  if(!target.current||!supportsStrokePractice(character))return;
   target.current.innerHTML="";
   writer.current=HanziWriter.create(target.current,character,{
    width:260,height:260,padding:12,
@@ -24,7 +25,7 @@ export default function StrokePractice({character,onPracticeComplete}:Props){
   return()=>{writer.current=null};
  },[character]);
 
- if(UNSAFE_COMPATIBILITY_FORMS.has(character)){
+ if(!supportsStrokePractice(character)){
   return <section className="stroke-practice"><h2>쓰기 연습</h2><p>이 글자는 한국식 자형의 획순 확인이 끝난 뒤 쓰기 연습을 제공할게요.</p></section>;
  }
 
