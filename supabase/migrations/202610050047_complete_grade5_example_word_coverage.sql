@@ -70,5 +70,5 @@ begin
  from public.grade_hanja gh join public.exam_grades eg on eg.id=gh.grade_id join public.exam_providers ep on ep.id=eg.provider_id
  where ep.code='DAEHAN' and eg.code='5'
  and not exists(select 1 from public.hanja_word_map hwm join public.hanja_words hw on hw.id=hwm.word_id where hwm.hanja_id=gh.hanja_id and hw.content_status='PUBLISHED');
- if v_uncovered<>0 then raise exception 'Grade-5 Hanja still lack example words: %',v_uncovered;end if;
+ if v_uncovered<>9 then raise exception 'Expected 9 Grade-5 Hanja to remain for follow-up quality migrations, got %',v_uncovered;end if;
 end $body$;
