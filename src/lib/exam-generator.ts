@@ -17,9 +17,15 @@ export type SpecialReading={id:number;hanja_id:number;reading:string;meaning:str
 export type ImageItem={id:number;hanja_id:number;asset_path:string;alt_text:string};
 
 
-export function validateExamQuestions(questions:ExamQuestion[],expectedCount:number){
+export function validateExamQuestions(questions:ExamQuestion[],expectedCount:number,blueprint?:ExamBlueprint){
  const errors:string[]=[];
  if(questions.length!==expectedCount)errors.push(`expected ${expectedCount} questions, got ${questions.length}`);
+ if(blueprint){
+  for(const item of blueprint.items){
+   const actual=questions.filter(q=>q.type===item.type).length;
+   if(actual!==item.count)errors.push(`blueprint ${item.type}: expected ${item.count}, got ${actual}`);
+  }
+ }
  const ids=new Set<string>();
  questions.forEach((q,index)=>{
   const label=`question ${index+1}`;
