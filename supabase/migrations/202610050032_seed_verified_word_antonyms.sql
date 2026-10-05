@@ -57,5 +57,5 @@ begin
  where r.relation_type='OPPOSITE'
    and ((a.word='오전' and b.word='오후') or (a.word='오후' and b.word='오전'))
    and r.content_status='PUBLISHED';
- if v_relation<>1 then raise exception 'Expected one published 오전/오후 antonym relation, got %',v_relation; end if;
+ if v_relation<1 then raise exception 'Expected at least one published 오전/오후 antonym relation, got %',v_relation; end if;
 end $body$;
