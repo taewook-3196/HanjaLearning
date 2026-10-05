@@ -52,18 +52,19 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
  const wordMeaningCount=blueprint?.items.filter(x=>x.type==="WORD_MEANING").reduce((n,x)=>n+x.count,0)??0;
  const relationCount=blueprint?.items.filter(x=>x.type==="CHAR_SYNONYM_ANTONYM").reduce((n,x)=>n+x.count,0)??0;
  const wordRelationCount=blueprint?.items.filter(x=>x.type==="WORD_SYNONYM_ANTONYM").reduce((n,x)=>n+x.count,0)??0;
- const principleCount=blueprint?.items.filter(x=>x.type==="CHARACTER_PRINCIPLE").reduce((n,x)=>n+x.count,0)??0;
+ const variableCount=blueprint?.items.filter(x=>x.type==="VARIABLE_VERIFIED").reduce((n,x)=>n+x.count,0)??0;
+ const pre5Variable=blueprint?.gradeCode==="PRE5"&&variableCount===2;
+ const pre3Variable=blueprint?.gradeCode==="PRE3"&&variableCount===1;
+ const grade6Variable=blueprint?.gradeCode==="6"&&variableCount===1;
+ const principleCount=(blueprint?.items.filter(x=>x.type==="CHARACTER_PRINCIPLE").reduce((n,x)=>n+x.count,0)??0)+(pre3Variable?1:0);
  const dictionaryCount=blueprint?.items.filter(x=>x.type==="DICTIONARY_LOOKUP").reduce((n,x)=>n+x.count,0)??0;
  const contextReadingCount=blueprint?.items.filter(x=>x.type==="CONTEXT_READING").reduce((n,x)=>n+x.count,0)??0;
  const contextHanjaCount=blueprint?.items.filter(x=>x.type==="CONTEXT_TO_HANJA").reduce((n,x)=>n+x.count,0)??0;
  const structureCount=blueprint?.items.filter(x=>x.type==="WORD_STRUCTURE").reduce((n,x)=>n+x.count,0)??0;
  const baseCommonCount=blueprint?.items.filter(x=>x.type==="COMMON_CHARACTER").reduce((n,x)=>n+x.count,0)??0;
- const variableCount=blueprint?.items.filter(x=>x.type==="VARIABLE_VERIFIED").reduce((n,x)=>n+x.count,0)??0;
- const pre5Variable=blueprint?.gradeCode==="PRE5"&&variableCount===2;
- const grade6Variable=blueprint?.gradeCode==="6"&&variableCount===1;
  const commonCount=baseCommonCount+(grade6Variable?1:0);
  const idiomCount=(blueprint?.items.filter(x=>x.type==="IDIOM").reduce((n,x)=>n+x.count,0)??0)+(pre5Variable?2:0);
- const cultureCount=(blueprint?.items.filter(x=>x.type==="CULTURE_ETIQUETTE").reduce((n,x)=>n+x.count,0)??0)+(pre5Variable?1:0);
+ const cultureCount=(blueprint?.items.filter(x=>x.type==="CULTURE_ETIQUETTE").reduce((n,x)=>n+x.count,0)??0)+(pre5Variable?1:0)+(pre3Variable?1:0);
  const usageCount=(blueprint?.items.filter(x=>x.type==="CHARACTER_USAGE").reduce((n,x)=>n+x.count,0)??0)+(pre5Variable?1:0)+(grade6Variable?1:0);
  const specialReadingCount=blueprint?.items.filter(x=>x.type==="SPECIAL_READING").reduce((n,x)=>n+x.count,0)??0;
  const imageCount=blueprint?.items.filter(x=>x.type==="IMAGE_RECOGNITION").reduce((n,x)=>n+x.count,0)??0;
@@ -154,6 +155,12 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
    }
    buckets.VARIABLE_VERIFIED=variableQs;
   }else buckets.VARIABLE_VERIFIED=[];
+ }
+ if(blueprint.gradeCode==="PRE3"&&blueprint.items.some(x=>x.type==="VARIABLE_VERIFIED")){
+  const fixedPrincipleCount=blueprint.items.filter(x=>x.type==="CHARACTER_PRINCIPLE").reduce((n,x)=>n+x.count,0);
+  const fixedCultureCount=blueprint.items.filter(x=>x.type==="CULTURE_ETIQUETTE").reduce((n,x)=>n+x.count,0);
+  const candidates:ExamQuestion[]=[principleQs[fixedPrincipleCount],cultureQs[fixedCultureCount]].filter((q):q is ExamQuestion=>q!==undefined);
+  buckets.VARIABLE_VERIFIED=shuffle(candidates).slice(0,1).map(q=>({...q,id:`variable-pre3:${q.id}`}));
  }
  const typedBuckets=Object.entries(buckets) as [string,ExamQuestion[]][];
  for(const [type,items] of typedBuckets)for(const q of items)q.type=type;
