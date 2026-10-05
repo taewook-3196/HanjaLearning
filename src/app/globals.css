@@ -348,3 +348,7 @@ button {
 .example-word-meaning{margin-top:3px;font-size:15px;line-height:1.35}
 .compact-learning-details .word-grade-row{margin-top:5px;margin-left:0}
 .compact-learning-details .word-grade-row small{font-size:12px}
+
+.writing-stage-indicator{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0 10px}
+.writing-stage-indicator span{padding:7px 4px;border-radius:999px;background:#eef1f5;color:#77808d;font-size:12px;font-weight:800;text-align:center}
+.writing-stage-indicator span.active{background:#e5f2ff;color:#1688e5}
