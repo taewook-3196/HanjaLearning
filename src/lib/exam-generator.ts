@@ -112,7 +112,8 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
  // requires stroke-order source data that is not modeled yet, so only the
  // fully supported 112-session pair (character usage + idiom usage) is eligible.
  if(blueprint.gradeCode==="PRE5"&&blueprint.items.some(x=>x.type==="VARIABLE_VERIFIED")){
-  const fixedUsageCount=blueprint.items.filter(x=>x.type==="CHARACTER_USAGE").reduce((n,x)=>n+x.count,0);\n  const usage=usageQs[fixedUsageCount],idiom=idiomQs[0];
+  const fixedUsageCount=blueprint.items.filter(x=>x.type==="CHARACTER_USAGE").reduce((n,x)=>n+x.count,0);
+  const usage=usageQs[fixedUsageCount],idiom=idiomQs[0];
   buckets.VARIABLE_VERIFIED=usage&&idiom
    ? [{...usage,id:`variable-112:${usage.id}`},{...idiom,id:`variable-112:${idiom.id}`}]
    : [];
