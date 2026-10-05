@@ -42,6 +42,26 @@ where content_status='PUBLISHED' and (grade_id is null or choice_a is null or ch
 update public.hanja_special_readings set content_status='REVIEWED'
 where content_status='PUBLISHED' and (choice_a is null or choice_b is null or choice_c is null or choice_d is null or correct_choice not between 1 and 4);
 
+-- Quarantine legacy rows that fail the new invariants. They remain in the
+-- database for review but are not exposed to learners.
+update public.hanja_usage_items
+set content_status='REVIEWED'
+where content_status='PUBLISHED' and (
+  length(btrim(prompt))=0
+  or length(btrim(choice_a))=0 or length(btrim(choice_b))=0 or length(btrim(choice_c))=0 or length(btrim(choice_d))=0
+  or btrim(choice_a)=btrim(choice_b) or btrim(choice_a)=btrim(choice_c) or btrim(choice_a)=btrim(choice_d)
+  or btrim(choice_b)=btrim(choice_c) or btrim(choice_b)=btrim(choice_d) or btrim(choice_c)=btrim(choice_d)
+);
+
+update public.hanja_image_items
+set content_status='REVIEWED'
+where content_status='PUBLISHED' and (
+  asset_path not like '/exam-images/%'
+  or asset_path ~ '(^|/)\.\.(/|$)' or asset_path ~ '^//'
+  or position('?' in asset_path)>0 or position('#' in asset_path)>0 or position('\\' in asset_path)>0
+  or length(btrim(alt_text))=0
+);
+
 alter table public.hanja_usage_items drop constraint if exists hanja_usage_items_choices_trimmed_check;
 alter table public.hanja_usage_items add constraint hanja_usage_items_choices_trimmed_check check (
   length(btrim(prompt))>0
