@@ -1,5 +1,5 @@
 // Abstract question-type distribution derived from the user-provided official
-// 대한검정회 111회·112회 papers. Do not store or reproduce copyrighted questions here.
+// 대한검정회 108회~112회 papers supplied by the user. Store only abstract distributions, never copyrighted question text.
 export type ExamQuestionType =
   | "IMAGE_RECOGNITION"
   | "HANJA_TO_READING_MEANING"
@@ -66,7 +66,7 @@ export const DAEHAN_FIELD_BLUEPRINTS:Record<string,ExamBlueprint>={
     {type:"CHARACTER_PRINCIPLE",count:1},{type:"CHARACTER_USAGE",count:1},{type:"DICTIONARY_LOOKUP",count:1},
     {type:"CHAR_SYNONYM_ANTONYM",count:1},{type:"WORD_READING",count:5},{type:"WORD_MEANING",count:4},
     {type:"WORD_TO_HANJA",count:4},{type:"CONTEXT_READING",count:7},{type:"CONTEXT_TO_HANJA",count:2},
-    {type:"WORD_SYNONYM_ANTONYM",count:1},{type:"COMMON_CHARACTER",count:1},{type:"IDIOM",count:1},
+    {type:"WORD_SYNONYM_ANTONYM",count:1},{type:"VARIABLE_VERIFIED",count:1},{type:"IDIOM",count:1},
     {type:"CULTURE_ETIQUETTE",count:1}
   ]},
   "PRE5":{gradeCode:"PRE5",questionCount:50,status:"VERIFIED_111_112",items:[
