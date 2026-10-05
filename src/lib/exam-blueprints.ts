@@ -19,7 +19,8 @@ export type ExamQuestionType =
   | "WORD_STRUCTURE"
   | "IDIOM"
   | "CULTURE_ETIQUETTE"
-  | "STROKE_ORDER"\n  | "VARIABLE_VERIFIED";
+  | "STROKE_ORDER"
+  | "VARIABLE_VERIFIED";
 
 export type ExamBlueprintItem={type:ExamQuestionType;count:number};
 export type ExamDataRequirement="HANJA_READING"|"WORDS"|"RELATIONS"|"CHARACTER_METADATA"|"WORD_CONTEXTS"|"WORD_STRUCTURES"|"COMMON_CHARACTER_SETS"|"USAGE_ITEMS"|"SPECIAL_READINGS"|"ORIGINAL_IMAGES"|"IDIOMS"|"CULTURE_CONTENT";
@@ -43,7 +44,8 @@ export const EXAM_TYPE_REQUIREMENTS:Record<ExamQuestionType,ExamDataRequirement[
   WORD_STRUCTURE:["WORDS","WORD_STRUCTURES"],
   IDIOM:["IDIOMS"],
   CULTURE_ETIQUETTE:["CULTURE_CONTENT"],
-  STROKE_ORDER:["CHARACTER_METADATA"],\n  VARIABLE_VERIFIED:[]
+  STROKE_ORDER:["CHARACTER_METADATA"],
+  VARIABLE_VERIFIED:[]
 };
 export type ExamBlueprint={gradeCode:string;questionCount:number;items:ExamBlueprintItem[];status:"VERIFIED_111_112"|"PENDING_FINAL_CHECK"};
 
