@@ -262,3 +262,5 @@ button {
 
 /* Daily Hanja stroke-order and handwriting practice */
 .stroke-practice{margin-top:20px;padding-top:18px;border-top:1px solid var(--line,#e5e7eb);text-align:center}.stroke-practice h2{margin:0 0 6px;font-size:1.15rem}.stroke-practice p{margin:0 0 12px;line-height:1.5}.stroke-practice svg{max-width:100%;height:auto;touch-action:none}
+
+.learn-progress{width:112px;height:7px;margin-top:6px;border-radius:999px;background:#e5e7eb;overflow:hidden}.learn-progress>span{display:block;height:100%;border-radius:inherit;background:currentColor;transition:width .2s ease}.writing-complete{margin:12px 0 0;font-weight:800;text-align:center}
