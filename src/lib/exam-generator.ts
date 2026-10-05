@@ -95,7 +95,7 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
   .filter(q=>q.choices.length===4);
  const structureLabels:Record<string,string>={SUBJECT_PREDICATE:"주술 관계",VERB_OBJECT:"술목 관계",MODIFIER_HEAD:"수식 관계",PARALLEL:"병렬 관계",OTHER:"기타 관계"};
  const structureQs=shuffle(wordStructures).filter(s=>wordById.has(s.word_id)&&Boolean(structureLabels[s.structure_type])).slice(0,structureCount).map(s=>{const w=wordById.get(s.word_id)!,correct=structureLabels[s.structure_type];const wrong=shuffle(Object.entries(structureLabels).filter(([k])=>k!==s.structure_type&&k!=="OTHER").map(([,v])=>v)).slice(0,3);return{id:`word-structure:${s.word_id}`,stem:w.word,prompt:"이 한자어의 짜임으로 알맞은 것을 고르세요.",correct,choices:shuffle([correct,...wrong]),examples:[]}}).filter(q=>q.choices.length===4);
- const commonQs=shuffle(commonCharacterSets).filter(set=>{const correct=characterById.get(set.common_hanja_id),setWords=set.word_ids.map(id=>wordById.get(id)?.word).filter(Boolean),allWordMaps=set.word_ids.map(id=>set.word_hanja_ids[id]??[]);return Boolean(correct)&&setWords.length>=2&&allWordMaps.length===set.word_ids.length&&allWordMaps.every(xs=>xs.includes(set.common_hanja_id))}).slice(0,commonCount).map(set=>{const correct=characterById.get(set.common_hanja_id),setWords=set.word_ids.map(id=>wordById.get(id)?.word).filter((x):x is string=>Boolean(x));if(!correct||setWords.length<2)return null;const wrong=[...new Set(shuffle(pool.filter(x=>x.id!==set.common_hanja_id&&x.character!==correct&&!set.word_ids.every(wordId=>(set.word_hanja_ids[wordId]??[]).includes(x.id)))).map(x=>x.character))].slice(0,3);if(wrong.length<3)return null;return{id:`common-character:${set.id}`,stem:setWords.join(" · "),prompt:"이 한자어들에 공통으로 들어가는 한자를 고르세요.",correct,choices:shuffle([correct,...wrong]),examples:[]}}).filter((q):q is ExamQuestion=>Boolean(q)&&q.choices.length===4);
+ const commonQs:ExamQuestion[]=shuffle(commonCharacterSets).filter(set=>{const correct=characterById.get(set.common_hanja_id),setWords=set.word_ids.map(id=>wordById.get(id)?.word).filter(Boolean),allWordMaps=set.word_ids.map(id=>set.word_hanja_ids[id]??[]);return Boolean(correct)&&setWords.length>=2&&allWordMaps.length===set.word_ids.length&&allWordMaps.every(xs=>xs.includes(set.common_hanja_id))}).slice(0,commonCount).flatMap(set=>{const correct=characterById.get(set.common_hanja_id),setWords=set.word_ids.map(id=>wordById.get(id)?.word).filter((x):x is string=>Boolean(x));if(!correct||setWords.length<2)return [];const wrong=[...new Set(shuffle(pool.filter(x=>x.id!==set.common_hanja_id&&x.character!==correct&&!set.word_ids.every(wordId=>(set.word_hanja_ids[wordId]??[]).includes(x.id)))).map(x=>x.character))].slice(0,3);if(wrong.length<3)return [];return [{id:`common-character:${set.id}`,stem:setWords.join(" · "),prompt:"이 한자어들에 공통으로 들어가는 한자를 고르세요.",correct,choices:shuffle([correct,...wrong]),examples:[]}];});
  const goodIdioms=idioms.filter(i=>i.idiom&&i.meaning);const idiomQs=goodIdioms.length<4?[]:shuffle(goodIdioms).filter(i=>new Set(goodIdioms.filter(x=>x.id!==i.id&&x.meaning!==i.meaning).map(x=>x.meaning)).size>=3).slice(0,idiomCount).map(i=>{const wrong=[...new Set(shuffle(goodIdioms.filter(x=>x.id!==i.id&&x.meaning!==i.meaning)).map(x=>x.meaning))].slice(0,3);return{id:`idiom:${i.id}`,stem:i.idiom,prompt:"이 사자성어의 뜻으로 알맞은 것을 고르세요.",correct:i.meaning,choices:shuffle([i.meaning,...wrong]),examples:[]}}).filter(q=>q.choices.length===4);
  const cultureQs=shuffle(cultureItems).filter(i=>{const cs=[i.choice_a,i.choice_b,i.choice_c,i.choice_d];return i.correct_choice>=1&&i.correct_choice<=4&&cs.every(Boolean)&&new Set(cs).size===4}).slice(0,cultureCount).map(i=>{const choices=[i.choice_a,i.choice_b,i.choice_c,i.choice_d];const correct=choices[i.correct_choice-1];return{id:`culture:${i.id}`,stem:i.prompt_summary,prompt:"알맞은 답을 고르세요.",correct,choices,examples:[]}}).filter(q=>Boolean(q.correct)&&q.choices.length===4&&new Set(q.choices).size===4);
  const imageQs=shuffle(imageItems).filter(x=>characterById.has(x.hanja_id)&&new Set(pool.filter(h=>h.id!==x.hanja_id&&h.character!==characterById.get(x.hanja_id)).map(h=>h.character)).size>=3).slice(0,imageCount).map(x=>{const correct=characterById.get(x.hanja_id)!;const wrong=[...new Set(shuffle(pool.filter(h=>h.id!==x.hanja_id&&h.character!==correct)).map(h=>h.character))].slice(0,3);return{id:`image:${x.id}`,stem:"그림 한자 찾기",prompt:"그림과 알맞은 한자를 고르세요.",correct,choices:shuffle([correct,...wrong]),examples:[],image:{src:x.asset_path,alt:x.alt_text}}}).filter(q=>q.choices.length===4);
@@ -129,7 +129,7 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
  if(blueprint.gradeCode==="6"&&blueprint.items.some(x=>x.type==="VARIABLE_VERIFIED")){
   const fixedUsageCount=blueprint.items.filter(x=>x.type==="CHARACTER_USAGE").reduce((n,x)=>n+x.count,0);
   const fixedCommonCount=blueprint.items.filter(x=>x.type==="COMMON_CHARACTER").reduce((n,x)=>n+x.count,0);
-  const candidates=[usageQs[fixedUsageCount],commonQs[fixedCommonCount]].filter((q):q is ExamQuestion=>Boolean(q));
+  const candidates:ExamQuestion[]=[usageQs[fixedUsageCount],commonQs[fixedCommonCount]].filter((q):q is ExamQuestion=>q!==undefined);
   buckets.VARIABLE_VERIFIED=shuffle(candidates).slice(0,1).map(q=>({...q,id:`variable-grade6:${q.id}`}));
  }
  if(blueprint.gradeCode==="PRE5"&&blueprint.items.some(x=>x.type==="VARIABLE_VERIFIED")){
@@ -146,11 +146,13 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
   const pattern=shuffle(viable)[0];
   if(pattern){
    const offsets=new Map<ExamQuestionType,number>();
-   buckets.VARIABLE_VERIFIED=pattern.types.map(type=>{
+   const variableQs:ExamQuestion[]=[];
+   for(const type of pattern.types){
     const offset=offsets.get(type)??0;offsets.set(type,offset+1);
     const q=source[type]?.[fixedCounts(type)+offset];
-    return q?{...q,id:`variable-pre5-${pattern.sessions.join("-")}:${q.id}`}:null;
-   }).filter((q):q is ExamQuestion=>Boolean(q));
+    if(q)variableQs.push({...q,id:`variable-pre5-${pattern.sessions.join("-")}:${q.id}`});
+   }
+   buckets.VARIABLE_VERIFIED=variableQs;
   }else buckets.VARIABLE_VERIFIED=[];
  }
  const typedBuckets=Object.entries(buckets) as [string,ExamQuestion[]][];
