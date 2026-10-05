@@ -42,6 +42,23 @@ where content_status='PUBLISHED' and (grade_id is null or choice_a is null or ch
 update public.hanja_special_readings set content_status='REVIEWED'
 where content_status='PUBLISHED' and (choice_a is null or choice_b is null or choice_c is null or choice_d is null or correct_choice not between 1 and 4);
 
+-- New-format published rows must also have non-empty, distinct choices.
+update public.exam_culture_items set content_status='REVIEWED'
+where content_status='PUBLISHED' and (
+  length(btrim(prompt_summary))=0 or length(btrim(correct_explanation))=0
+  or length(btrim(choice_a))=0 or length(btrim(choice_b))=0 or length(btrim(choice_c))=0 or length(btrim(choice_d))=0
+  or btrim(choice_a)=btrim(choice_b) or btrim(choice_a)=btrim(choice_c) or btrim(choice_a)=btrim(choice_d)
+  or btrim(choice_b)=btrim(choice_c) or btrim(choice_b)=btrim(choice_d) or btrim(choice_c)=btrim(choice_d)
+);
+
+update public.hanja_special_readings set content_status='REVIEWED'
+where content_status='PUBLISHED' and (
+  length(btrim(usage_note))=0
+  or length(btrim(choice_a))=0 or length(btrim(choice_b))=0 or length(btrim(choice_c))=0 or length(btrim(choice_d))=0
+  or btrim(choice_a)=btrim(choice_b) or btrim(choice_a)=btrim(choice_c) or btrim(choice_a)=btrim(choice_d)
+  or btrim(choice_b)=btrim(choice_c) or btrim(choice_b)=btrim(choice_d) or btrim(choice_c)=btrim(choice_d)
+);
+
 -- Quarantine legacy rows that fail the new invariants. They remain in the
 -- database for review but are not exposed to learners.
 update public.hanja_usage_items
@@ -125,6 +142,23 @@ for select to authenticated using (
   and correct_choice between 1 and 4
   and exists(select 1 from public.exam_grades g where g.id=grade_id and g.provider_id=exam_culture_items.provider_id)
 );
+
+alter table public.exam_culture_items drop constraint if exists exam_culture_items_reconciled_choices_check;
+alter table public.exam_culture_items add constraint exam_culture_items_reconciled_choices_check check (
+  grade_id is not null and correct_choice between 1 and 4
+  and length(btrim(prompt_summary))>0 and length(btrim(correct_explanation))>0
+  and length(btrim(choice_a))>0 and length(btrim(choice_b))>0 and length(btrim(choice_c))>0 and length(btrim(choice_d))>0
+  and btrim(choice_a)<>btrim(choice_b) and btrim(choice_a)<>btrim(choice_c) and btrim(choice_a)<>btrim(choice_d)
+  and btrim(choice_b)<>btrim(choice_c) and btrim(choice_b)<>btrim(choice_d) and btrim(choice_c)<>btrim(choice_d)
+) not valid;
+
+alter table public.hanja_special_readings drop constraint if exists hanja_special_readings_reconciled_choices_check;
+alter table public.hanja_special_readings add constraint hanja_special_readings_reconciled_choices_check check (
+  correct_choice between 1 and 4 and length(btrim(usage_note))>0
+  and length(btrim(choice_a))>0 and length(btrim(choice_b))>0 and length(btrim(choice_c))>0 and length(btrim(choice_d))>0
+  and btrim(choice_a)<>btrim(choice_b) and btrim(choice_a)<>btrim(choice_c) and btrim(choice_a)<>btrim(choice_d)
+  and btrim(choice_b)<>btrim(choice_c) and btrim(choice_b)<>btrim(choice_d) and btrim(choice_c)<>btrim(choice_d)
+) not valid;
 
 drop policy if exists "authenticated read published special readings" on public.hanja_special_readings;
 create policy "authenticated read published special readings" on public.hanja_special_readings
