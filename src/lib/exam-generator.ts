@@ -25,7 +25,7 @@ export function validateExamQuestions(questions:ExamQuestion[],expectedCount:num
   const label=`question ${index+1}`;
   if(ids.has(q.id))errors.push(`${label}: duplicate id ${q.id}`); else ids.add(q.id);
   if(!q.stem.trim())errors.push(`${label}: empty stem`);
-  if(!q.prompt.trim())errors.push(`${label}: empty prompt`);
+  if(!q.prompt.trim())errors.push(`${label}: empty prompt`);if(q.image&&(!q.image.src.startsWith("/exam-images/")||q.image.src.includes("..")||q.image.src.includes("?")||q.image.src.includes("#")||q.image.src.includes("\\")||!q.image.alt.trim()))errors.push(`${label}: invalid image metadata`);
   if(q.choices.length!==4)errors.push(`${label}: expected 4 choices, got ${q.choices.length}`);
   if(new Set(q.choices).size!==q.choices.length)errors.push(`${label}: duplicate choices`);
   if(!q.choices.includes(q.correct))errors.push(`${label}: correct answer is missing from choices`);
