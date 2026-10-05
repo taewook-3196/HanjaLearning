@@ -298,3 +298,27 @@ button {
 .collection-cell.detail-open>.hanja-tile{grid-column:auto}
 .collection-cell.detail-open>.collection-detail{grid-column:1/-1;width:100%;margin-top:0}
 @media(min-width:700px){.collection-cell.detail-open{grid-template-columns:repeat(5,minmax(0,1fr))}}
+
+/* Compact one-screen daily learning */
+.compact-learn{padding-top:12px;padding-bottom:16px}
+.compact-learn .learn-top{margin-bottom:8px}
+.compact-flash-card{min-height:0;padding:12px 14px;justify-content:flex-start}
+.compact-flash-card>.eyebrow{margin-bottom:2px}
+.stroke-practice.compact{margin-top:2px;padding-top:0;border-top:0}
+.stroke-practice.compact p{margin-bottom:4px;font-size:12px;line-height:1.25;color:var(--muted)}
+.stroke-practice.compact>div:last-child{gap:6px;flex-wrap:nowrap}
+.stroke-practice.compact button{min-height:38px;margin-top:2px;padding:0 10px;font-size:13px}
+.compact-answer-box{margin:6px 0 0;padding:9px 10px;font-size:17px}
+.compact-answer-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.compact-answer-heading .speak-button{flex:0 0 auto;margin:0;min-height:34px}
+.compact-examples{margin-top:5px;text-align:left}
+.compact-examples p{margin:3px 0;font-size:13px;line-height:1.3}
+.compact-examples .word-grade-row{display:inline-flex;margin-left:5px}
+.compact-examples .word-grade-row small{font-size:10px}
+.reveal-button{margin-top:7px;min-height:44px}
+.sticky-answer-actions{margin-top:8px}
+.sticky-answer-actions button{min-height:46px}
+.compact-writing-nudge{margin-top:7px;padding:8px;font-size:12px}
+.compact-writing-nudge .secondary-button{min-height:38px;margin-top:6px}
+.compact-learn .writing-complete{margin:3px 0 0;font-size:12px}
+@media(max-height:740px){.stroke-practice.compact svg{max-height:170px}.compact-flash-card{padding-top:8px;padding-bottom:8px}.compact-examples p:nth-child(n+2){display:none}}
