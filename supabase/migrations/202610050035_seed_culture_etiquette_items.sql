@@ -24,7 +24,7 @@ insert into public.exam_culture_items(provider_id,grade_id,topic,prompt_summary,
 select p.id,g.id,i.topic,i.prompt_summary,i.choice_a,i.choice_b,i.choice_c,i.choice_d,i.correct_choice,i.correct_explanation,'PUBLISHED','앱 자체 제작 문화·예절 문항 · 기출문제 비복제 · 2026-10-05'
 from items i
 cross join provider p
-join public.exam_grades g on g.provider_id=p.id and g.grade_code=i.grade_code
+join public.exam_grades g on g.provider_id=p.id and g.code=i.grade_code
 where not exists (
  select 1 from public.exam_culture_items e
  where e.provider_id=p.id and e.grade_id=g.id and e.prompt_summary=i.prompt_summary
@@ -51,6 +51,6 @@ begin
  from required r
  where (select count(*) from public.exam_culture_items e
         join public.exam_grades g on g.id=e.grade_id
-        where g.grade_code=r.grade_code and e.content_status='PUBLISHED')<r.min_count;
+        where g.code=r.grade_code and e.content_status='PUBLISHED')<r.min_count;
  if v_missing<>0 then raise exception 'Culture/etiquette grade coverage missing for % grades',v_missing; end if;
 end $body$;
