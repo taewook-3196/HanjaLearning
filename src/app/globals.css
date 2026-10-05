@@ -258,3 +258,7 @@ button {
 .privacy-copy p{margin:0;color:var(--muted);font-size:14px;line-height:1.75}
 
 .turnstile-wrap{display:flex;min-height:66px;align-items:center;justify-content:center;overflow:hidden}
+
+
+/* Daily Hanja stroke-order and handwriting practice */
+.stroke-practice{margin-top:20px;padding-top:18px;border-top:1px solid var(--line,#e5e7eb);text-align:center}.stroke-practice h2{margin:0 0 6px;font-size:1.15rem}.stroke-practice p{margin:0 0 12px;line-height:1.5}.stroke-practice svg{max-width:100%;height:auto;touch-action:none}
