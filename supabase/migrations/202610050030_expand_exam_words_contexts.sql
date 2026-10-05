@@ -47,30 +47,19 @@ cross join lateral unnest(w.chars) with ordinality as u(ch,ord)
 join public.hanja h on h.character=u.ch
 on conflict do nothing;
 
--- Every seeded word must map exactly to all characters declared above.
+-- Every newly seeded word must have a complete character mapping.
 do $body$
-declare v_bad integer;
+declare v_words integer; v_bad integer;
 begin
- with expected(word,reading,meaning,chars) as (
-  values
-  ('동서','동서','동쪽과 서쪽',array['東','西']),('남북','남북','남쪽과 북쪽',array['南','北']),
-  ('산수','산수','산과 물',array['山','水']),('화산','화산','땅속의 물질이 지표로 분출하는 산',array['火','山']),
-  ('인구','인구','일정한 지역에 사는 사람의 수',array['人','口']),('대문','대문','집의 큰 출입문',array['大','門']),
-  ('소년','소년','아직 어린 나이의 사람',array['少','年']),('청년','청년','젊은 나이의 사람',array['靑','年']),
-  ('천지','천지','하늘과 땅',array['天','地']),('우수','우수','오른손',array['右','手']),
-  ('좌우','좌우','왼쪽과 오른쪽',array['左','右']),('출입','출입','나가고 들어옴',array['出','入']),
-  ('명마','명마','이름난 좋은 말',array['名','馬']),('어류','어류','물고기 종류를 통틀어 이르는 말',array['魚','類']),
-  ('국민','국민','한 나라를 이루는 사람들',array['國','民']),('한국','한국','대한민국을 이르는 말',array['韓','國']),
-  ('한자','한자','한자 문화권에서 쓰여 온 문자',array['漢','字']),('학교','학교','학생을 가르치는 교육 기관',array['學','校']),
-  ('학생','학생','학교에서 배우는 사람',array['學','生']),('독서','독서','책을 읽음',array['讀','書']),
-  ('시간','시간','어떤 시각에서 다른 시각까지의 동안',array['時','間']),('농촌','농촌','농업을 주로 하는 마을',array['農','村']),
-  ('전기','전기','전하의 이동과 관련된 에너지 현상',array['電','氣']),('부모','부모','아버지와 어머니를 아울러 이르는 말',array['父','母']),
-  ('형제','형제','형과 아우를 아울러 이르는 말',array['兄','弟']),('자녀','자녀','아들과 딸을 아울러 이르는 말',array['子','女']),
-  ('남녀','남녀','남자와 여자를 아울러 이르는 말',array['男','女'])
- )
- select count(*) into v_bad from expected e
- join public.hanja_words w on w.word=e.word and w.reading=e.reading and w.meaning=e.meaning
- where (select count(*) from public.hanja_word_map m where m.word_id=w.id)<>cardinality(e.chars);
+ select count(*) into v_words
+ from public.hanja_words
+ where source_note='교육용 한자어 검토 · 앱 자체 뜻풀이 · 2026-10-05';
+ if v_words<>23 then raise exception 'Expected 23 expanded words, got %',v_words; end if;
+
+ select count(*) into v_bad
+ from public.hanja_words w
+ where w.source_note='교육용 한자어 검토 · 앱 자체 뜻풀이 · 2026-10-05'
+   and (select count(*) from public.hanja_word_map m where m.word_id=w.id)<>char_length(w.word);
  if v_bad<>0 then raise exception 'Expanded word mapping integrity failure: %',v_bad; end if;
 end $body$;
 
