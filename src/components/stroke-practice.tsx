@@ -66,7 +66,8 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
   <div className="writing-stage-indicator" aria-label={"쓰기 "+stage+"단계"}><span className={stage>=1?"active":""}>1 따라쓰기</span><span className={stage>=2?"active":""}>2 힌트쓰기</span><span className={stage>=3?"active":""}>3 기억쓰기</span></div>
   <p role={mode==="ERROR"?"alert":undefined}>{message}</p>
   <div ref={target} aria-label={character+" 획순과 쓰기 연습"} style={{width:compact?190:260,height:compact?190:260,margin:"0 auto",touchAction:"none"}}/>
-  {details}\n  {!disabled&&controlsEnabled?<div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+  {details}
+  {!disabled&&controlsEnabled?<div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
    <button type="button" className="secondary-button" onClick={animate}>▶ 획순 보기</button>
    <button type="button" onClick={()=>practice(stage)}>{stage===1?"✍️ 따라 쓰기":stage===2?"✍️ 힌트 쓰기":mode==="DONE"?"한 번 더 기억쓰기":"✍️ 기억 쓰기"}</button>
   </div>:null}
