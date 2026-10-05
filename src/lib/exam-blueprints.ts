@@ -23,6 +23,7 @@ export type ExamQuestionType =
   | "VARIABLE_VERIFIED";
 
 export type ExamBlueprintItem={type:ExamQuestionType;count:number};
+export type VerifiedVariablePattern={sessions:number[];types:ExamQuestionType[];supported:boolean};
 export type ExamDataRequirement="HANJA_READING"|"WORDS"|"RELATIONS"|"CHARACTER_METADATA"|"WORD_CONTEXTS"|"WORD_STRUCTURES"|"COMMON_CHARACTER_SETS"|"USAGE_ITEMS"|"SPECIAL_READINGS"|"ORIGINAL_IMAGES"|"IDIOMS"|"CULTURE_CONTENT";
 
 export const EXAM_TYPE_REQUIREMENTS:Record<ExamQuestionType,ExamDataRequirement[]>={
@@ -48,6 +49,19 @@ export const EXAM_TYPE_REQUIREMENTS:Record<ExamQuestionType,ExamDataRequirement[
   VARIABLE_VERIFIED:[]
 };
 export type ExamBlueprint={gradeCode:string;questionCount:number;items:ExamBlueprintItem[];status:"VERIFIED_108_112"|"VERIFIED_111_112"|"PENDING_FINAL_CHECK"};
+
+export const VERIFIED_VARIABLE_PATTERNS:Partial<Record<string,VerifiedVariablePattern[]>>={
+  "PRE5":[
+    {sessions:[108,112],types:["CHARACTER_USAGE","IDIOM"],supported:true},
+    {sessions:[109],types:["IDIOM","IDIOM"],supported:true},
+    {sessions:[110],types:["CULTURE_ETIQUETTE","IDIOM"],supported:true},
+    {sessions:[111],types:["COMMON_CHARACTER","STROKE_ORDER"],supported:false}
+  ],
+  "6":[
+    {sessions:[108,109,110,112],types:["CHARACTER_USAGE"],supported:true},
+    {sessions:[111],types:["COMMON_CHARACTER"],supported:true}
+  ]
+};
 
 export const DAEHAN_FIELD_BLUEPRINTS:Record<string,ExamBlueprint>={
   "8":{gradeCode:"8",questionCount:25,status:"VERIFIED_108_112",items:[
