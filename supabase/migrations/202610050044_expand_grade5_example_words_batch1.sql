@@ -96,8 +96,6 @@ begin
  select count(*) into v_bad
  from public.hanja_words w
  where w.source_note='초등 학습용 대표 어휘 1차 · 앱 자체 쉬운 뜻풀이 · 2026-10-05'
-   and (select count(*) from public.hanja_word_map m where m.word_id=w.id)<>cardinality(
-     (select x.chars from words x where x.word=w.word and x.reading=w.reading and x.meaning=w.meaning)
-   );
+   and (select count(*) from public.hanja_word_map m where m.word_id=w.id)<>char_length(w.word);
  if v_bad<>0 then raise exception 'Batch-1 example word mapping integrity failure: %',v_bad; end if;
 end $body$;
