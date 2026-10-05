@@ -1,4 +1,4 @@
--- Seed reviewed word structures, common-character sets, and word relations.
+-- Seed reviewed word structures, common-character sets.
 -- Uses only published app word data; no past-paper wording is stored.
 
 -- Semantic structure classifications used by WORD_STRUCTURE questions.
@@ -61,27 +61,9 @@ join sets s on s.character=l.common_char
 join public.hanja_words w on w.word=l.word and w.content_status='PUBLISHED'
 on conflict do nothing;
 
--- High-confidence opposite word pairs. Pair ordering follows the table's
--- from_word_id < to_word_id invariant regardless of insertion order.
-with relation_defs(word_a,word_b,relation_type) as (
- values
- ('동서','남북','OPPOSITE')
-),
-resolved as (
- select least(a.id,b.id) from_id,greatest(a.id,b.id) to_id,r.relation_type
- from relation_defs r
- join public.hanja_words a on a.word=r.word_a and a.content_status='PUBLISHED'
- join public.hanja_words b on b.word=r.word_b and b.content_status='PUBLISHED'
-)
-insert into public.hanja_word_relations(from_word_id,to_word_id,relation_type,content_status,source_note)
-select from_id,to_id,relation_type,'PUBLISHED','교육용 한자어 관계 검토 · 2026-10-05'
-from resolved
-on conflict(from_word_id,to_word_id,relation_type) do update set
- content_status='PUBLISHED',source_note=excluded.source_note,updated_at=now();
-
 -- Fail the migration if any intended structure/set was silently skipped.
 do $body$
-declare v_structures integer; v_sets integer; v_bad_sets integer; v_relations integer;
+declare v_structures integer; v_sets integer; v_bad_sets integer;
 begin
  select count(*) into v_structures from public.hanja_word_structures
  where source_note='교육용 한자어 짜임 검토 · 2026-10-05';
@@ -99,8 +81,4 @@ begin
     where l.set_id=s.id
    )<2;
  if v_bad_sets<>0 then raise exception 'Incomplete common-character sets: %',v_bad_sets; end if;
-
- select count(*) into v_relations from public.hanja_word_relations
- where source_note='교육용 한자어 관계 검토 · 2026-10-05';
- if v_relations<>1 then raise exception 'Expected 1 seeded word relation, got %',v_relations; end if;
 end $body$;
