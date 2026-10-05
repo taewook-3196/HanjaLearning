@@ -1,8 +1,8 @@
 "use client";
-import {useEffect,useRef,useState} from "react";
+import {useEffect,useRef,useState,type ReactNode} from "react";
 import HanziWriter from "hanzi-writer";
 
-type Props={character:string;onPracticeComplete?:()=>void;onAvailabilityChange?:(available:boolean)=>void;compact?:boolean};
+type Props={character:string;onPracticeComplete?:()=>void;onAvailabilityChange?:(available:boolean)=>void;compact?:boolean;details?:ReactNode;controlsEnabled?:boolean};
 
 // CJK compatibility ideographs need separate Korean-form verification before enabling.
 export function isCompatibilityIdeograph(character:string){
@@ -11,7 +11,7 @@ export function isCompatibilityIdeograph(character:string){
 }
 export function supportsStrokePractice(character:string){return !isCompatibilityIdeograph(character);}
 
-export default function StrokePractice({character,onPracticeComplete,onAvailabilityChange,compact=false}:Props){
+export default function StrokePractice({character,onPracticeComplete,onAvailabilityChange,compact=false,details,controlsEnabled=true}:Props){
  const target=useRef<HTMLDivElement>(null);
  const writer=useRef<HanziWriter|null>(null);
  const [mode,setMode]=useState<"LOADING"|"WATCH"|"TRACE"|"DONE"|"ERROR">("LOADING");
@@ -58,7 +58,7 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
   {!compact?<h2>획순 · 쓰기 연습</h2>:null}
   <p role={mode==="ERROR"?"alert":undefined}>{message}</p>
   <div ref={target} aria-label={character+" 획순과 쓰기 연습"} style={{width:compact?190:260,height:compact?190:260,margin:"0 auto",touchAction:"none"}}/>
-  {!disabled?<div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+  {details}\n  {!disabled&&controlsEnabled?<div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
    <button type="button" className="secondary-button" onClick={animate}>▶ 획순 보기</button>
    <button type="button" onClick={practice}>{mode==="DONE"?"한 번 더 쓰기":"✍️ 따라 쓰기"}</button>
   </div>:null}
