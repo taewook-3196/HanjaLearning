@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -35,6 +37,8 @@ jobs:
         run: npm install
 
       - name: Check example-word migrations
+        env:
+          MIGRATION_CHECK_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: node scripts/check-example-word-migrations.cjs
 
       - name: Lint
