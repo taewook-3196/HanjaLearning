@@ -36,7 +36,8 @@ export default function LoginPage() {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error || !data.user) {
-      setMessage("아이디 또는 비밀번호를 확인해 주세요.");
+      const code = error?.code || String(error?.status || "unknown");
+      setMessage(`아이디 또는 비밀번호를 확인해 주세요. (오류 코드: ${code})`);
       setLoading(false);
       return;
     }
@@ -52,7 +53,7 @@ export default function LoginPage() {
 
     if (profileError) {
       await supabase.auth.signOut();
-      setMessage("학습 프로필을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+      setMessage(`학습 프로필을 준비하지 못했습니다. (오류 코드: ${profileError.code || "profile_unknown"})`);
       setLoading(false);
       return;
     }
