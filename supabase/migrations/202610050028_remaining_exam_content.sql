@@ -10,7 +10,7 @@ create table if not exists public.hanja_usage_items (
   content_status text not null default 'DRAFT'
     check (content_status in ('DRAFT','REVIEWED','SOURCE_VERIFIED','PUBLISHED')),
   source_note text,
-  check (choice_a<>choice_b and choice_a<>choice_c and choice_a<>choice_d and choice_b<>choice_c and choice_b<>choice_d and choice_c<>choice_d)
+  check (btrim(choice_a)<>btrim(choice_b) and btrim(choice_a)<>btrim(choice_c) and btrim(choice_a)<>btrim(choice_d) and btrim(choice_b)<>btrim(choice_c) and btrim(choice_b)<>btrim(choice_d) and btrim(choice_c)<>btrim(choice_d))
 );
 
 create table if not exists public.hanja_special_readings (
@@ -26,7 +26,7 @@ create table if not exists public.hanja_special_readings (
   source_note text,
   unique(hanja_id,reading,meaning),
   check (length(trim(usage_note))>0),
-  check (choice_a<>choice_b and choice_a<>choice_c and choice_a<>choice_d and choice_b<>choice_c and choice_b<>choice_d and choice_c<>choice_d)
+  check (btrim(choice_a)<>btrim(choice_b) and btrim(choice_a)<>btrim(choice_c) and btrim(choice_a)<>btrim(choice_d) and btrim(choice_b)<>btrim(choice_c) and btrim(choice_b)<>btrim(choice_d) and btrim(choice_c)<>btrim(choice_d))
 );
 
 create table if not exists public.hanja_image_items (
@@ -40,6 +40,8 @@ create table if not exists public.hanja_image_items (
   source_note text,
   unique(asset_path),
   check (asset_path like '/exam-images/%'),
+  check (asset_path !~ '(^|/)\\.\\.(/|$)' and asset_path !~ '^//'),
+  check (position('?' in asset_path)=0 and position('#' in asset_path)=0 and position('\\\\' in asset_path)=0),
   check (length(trim(alt_text))>0)
 );
 
