@@ -36,7 +36,9 @@ export default function SignupPage() {
     const email=`${id}@${AUTH_DOMAIN}`;
     const {data,error}=await supabase.auth.signUp({email,password,options:{data:{login_id:id,nickname:name,application_message:applicationMessage.trim()}}});
     if(error||!data.user){
-      setMessage(error?.message?.toLowerCase().includes("already")?"이미 사용 중인 아이디예요.":"회원가입을 완료하지 못했어요. 잠시 후 다시 시도해 주세요.");
+      const errorCode=error?.code||String(error?.status||"unknown");
+      const alreadyUsed=error?.message?.toLowerCase().includes("already")||errorCode==="user_already_exists";
+      setMessage(alreadyUsed?`이미 사용 중인 아이디예요. (오류 코드: ${errorCode})`:`회원가입을 완료하지 못했어요. 오류 코드: ${errorCode}`);
       setLoading(false);return;
     }
     if(!data.session){
@@ -48,7 +50,9 @@ export default function SignupPage() {
       supabase.from("user_settings").upsert({user_id:data.user.id},{onConflict:"user_id"}),
     ]);
     if(profileError||settingsError){
-      setMessage("계정은 만들어졌지만 학습 프로필 준비에 실패했어요. 다시 로그인해 주세요.");
+      const profileCode=profileError?.code||"ok";
+      const settingsCode=settingsError?.code||"ok";
+      setMessage(`계정은 만들어졌지만 학습 프로필 준비에 실패했어요. 오류 코드: profile=${profileCode}, settings=${settingsCode}`);
       setLoading(false);return;
     }
     router.replace("/pending");router.refresh();
