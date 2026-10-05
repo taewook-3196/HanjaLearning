@@ -19,7 +19,7 @@ export type ExamQuestionType =
   | "WORD_STRUCTURE"
   | "IDIOM"
   | "CULTURE_ETIQUETTE"
-  | "VARIABLE_VERIFIED";
+  | "STROKE_ORDER"\n  | "VARIABLE_VERIFIED";
 
 export type ExamBlueprintItem={type:ExamQuestionType;count:number};
 export type ExamDataRequirement="HANJA_READING"|"WORDS"|"RELATIONS"|"CHARACTER_METADATA"|"WORD_CONTEXTS"|"WORD_STRUCTURES"|"COMMON_CHARACTER_SETS"|"USAGE_ITEMS"|"SPECIAL_READINGS"|"ORIGINAL_IMAGES"|"IDIOMS"|"CULTURE_CONTENT";
@@ -43,7 +43,7 @@ export const EXAM_TYPE_REQUIREMENTS:Record<ExamQuestionType,ExamDataRequirement[
   WORD_STRUCTURE:["WORDS","WORD_STRUCTURES"],
   IDIOM:["IDIOMS"],
   CULTURE_ETIQUETTE:["CULTURE_CONTENT"],
-  VARIABLE_VERIFIED:[]
+  STROKE_ORDER:["CHARACTER_METADATA"],\n  VARIABLE_VERIFIED:[]
 };
 export type ExamBlueprint={gradeCode:string;questionCount:number;items:ExamBlueprintItem[];status:"VERIFIED_111_112"|"PENDING_FINAL_CHECK"};
 
@@ -99,7 +99,7 @@ export const DAEHAN_FIELD_BLUEPRINTS:Record<string,ExamBlueprint>={
     {type:"CONTEXT_TO_HANJA",count:3},{type:"WORD_STRUCTURE",count:1},{type:"WORD_SYNONYM_ANTONYM",count:2},
     {type:"IDIOM",count:1},{type:"CULTURE_ETIQUETTE",count:2}
   ]},
-  "PRE3":{gradeCode:"PRE3",questionCount:50,status:"VERIFIED_111_112",items:[
+  "PRE3":{gradeCode:"PRE3",questionCount:50,status:"PENDING_FINAL_CHECK",items:[
     {type:"HANJA_TO_READING_MEANING",count:8},{type:"READING_MEANING_TO_HANJA",count:7},
     {type:"CHARACTER_PRINCIPLE",count:1},{type:"SPECIAL_READING",count:2},{type:"DICTIONARY_LOOKUP",count:1},
     {type:"CHAR_SYNONYM_ANTONYM",count:2},{type:"COMMON_CHARACTER",count:1},{type:"WORD_READING",count:9},
