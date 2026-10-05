@@ -2,13 +2,13 @@
 import {useEffect,useRef,useState} from "react";
 import HanziWriter from "hanzi-writer";
 
-type Props={character:string;onPracticeComplete?:()=>void};
+type Props={character:string;onPracticeComplete?:()=>void;onAvailabilityChange?:(available:boolean)=>void};
 
 // Compatibility/variant forms need separate Korean-form verification before enabling.
 export const UNSAFE_COMPATIBILITY_FORMS=new Set(["六","車","不","樂"]);
 export function supportsStrokePractice(character:string){return !UNSAFE_COMPATIBILITY_FORMS.has(character);}
 
-export default function StrokePractice({character,onPracticeComplete}:Props){
+export default function StrokePractice({character,onPracticeComplete,onAvailabilityChange}:Props){
  const target=useRef<HTMLDivElement>(null);
  const writer=useRef<HanziWriter|null>(null);
  const [mode,setMode]=useState<"LOADING"|"WATCH"|"TRACE"|"DONE"|"ERROR">("LOADING");
@@ -17,7 +17,7 @@ export default function StrokePractice({character,onPracticeComplete}:Props){
  useEffect(()=>{
   let active=true;
   setMode("LOADING");setMessage("획순을 준비하고 있어요.");
-  if(!target.current||!supportsStrokePractice(character))return;
+  if(!supportsStrokePractice(character)){onAvailabilityChange?.(false);return;}\n  if(!target.current)return;
   target.current.innerHTML="";
   writer.current=HanziWriter.create(target.current,character,{
    width:260,height:260,padding:12,
@@ -25,12 +25,12 @@ export default function StrokePractice({character,onPracticeComplete}:Props){
    strokeAnimationSpeed:1,delayBetweenStrokes:180,
    onLoadCharDataError:()=>{
     if(!active)return;
-    writer.current=null;setMode("ERROR");setMessage("이 글자의 획순 자료를 불러오지 못했어요. 뜻과 소리 학습은 계속할 수 있어요.");
+    writer.current=null;onAvailabilityChange?.(false);setMode("ERROR");setMessage("이 글자의 획순 자료를 불러오지 못했어요. 뜻과 소리 학습은 계속할 수 있어요.");
    },
-   onLoadCharDataSuccess:()=>{if(active){setMode("WATCH");setMessage("먼저 획순을 보고 따라 써 보세요.");}},
+   onLoadCharDataSuccess:()=>{if(active){onAvailabilityChange?.(true);setMode("WATCH");setMessage("먼저 획순을 보고 따라 써 보세요.");}},
   });
   return()=>{active=false;writer.current=null;if(target.current)target.current.innerHTML="";};
- },[character]);
+ },[character,onAvailabilityChange]);
 
  if(!supportsStrokePractice(character)){
   return <section className="stroke-practice"><h2>쓰기 연습</h2><p>이 글자는 한국식 자형의 획순 확인이 끝난 뒤 쓰기 연습을 제공할게요.</p></section>;
