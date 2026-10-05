@@ -18,7 +18,7 @@ export default async function Home() {
   const gradeIds = (grades ?? []).map((grade) => grade.id);
   let targetCount = 0;
 
-  let learnedCount = 0, reviewCount = 0, wrongCount = 0;
+  let learnedCount = 0, masteredCount = 0, familiarCount = 0, reviewCount = 0, wrongCount = 0;
   const streakSince=new Date(); streakSince.setUTCDate(streakSince.getUTCDate()-60);
   const {data:recentActivity}=await supabase.from("review_history").select("created_at").eq("user_id",user.id).gte("created_at",streakSince.toISOString()).order("created_at",{ascending:false});
   const dayKey=(value:Date|string)=>new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(value));
@@ -34,12 +34,14 @@ export default async function Home() {
     targetCount = ids.length;
     if (ids.length) {
       const now = new Date().toISOString();
-      const [{ count: learned }, { count: review }, { count: wrong }] = await Promise.all([
+      const [{ count: learned }, { count: mastered }, { count: familiar }, { count: review }, { count: wrong }] = await Promise.all([
         supabase.from("user_hanja_progress").select("*",{count:"exact",head:true}).eq("user_id",user.id).in("hanja_id",ids).gt("study_count",0),
+        supabase.from("user_hanja_progress").select("*",{count:"exact",head:true}).eq("user_id",user.id).in("hanja_id",ids).eq("learning_state","MASTERED"),
+        supabase.from("user_hanja_progress").select("*",{count:"exact",head:true}).eq("user_id",user.id).in("hanja_id",ids).eq("learning_state","FAMILIAR"),
         supabase.from("user_hanja_progress").select("*",{count:"exact",head:true}).eq("user_id",user.id).in("hanja_id",ids).gt("study_count",0).lte("next_review_at",now),
         supabase.from("user_hanja_progress").select("*",{count:"exact",head:true}).eq("user_id",user.id).in("hanja_id",ids).gt("study_count",0).gt("wrong_streak",0),
       ]);
-      learnedCount=learned??0; reviewCount=review??0; wrongCount=wrong??0;
+      learnedCount=learned??0; masteredCount=mastered??0; familiarCount=familiar??0; reviewCount=review??0; wrongCount=wrong??0;
     }
   }
   if (targetCount === 0) {
@@ -56,7 +58,7 @@ export default async function Home() {
   return <main className="app-shell">
     <header className="home-header"><div><strong>아빠한자</strong><span>{profile.nickname}님 · {profile.target_grade} 도전</span></div><div className="home-mark" aria-hidden="true">漢</div></header>
     <section className="study-card today-card">{plan.daysUntilExam!==null?<p className="eyebrow">시험 D-{plan.daysUntilExam} · {plan.phase==="LEARN"?`새 한자 학습 + 시험 전 ${plan.masteryDays}일 숙달 확보`:plan.phase==="CATCH_UP"?"일정이 빠듯해요 · 새 학습과 복습을 함께 진행":plan.phase==="MASTER"?"숙달·복습 집중 기간":"시험일"}</p>:null}<div className="today-heading compact"><div><p className="eyebrow">오늘 할 일</p><h2>{todayTotal>0?`${todayTotal}자 · 약 ${estimatedMinutes}분`:"오늘 학습 완료 🎉"}</h2></div><div className="streak-badge" aria-label={`연속 학습 ${streak}일`}><span>🔥</span><strong>{streak}일</strong><small>연속</small></div></div><div className="compact-plan"><span>새 한자 <strong>{newCount}</strong></span><span>복습 <strong>{todayReviewCount}</strong></span><span>확인 <strong>{todayTotal>0?Math.min(3,todayTotal):0}</strong></span>{wrongCount>0?<Link href="/learn?mode=wrong">오답 {wrongCount}</Link>:null}</div>{todayTotal>0?<Link className="primary-link" href="/learn">계속 학습하기</Link>:null}<div className="home-quick-links"><Link href="/write">✍️ 쓰기</Link><Link href="/stats">📈 기록</Link><Link href="/collection">漢 도감</Link></div></section>
-    <section className="progress-card compact-progress"><div className="progress-heading"><div><p className="eyebrow">{providerLabel} · {profile.target_grade}</p><h2>전체 진도 {percent}%</h2></div><strong>{learnedCount} / {targetCount}</strong></div><div className="progress-track" aria-label={"학습 진도 "+percent+"%"}><span style={{width:percent+"%"}} /></div></section>
+    <section className="progress-card compact-progress"><div className="progress-heading"><div><p className="eyebrow">{providerLabel} · {profile.target_grade}</p><h2>전체 진도 {percent}%</h2></div><strong>{learnedCount} / {targetCount}</strong></div><div className="progress-track" aria-label={"학습 진도 "+percent+"%"}><span style={{width:percent+"%"}} /></div><div className="compact-plan"><span>숙달 <strong>{masteredCount}</strong></span><span>익숙해지는 중 <strong>{familiarCount}</strong></span><span>학습 경험 <strong>{learnedCount}</strong></span></div></section>
     <nav className="bottom-nav" aria-label="주 메뉴"><span className="active">홈</span><Link href="/learn">학습</Link><Link href="/collection">도감</Link><Link href="/quiz">퀴즈</Link><Link href="/settings">나</Link></nav>
   </main>;
 }
