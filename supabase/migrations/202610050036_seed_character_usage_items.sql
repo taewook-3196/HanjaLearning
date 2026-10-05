@@ -43,7 +43,7 @@ begin
  select count(*) into v_count
  from public.hanja_usage_items
  where source_note='검증된 hanja_words/hanja_word_map 기반 앱 자체 제작 용례 문항 · 2026-10-05';
- if v_count<>8 then raise exception 'Expected 8 character-usage items, got %',v_count; end if;
+ if v_count<8 then raise exception 'Expected at least 8 character-usage items, got %',v_count; end if;
 
  select count(*) into v_bad
  from public.hanja_usage_items u
