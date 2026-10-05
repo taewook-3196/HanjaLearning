@@ -26,9 +26,31 @@ alter table public.hanja_special_readings add column if not exists correct_choic
 
 -- Old rows are never exposed as valid new-format questions until reviewed.
 update public.exam_culture_items set content_status='REVIEWED'
+where content_status='PUBLISHED' and grade_id is null;
+
+-- Preserve bad legacy idiom maps for later review by removing only impossible
+-- positions before installing the stricter invariant.
+delete from public.hanja_idiom_map where position not between 1 and 4;
+update public.exam_culture_items set content_status='REVIEWED'
 where content_status='PUBLISHED' and (grade_id is null or choice_a is null or choice_b is null or choice_c is null or choice_d is null or correct_choice not between 1 and 4);
 update public.hanja_special_readings set content_status='REVIEWED'
 where content_status='PUBLISHED' and (choice_a is null or choice_b is null or choice_c is null or choice_d is null or correct_choice not between 1 and 4);
+
+alter table public.hanja_usage_items drop constraint if exists hanja_usage_items_choices_trimmed_check;
+alter table public.hanja_usage_items add constraint hanja_usage_items_choices_trimmed_check check (
+  length(btrim(prompt))>0
+  and length(btrim(choice_a))>0 and length(btrim(choice_b))>0 and length(btrim(choice_c))>0 and length(btrim(choice_d))>0
+  and btrim(choice_a)<>btrim(choice_b) and btrim(choice_a)<>btrim(choice_c) and btrim(choice_a)<>btrim(choice_d)
+  and btrim(choice_b)<>btrim(choice_c) and btrim(choice_b)<>btrim(choice_d) and btrim(choice_c)<>btrim(choice_d)
+) not valid;
+
+alter table public.hanja_image_items drop constraint if exists hanja_image_items_safe_path_check;
+alter table public.hanja_image_items add constraint hanja_image_items_safe_path_check check (
+  asset_path like '/exam-images/%'
+  and asset_path !~ '(^|/)\.\.(/|$)' and asset_path !~ '^//'
+  and position('?' in asset_path)=0 and position('#' in asset_path)=0 and position('\\' in asset_path)=0
+  and length(btrim(alt_text))>0
+) not valid;
 
 alter table public.hanja_idiom_map drop constraint if exists hanja_idiom_map_position_check;
 alter table public.hanja_idiom_map add constraint hanja_idiom_map_position_check check(position between 1 and 4);
