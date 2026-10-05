@@ -106,6 +106,15 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
   SPECIAL_READING:[...specialQs],
   IMAGE_RECOGNITION:[...imageQs]
  };
+ // PRE5 has a verified two-question variable block. The 111-session variant
+ // requires stroke-order source data that is not modeled yet, so only the
+ // fully supported 112-session pair (character usage + idiom usage) is eligible.
+ if(blueprint.gradeCode==="PRE5"&&blueprint.items.some(x=>x.type==="VARIABLE_VERIFIED")){
+  const usage=usageQs[0],idiom=idiomQs[0];
+  buckets.VARIABLE_VERIFIED=usage&&idiom
+   ? [{...usage,id:`variable-112:${usage.id}`},{...idiom,id:`variable-112:${idiom.id}`}]
+   : [];
+ }
  const typedBuckets=Object.entries(buckets) as [string,ExamQuestion[]][];
  for(const [type,items] of typedBuckets)for(const q of items)q.type=type;
  const ordered:ExamQuestion[]=[];
@@ -122,5 +131,5 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
   if(placed!==item.count)return[];
  }
  if(ordered.length!==questionCount)return[];
-
+ return ordered;
 }
