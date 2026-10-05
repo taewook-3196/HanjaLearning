@@ -4,7 +4,7 @@ import StrokePractice from "@/components/stroke-practice";
 import {speakKorean,type SpeechVoicePreference} from "@/lib/speech";
 import {createClient} from "@/lib/supabase/client";
 
-type Example={word:string;reading:string|null;meaning:string;child_explanation:string|null;chars:{character:string;grade:string|null;isCurrent:boolean}[]};
+type Example={word:string;reading:string|null;meaning:string;child_explanation:string|null;chars:{character:string;grade:string|null;isCurrent:boolean;isRegistered:boolean}[]};
 type Props={id:number;character:string;reading:string;meaning:string;mastery:number;examples:Example[];soundEnabled:boolean;speechVoice:string;onClose:()=>void};
 
 export default function CollectionDetail({id,character,reading,meaning,mastery,examples,soundEnabled,speechVoice,onClose}:Props){
@@ -17,7 +17,7 @@ export default function CollectionDetail({id,character,reading,meaning,mastery,e
   <h2>{meaning} {reading}</h2>
   <p>현재 숙련도 {mastery}</p>
   {soundEnabled?<button type="button" className="speak-button" onClick={()=>speakKorean(meaning+" "+reading,speechVoice as SpeechVoicePreference,()=>setMessage("이 기기에서는 음성 읽어주기를 사용할 수 없어요."))}>🔊 읽어주기</button>:null}
-  {examples.length?<div className="collection-examples"><h3>함께 알아둘 말</h3>{examples.map((w,i)=><div key={w.word+"-"+i} className="collection-example"><strong>{w.chars.map(c=>c.character).join("")||w.word}</strong>{w.reading?` (${w.reading.replace(/\\n|\n/g," ").trim()})`:""} · {(w.child_explanation||w.meaning).replace(/\\n|\n/g," ").trim()}<span className="word-grade-row">{w.chars.map((c,j)=><small key={c.character+"-"+j} className={c.isCurrent?"current":""}>{c.character}{c.grade?` ${c.grade}`:""}</small>)}</span></div>)}</div>:<p>등록된 예시 단어가 아직 없어요.</p>}
+  {examples.length?<div className="collection-examples"><h3>함께 알아둘 말</h3>{examples.map((w,i)=><div key={w.word+"-"+i} className="collection-example"><strong>{w.chars.map(c=>c.character).join("")||w.word}</strong>{w.reading?` (${w.reading.replace(/\\n|\n/g," ").trim()})`:""} · {(w.child_explanation||w.meaning).replace(/\\n|\n/g," ").trim()}<span className="word-grade-row">{w.chars.map((c,j)=><small key={c.character+"-"+j} className={c.isCurrent?"current":""}>{c.character}{c.grade?` ${c.grade}`:c.isRegistered?"":" 미등록"}</small>)}</span></div>)}</div>:<p>등록된 예시 단어가 아직 없어요.</p>}
   <StrokePractice key={id} character={character} onPracticeComplete={()=>void recordWriting()}/>
   {message?<p className="form-message" role="status">{message}</p>:null}
  </section>;

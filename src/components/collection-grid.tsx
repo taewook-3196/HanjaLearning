@@ -2,7 +2,7 @@
 import {useRef,useState} from "react";
 import CollectionDetail from "@/components/collection-detail";
 
-type Example={word:string;reading:string|null;meaning:string;child_explanation:string|null;chars:{character:string;grade:string|null;isCurrent:boolean}[]};
+type Example={word:string;reading:string|null;meaning:string;child_explanation:string|null;chars:{character:string;grade:string|null;isCurrent:boolean;isRegistered:boolean}[]};
 type Row={id:number;character:string;reading:{reading:string;meaning:string|null}|null;progress:{mastery_score:number|null;study_count:number|null}|null;examples:Example[]};
 
 export default function CollectionGrid({rows,soundEnabled,speechVoice}:{rows:Row[];soundEnabled:boolean;speechVoice:string}){
