@@ -5,14 +5,12 @@ set content_status='DRAFT',
     source_note=coalesce(source_note,'') || ' · 2026-10-05 품질검수: 학습 예시에서 제외'
 where (word,reading,meaning) in (
  ('치수','치수','길이의 크기'),
- ('도공','도공','칼을 만드는 장인'),
  ('미식','미식','맛있는 음식을 즐겨 먹음')
 );
 
 with words(word,reading,meaning,child_explanation,chars) as (
  values
  ('촌수','촌수','친족 관계의 가까운 정도','가족이나 친척 사이가 얼마나 가까운지를 나타내는 수',array['寸','數']),
- ('도검','도검','칼과 검','사람이 쓰는 칼과 검을 함께 이르는 말',array['刀','劍']),
  ('백미','백미','흰쌀','겉껍질과 겨를 벗겨 하얗게 만든 쌀',array['白','米'])
 )
 insert into public.hanja_words(word,reading,meaning,child_explanation,content_status,source_note)
@@ -23,7 +21,6 @@ on conflict(word,reading,meaning) do update set child_explanation=excluded.child
 with words(word,reading,meaning,chars) as (
  values
  ('촌수','촌수','친족 관계의 가까운 정도',array['寸','數']),
- ('도검','도검','칼과 검',array['刀','劍']),
  ('백미','백미','흰쌀',array['白','米'])
 )
 insert into public.hanja_word_map(word_id,hanja_id,position)
