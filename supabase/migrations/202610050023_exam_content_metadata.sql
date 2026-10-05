@@ -59,10 +59,20 @@ create table if not exists public.exam_culture_items (
   grade_id bigint not null references public.exam_grades(id) on delete cascade,
   topic text not null,
   prompt_summary text not null,
+  choice_a text not null,
+  choice_b text not null,
+  choice_c text not null,
+  choice_d text not null,
+  correct_choice smallint not null check (correct_choice between 1 and 4),
   correct_explanation text not null,
   content_status text not null default 'DRAFT'
     check (content_status in ('DRAFT','REVIEWED','SOURCE_VERIFIED','PUBLISHED')),
-  source_note text
+  source_note text,
+  check (length(btrim(topic))>0),
+  check (length(btrim(prompt_summary))>0),
+  check (length(btrim(choice_a))>0 and length(btrim(choice_b))>0 and length(btrim(choice_c))>0 and length(btrim(choice_d))>0),
+  check (btrim(choice_a)<>btrim(choice_b) and btrim(choice_a)<>btrim(choice_c) and btrim(choice_a)<>btrim(choice_d) and btrim(choice_b)<>btrim(choice_c) and btrim(choice_b)<>btrim(choice_d) and btrim(choice_c)<>btrim(choice_d)),
+  check (length(btrim(correct_explanation))>0)
 );
 
 alter table public.hanja_exam_metadata enable row level security;
