@@ -1,0 +1,43 @@
+-- DAEHAN grade-4 representative example words, batch 5.
+with words(word,reading,meaning,child_explanation,chars) as (values
+('감시','감시','주의 깊게 살펴봄','문제가 생기지 않도록 계속 살펴보는 일',array['監','視']),
+('단상','단상','높여 만든 자리','사람이 올라설 수 있게 높여 만든 자리',array['壇','上']),
+('양쪽','양쪽','두 쪽','서로 반대되거나 나뉜 두 쪽',array['兩','方']),
+('선명','선명','뚜렷하고 분명함','색이나 모습이 또렷하게 보이는 상태',array['鮮','明']),
+('선인','선인','신선 같은 사람','옛이야기에서 속세를 떠나 산다고 하는 신선',array['仙','人']),
+('별빛','별빛','별에서 비치는 빛','밤하늘의 별에서 보이는 빛',array['星','光']),
+('성씨','성씨','가족의 성을 나타내는 이름','김 이 박처럼 집안의 성을 나타내는 이름',array['姓','氏']),
+('장래','장래','앞으로 다가올 때','앞으로 살아가며 맞게 될 미래',array['將','來']),
+('적대','적대','서로 원수처럼 맞섬','상대와 서로 맞서고 미워하는 관계',array['敵','對']),
+('종일','종일','하루가 끝날 때까지','아침부터 저녁까지 하루 내내',array['終','日']),
+('지지','지지','찬성하며 힘을 보탬','어떤 의견이나 사람을 믿고 도와주는 것',array['支','持']),
+('차례','차례','정해진 순서','어떤 일을 하는 앞뒤의 순서',array['次','例']),
+('관찰','관찰','자세히 살펴봄','대상의 모습이나 변화를 자세히 살펴보는 일',array['觀','察']),
+('합창','합창','여럿이 함께 노래함','여러 사람이 목소리를 맞추어 함께 노래하는 것',array['合','唱']),
+('철도','철도','기차가 다니는 길','기차가 달릴 수 있도록 만든 철길',array['鐵','道']),
+('최고','최고','가장 높거나 좋은 것','여럿 가운데 가장 높거나 좋은 것',array['最','高']),
+('축하','축하','좋은 일을 함께 기뻐함','좋은 일이 생긴 사람에게 기쁜 마음을 전하는 것',array['祝','賀']),
+('충성','충성','진심으로 따르고 섬김','나라나 사람을 진심으로 따르고 힘을 다하는 마음',array['忠','誠']),
+('석탄','석탄','땅속에서 캐는 검은 연료','땅속에서 캐내어 연료로 쓰는 검은 돌',array['石','炭']),
+('주택','주택','사람이 사는 집','사람이 생활하도록 지은 집',array['住','宅']),
+('통일','통일','하나로 합침','나뉜 것을 하나로 합치는 것',array['統','一']),
+('퇴장','퇴장','있던 곳에서 나감','경기장이나 무대 같은 곳에서 나가는 것',array['退','場']),
+('판자','판자','넓고 평평하게 켠 나무','나무를 얇고 넓적하게 잘라 만든 널빤지',array['板','子']),
+('패배','패배','경기나 싸움에서 짐','경기나 겨룸에서 상대에게 지는 것',array['敗','北']),
+('필기','필기','글씨를 써서 기록함','배운 내용 등을 글씨로 적어 두는 것',array['筆','記']),
+('한파','한파','매우 심한 추위','기온이 크게 내려가 매우 추운 날씨',array['寒','波']),
+('향기','향기','좋은 냄새','꽃이나 음식 등에서 나는 기분 좋은 냄새',array['香','氣']),
+('허가','허가','해도 좋다고 인정함','어떤 일을 해도 된다고 공식적으로 인정하는 것',array['許','可']),
+('협력','협력','서로 힘을 합침','같은 목표를 위해 서로 도우며 힘을 합치는 것',array['協','力']),
+('호감','호감','좋게 느끼는 마음','사람이나 사물을 좋게 생각하는 마음',array['好','感']),
+('호수','호수','육지에 둘러싸인 큰 물','땅으로 둘러싸여 물이 고여 있는 큰 곳',array['湖','水']),
+('환자','환자','병이 있거나 다친 사람','아프거나 다쳐 치료가 필요한 사람',array['患','者']),
+('회전','회전','빙글빙글 돎','물체가 중심을 두고 빙글 도는 것',array['回','轉']),
+('효과','효과','어떤 행동 뒤에 나타나는 좋은 결과','어떤 일을 한 뒤 실제로 나타나는 결과',array['效','果'])
+), upserted as (
+insert into public.hanja_words(word,reading,meaning,child_explanation,content_status,source_note)
+select word,reading,meaning,child_explanation,'PUBLISHED','4급 예시어 5차 · 앱 자체 쉬운 뜻풀이 · 2026-10-05' from words
+on conflict(word,reading,meaning) do update set child_explanation=excluded.child_explanation,content_status='PUBLISHED',source_note=excluded.source_note returning id,word,reading,meaning
+)
+insert into public.hanja_word_map(word_id,hanja_id,position)
+select hw.id,h.id,u.ord::integer from words w join upserted hw on hw.word=w.word and hw.reading=w.reading and hw.meaning=w.meaning cross join lateral unnest(w.chars) with ordinality u(ch,ord) join public.hanja h on h.character=u.ch on conflict do nothing;
