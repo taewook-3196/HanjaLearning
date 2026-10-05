@@ -11,7 +11,7 @@ create table if not exists public.hanja_word_relations (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (from_word_id,to_word_id,relation_type),
-  check (from_word_id<>to_word_id)
+  check (from_word_id<to_word_id)
 );
 
 create index if not exists idx_hanja_word_relations_from
@@ -39,4 +39,4 @@ create policy "authenticated read published word relations"
   );
 
 comment on table public.hanja_word_relations is
-  'Source-verifiable synonym/antonym relationships between Hanja words used for exam generation.';
+  'Source-verifiable synonym/antonym relationships between Hanja words used for exam generation. Store each unordered pair once with from_word_id < to_word_id.';
