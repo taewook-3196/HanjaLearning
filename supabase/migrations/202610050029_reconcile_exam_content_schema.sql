@@ -28,9 +28,15 @@ alter table public.hanja_special_readings add column if not exists correct_choic
 update public.exam_culture_items set content_status='REVIEWED'
 where content_status='PUBLISHED' and grade_id is null;
 
--- Preserve bad legacy idiom maps for later review by removing only impossible
--- positions before installing the stricter invariant.
-delete from public.hanja_idiom_map where position not between 1 and 4;
+-- Preserve legacy idiom mappings. If an old mapping is impossible under the
+-- stricter rule, hide the parent idiom until an editor repairs the mapping.
+update public.hanja_idioms i
+set content_status='REVIEWED'
+where i.content_status='PUBLISHED'
+  and exists (
+    select 1 from public.hanja_idiom_map m
+    where m.idiom_id=i.id and m.position not between 1 and 4
+  );
 update public.exam_culture_items set content_status='REVIEWED'
 where content_status='PUBLISHED' and (grade_id is null or choice_a is null or choice_b is null or choice_c is null or choice_d is null or correct_choice not between 1 and 4);
 update public.hanja_special_readings set content_status='REVIEWED'
@@ -53,7 +59,8 @@ alter table public.hanja_image_items add constraint hanja_image_items_safe_path_
 ) not valid;
 
 alter table public.hanja_idiom_map drop constraint if exists hanja_idiom_map_position_check;
-alter table public.hanja_idiom_map add constraint hanja_idiom_map_position_check check(position between 1 and 4);
+alter table public.hanja_idiom_map add constraint hanja_idiom_map_position_check
+  check(position between 1 and 4) not valid;
 
 create or replace function public.validate_hanja_idiom_map()
 returns trigger language plpgsql set search_path=public as $body$
