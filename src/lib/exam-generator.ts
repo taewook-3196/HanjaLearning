@@ -102,16 +102,6 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
  };
  const ordered:ExamQuestion[]=[];
  const usedIds=new Set<string>();
- const fallbackPool=shuffle(pool);
- let fallbackCursor=0;
- const nextFallback=()=>{
-  while(fallbackCursor<fallbackPool.length){
-   const h=fallbackPool[fallbackCursor++];
-   const q=forward([h,...pool.filter(x=>x.id!==h.id)],1)[0];
-   if(q&&!usedIds.has(q.id)){usedIds.add(q.id);return q}
-  }
-  return undefined;
- };
  for(const item of blueprint.items){
   const bucket=buckets[item.type]??[];
   let placed=0;
@@ -120,11 +110,9 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
    if(usedIds.has(q.id))continue;
    usedIds.add(q.id);ordered.push(q);placed++;
   }
-  while(placed<item.count){
-   const fallback=nextFallback();
-   if(!fallback)break;
-   ordered.push(fallback);placed++;
-  }
+  // An official blueprint must never silently substitute another question type.
+  if(placed!==item.count)return[];
  }
- return ordered.slice(0,questionCount);
+ if(ordered.length!==questionCount)return[];
+
 }
