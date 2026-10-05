@@ -16,7 +16,6 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
 
  useEffect(()=>{
   let active=true;
-  setMode("LOADING");setMessage("획순을 준비하고 있어요.");
   if(!supportsStrokePractice(character)){onAvailabilityChange?.(false);return;}
   if(!target.current)return;
   target.current.innerHTML="";
