@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { koreaDateKey } from "@/lib/korea-date";
 
 type Provider = { id: number; code: string; name: string };
 type Grade = { id: number; provider_id: number; code: string; name: string; cumulative_hanja_count: number | null; sort_order: number };
@@ -57,10 +58,9 @@ export default function OnboardingPage() {
     const selected = providers.find((p) => String(p.id) === provider);
     const providerId = provider === "ALL" ? null : Number(provider);
     const targetProvider = provider === "ALL" ? "ALL" : selected?.code ?? null;
-    const { error: a } = await s.from("profiles").update({ nickname: nickname.trim(), target_provider: targetProvider, target_grade: grade, updated_at: new Date().toISOString() }).eq("user_id", user.id);
-    const { error: b } = await s.from("user_settings").update({ exam_provider_id: providerId, target_exam_date: examDate || null, updated_at: new Date().toISOString() }).eq("user_id", user.id);
-    if (a || b) { setMessage("설정을 저장하지 못했습니다. 다시 시도해 주세요."); setSaving(false); return; }
-    router.replace("/"); router.refresh();
+    const { error } = await s.rpc("save_onboarding_settings", { target_nickname: nickname.trim(), target_provider_code: targetProvider, target_grade_code: grade, target_exam_provider_id: providerId, target_exam_date: examDate || null });
+    if (error) { setMessage("설정을 저장하지 못했습니다. 다시 시도해 주세요."); setSaving(false); return; }
+        router.replace("/"); router.refresh();
   }
 
   if (loading) return <main className="auth-shell"><section className="auth-card"><p>학습 준비 중...</p></section></main>;
@@ -72,7 +72,7 @@ export default function OnboardingPage() {
       <label><span>이름</span><input value={nickname} maxLength={30} onChange={(e) => setNickname(e.target.value)} placeholder="예: 민준" required /></label>
       <label><span>시험기관</span><select value={provider} onChange={(e) => { setProvider(e.target.value); setGrade(""); }} required><option value="">골라 주세요</option>{providers.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
       <label><span>목표급수</span><select value={grade} onChange={(e) => setGrade(e.target.value)} required disabled={!provider}><option value="">골라 주세요</option>{visible.map((g) => <option key={g.id} value={g.code}>{g.name}{g.cumulative_hanja_count ? " · " + g.cumulative_hanja_count + "자" : ""}</option>)}</select></label>
-      <label><span>시험 날짜 (선택)</span><input type="date" value={examDate} min={new Date().toISOString().slice(0,10)} onChange={(e) => setExamDate(e.target.value)} /><small>날짜를 정하면 시험 전에 복습·숙달 기간이 남도록 학습량을 맞춰요.</small></label>
+      <label><span>시험 날짜 (선택)</span><input type="date" value={examDate} min={koreaDateKey()} onChange={(e) => setExamDate(e.target.value)} /><small>날짜를 정하면 시험 전에 복습·숙달 기간이 남도록 학습량을 맞춰요.</small></label>
       {message ? <p className="form-message" role="alert">{message}</p> : null}
       <button disabled={saving}>{saving ? "저장 중..." : "공부 시작하기"}</button>
     </form>
