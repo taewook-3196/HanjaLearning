@@ -16,6 +16,27 @@ export type UsageItem={id:number;hanja_id:number;prompt:string;choice_a:string;c
 export type SpecialReading={id:number;hanja_id:number;reading:string;meaning:string;usage_note:string;choice_a:string;choice_b:string;choice_c:string;choice_d:string;correct_choice:number};
 export type ImageItem={id:number;hanja_id:number;asset_path:string;alt_text:string};
 
+export type ExamReadinessInput={pool:HanjaPoolItem[];words:PublishedWord[];relations:Relation[];wordRelations:WordRelation[];metadata:Metadata[];wordContexts:WordContext[];wordStructures:WordStructure[];commonCharacterSets:CommonCharacterSet[];idioms:Idiom[];cultureItems:CultureItem[];usageItems:UsageItem[];specialReadings:SpecialReading[];imageItems:ImageItem[]};
+
+export function examReadinessSummary(input:ExamReadinessInput){
+ return {
+  HANJA_READING:input.pool.length,
+  WORDS:input.words.filter(x=>x.word&&x.reading&&x.meaning).length,
+  RELATIONS:input.relations.length,
+  WORD_RELATIONS:input.wordRelations.length,
+  CHARACTER_PRINCIPLE:input.metadata.filter(x=>Boolean(x.formation_type)).length,
+  DICTIONARY_LOOKUP:input.metadata.filter(x=>Boolean(x.radical)||typeof x.total_strokes==="number").length,
+  WORD_CONTEXTS:input.wordContexts.length,
+  WORD_STRUCTURES:input.wordStructures.length,
+  COMMON_CHARACTER_SETS:input.commonCharacterSets.length,
+  IDIOMS:input.idioms.length,
+  CULTURE_CONTENT:input.cultureItems.length,
+  USAGE_ITEMS:input.usageItems.length,
+  SPECIAL_READINGS:input.specialReadings.length,
+  ORIGINAL_IMAGES:input.imageItems.length,
+ };
+}
+
 
 export function validateExamQuestions(questions:ExamQuestion[],expectedCount:number,blueprint?:ExamBlueprint){
  const errors:string[]=[];
