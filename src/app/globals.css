@@ -336,3 +336,15 @@ button {
 .compact-learn .stroke-practice.compact>.reveal-button,.compact-learn .stroke-practice.compact>.compact-learning-details{order:2}
 .compact-learn .stroke-practice.compact>div:last-child{order:3}
 @media(max-height:760px){.compact-learn{padding-top:8px}.compact-learn .learn-top{margin-bottom:5px}.compact-flash-card{padding:8px 10px}.stroke-practice.compact>p{display:none}.compact-learning-details .compact-examples p:nth-child(n+2){display:none}}
+
+/* Daily learning: compact practice actions and readable example words */
+.compact-learn .practice-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.compact-learn .practice-actions button{width:100%;min-width:0;margin-top:2px}
+.compact-learning-details{max-width:none;width:100%;padding:10px 12px}
+.compact-learning-details .compact-examples{margin-top:6px}
+.compact-learning-details .compact-examples .example-word{margin:8px 0;line-height:1.3}
+.example-word-title{font-size:20px;font-weight:900;letter-spacing:-.03em}
+.example-word-title span{font-size:16px;font-weight:800}
+.example-word-meaning{margin-top:3px;font-size:15px;line-height:1.35}
+.compact-learning-details .word-grade-row{margin-top:5px;margin-left:0}
+.compact-learning-details .word-grade-row small{font-size:12px}
