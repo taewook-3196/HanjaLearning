@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireActiveUser } from "@/lib/auth/require-active-user";
+import { buildStudyPlan } from "@/lib/study-plan";
 
 export default async function Home() {
   const { supabase, user } = await requireActiveUser();
 
   const [{ data: profile }, { data: settings }] = await Promise.all([
     supabase.from("profiles").select("nickname,target_provider,target_grade").eq("user_id", user.id).maybeSingle(),
-    supabase.from("user_settings").select("exam_provider_id").eq("user_id", user.id).maybeSingle(),
+    supabase.from("user_settings").select("exam_provider_id,target_exam_date").eq("user_id", user.id).maybeSingle(),
   ]);
   if (!profile?.target_provider || !profile?.target_grade) redirect("/onboarding");
 
@@ -44,18 +45,17 @@ export default async function Home() {
   if (targetCount === 0) {
     return <main className="app-shell"><header className="home-header"><div><strong>아빠한자</strong><span>{profile.nickname}님</span></div><div className="home-mark" aria-hidden="true">漢</div></header><section className="study-card"><div><p className="eyebrow">목표급수 확인</p><h2>{profile.target_grade}은(는) 아직 학습할 수 없어요.</h2><p className="subtitle">지금 학습 가능한 급수로 목표를 바꿔 주세요. 기존 학습 기록은 그대로 남습니다.</p></div><Link className="primary-link" href="/settings">학습 가능한 급수 선택하기</Link></section></main>;
   }
-  // /learn serves due reviews first, then unseen Hanja, capped at 8 cards total.
-  // Keep the home summary aligned with that exact session composition.
-  const todayReviewCount=Math.min(8,reviewCount);
-  const newCount=Math.min(Math.max(0,8-todayReviewCount),Math.max(0,targetCount-learnedCount));
-  const todayTotal=todayReviewCount+newCount;
+  const plan=buildStudyPlan({unseen:Math.max(0,targetCount-learnedCount),dueReviews:reviewCount,examDate:settings?.target_exam_date});
+  const todayReviewCount=plan.reviewCount;
+  const newCount=plan.newCount;
+  const todayTotal=plan.total;
   const estimatedMinutes=Math.max(1,Math.ceil(todayTotal*0.9));
   const percent=targetCount?Math.min(100,Math.round((learnedCount/targetCount)*100)):0;
   const providerLabel=profile.target_provider==="ALL"?"전체":profile.target_provider;
 
   return <main className="app-shell">
     <header className="home-header"><div><strong>아빠한자</strong><span>{profile.nickname}님 · {profile.target_grade} 도전</span></div><div className="home-mark" aria-hidden="true">漢</div></header>
-    <section className="study-card today-card"><div className="today-heading compact"><div><p className="eyebrow">오늘 할 일</p><h2>{todayTotal>0?`${todayTotal}자 · 약 ${estimatedMinutes}분`:"오늘 학습 완료 🎉"}</h2></div><div className="streak-badge" aria-label={`연속 학습 ${streak}일`}><span>🔥</span><strong>{streak}일</strong><small>연속</small></div></div><div className="compact-plan"><span>새 한자 <strong>{newCount}</strong></span><span>복습 <strong>{todayReviewCount}</strong></span><span>확인 <strong>{todayTotal>0?Math.min(3,todayTotal):0}</strong></span>{wrongCount>0?<Link href="/learn?mode=wrong">오답 {wrongCount}</Link>:null}</div>{todayTotal>0?<Link className="primary-link" href="/learn">계속 학습하기</Link>:null}<div className="home-quick-links"><Link href="/write">✍️ 쓰기</Link><Link href="/stats">📈 기록</Link><Link href="/collection">漢 도감</Link></div></section>
+    <section className="study-card today-card">{plan.daysUntilExam!==null?<p className="eyebrow">시험 D-{plan.daysUntilExam} · {plan.phase==="LEARN"?`새 한자 학습 + 시험 전 ${plan.masteryDays}일 숙달 확보`:plan.phase==="MASTER"?"숙달·복습 집중 기간":"시험일"}</p>:null}<div className="today-heading compact"><div><p className="eyebrow">오늘 할 일</p><h2>{todayTotal>0?`${todayTotal}자 · 약 ${estimatedMinutes}분`:"오늘 학습 완료 🎉"}</h2></div><div className="streak-badge" aria-label={`연속 학습 ${streak}일`}><span>🔥</span><strong>{streak}일</strong><small>연속</small></div></div><div className="compact-plan"><span>새 한자 <strong>{newCount}</strong></span><span>복습 <strong>{todayReviewCount}</strong></span><span>확인 <strong>{todayTotal>0?Math.min(3,todayTotal):0}</strong></span>{wrongCount>0?<Link href="/learn?mode=wrong">오답 {wrongCount}</Link>:null}</div>{todayTotal>0?<Link className="primary-link" href="/learn">계속 학습하기</Link>:null}<div className="home-quick-links"><Link href="/write">✍️ 쓰기</Link><Link href="/stats">📈 기록</Link><Link href="/collection">漢 도감</Link></div></section>
     <section className="progress-card compact-progress"><div className="progress-heading"><div><p className="eyebrow">{providerLabel} · {profile.target_grade}</p><h2>전체 진도 {percent}%</h2></div><strong>{learnedCount} / {targetCount}</strong></div><div className="progress-track" aria-label={"학습 진도 "+percent+"%"}><span style={{width:percent+"%"}} /></div></section>
     <nav className="bottom-nav" aria-label="주 메뉴"><span className="active">홈</span><Link href="/learn">학습</Link><Link href="/collection">도감</Link><Link href="/quiz">퀴즈</Link><Link href="/settings">나</Link></nav>
   </main>;
