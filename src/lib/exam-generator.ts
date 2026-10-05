@@ -1,7 +1,7 @@
 import type { ExamBlueprint } from "@/lib/exam-blueprints";
 
 export type ExampleWord={word:string;reading:string|null;meaning:string;child_explanation:string|null};
-export type ExamQuestion={id:string;stem:string;prompt:string;correct:string;choices:string[];examples:ExampleWord[];image?:{src:string;alt:string}};
+export type ExamQuestion={id:string;type?:string;stem:string;prompt:string;correct:string;choices:string[];examples:ExampleWord[];image?:{src:string;alt:string}};
 export type HanjaPoolItem={id:number;character:string;answer:string;examples:ExampleWord[]};
 export type PublishedWord={id:number;word:string;reading:string|null;meaning:string;child_explanation?:string|null};
 export type Relation={from_hanja_id:number;to_hanja_id:number;relation_type:string};
@@ -100,6 +100,8 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
   SPECIAL_READING:[...specialQs],
   IMAGE_RECOGNITION:[...imageQs]
  };
+ const typedBuckets=Object.entries(buckets) as [string,ExamQuestion[]][];
+ for(const [type,items] of typedBuckets)for(const q of items)q.type=type;
  const ordered:ExamQuestion[]=[];
  const usedIds=new Set<string>();
  for(const item of blueprint.items){
