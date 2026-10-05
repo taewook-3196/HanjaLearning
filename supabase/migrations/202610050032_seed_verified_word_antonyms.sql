@@ -14,12 +14,12 @@ inserted as (
   child_explanation=excluded.child_explanation,
   content_status='PUBLISHED',
   source_note=excluded.source_note
- returning id
+ returning id,word,reading,meaning
 )
 insert into public.hanja_word_map(word_id,hanja_id,position)
 select w.id,h.id,u.ord::integer
 from words d
-join public.hanja_words w on w.word=d.word and w.reading=d.reading and w.meaning=d.meaning
+join inserted w on w.word=d.word and w.reading=d.reading and w.meaning=d.meaning
 cross join lateral unnest(d.chars) with ordinality as u(ch,ord)
 join public.hanja h on h.character=u.ch
 on conflict do nothing;
