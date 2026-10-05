@@ -58,9 +58,11 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
  const contextHanjaCount=blueprint?.items.filter(x=>x.type==="CONTEXT_TO_HANJA").reduce((n,x)=>n+x.count,0)??0;
  const structureCount=blueprint?.items.filter(x=>x.type==="WORD_STRUCTURE").reduce((n,x)=>n+x.count,0)??0;
  const commonCount=blueprint?.items.filter(x=>x.type==="COMMON_CHARACTER").reduce((n,x)=>n+x.count,0)??0;
- const idiomCount=blueprint?.items.filter(x=>x.type==="IDIOM").reduce((n,x)=>n+x.count,0)??0;
+ const variableCount=blueprint?.items.filter(x=>x.type==="VARIABLE_VERIFIED").reduce((n,x)=>n+x.count,0)??0;
+ const pre5Variable=blueprint?.gradeCode==="PRE5"&&variableCount===2;
+ const idiomCount=(blueprint?.items.filter(x=>x.type==="IDIOM").reduce((n,x)=>n+x.count,0)??0)+(pre5Variable?1:0);
  const cultureCount=blueprint?.items.filter(x=>x.type==="CULTURE_ETIQUETTE").reduce((n,x)=>n+x.count,0)??0;
- const usageCount=blueprint?.items.filter(x=>x.type==="CHARACTER_USAGE").reduce((n,x)=>n+x.count,0)??0;
+ const usageCount=(blueprint?.items.filter(x=>x.type==="CHARACTER_USAGE").reduce((n,x)=>n+x.count,0)??0)+(pre5Variable?1:0);
  const specialReadingCount=blueprint?.items.filter(x=>x.type==="SPECIAL_READING").reduce((n,x)=>n+x.count,0)??0;
  const imageCount=blueprint?.items.filter(x=>x.type==="IMAGE_RECOGNITION").reduce((n,x)=>n+x.count,0)??0;
  const forward=(items:HanjaPoolItem[],count:number)=>shuffle(items).filter(x=>new Set(pool.filter(y=>y.id!==x.id&&y.answer!==x.answer).map(y=>y.answer)).size>=3).slice(0,count).map(x=>{const wrong=[...new Set(shuffle(pool.filter(y=>y.id!==x.id&&y.answer!==x.answer)).map(y=>y.answer))].slice(0,3);return{id:`hanja-forward:${x.id}`,stem:x.character,prompt:"알맞은 뜻과 소리를 고르세요.",correct:x.answer,choices:shuffle([x.answer,...wrong]),examples:x.examples}}).filter(x=>x.choices.length===4);
@@ -110,7 +112,7 @@ export function generateExamQuestions(args:{pool:HanjaPoolItem[];words:Published
  // requires stroke-order source data that is not modeled yet, so only the
  // fully supported 112-session pair (character usage + idiom usage) is eligible.
  if(blueprint.gradeCode==="PRE5"&&blueprint.items.some(x=>x.type==="VARIABLE_VERIFIED")){
-  const usage=usageQs[0],idiom=idiomQs[0];
+  const fixedUsageCount=blueprint.items.filter(x=>x.type==="CHARACTER_USAGE").reduce((n,x)=>n+x.count,0);\n  const usage=usageQs[fixedUsageCount],idiom=idiomQs[0];
   buckets.VARIABLE_VERIFIED=usage&&idiom
    ? [{...usage,id:`variable-112:${usage.id}`},{...idiom,id:`variable-112:${idiom.id}`}]
    : [];
