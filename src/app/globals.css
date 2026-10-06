@@ -383,3 +383,5 @@ button {
 
 /* Keep the personal avatar beside the nickname on every phone width. */
 .home-header .profile-heading{display:flex;flex-direction:row;align-items:center;gap:12px;min-width:0}.home-header .profile-heading>div{display:flex;min-width:0;flex-direction:column;gap:3px}.profile-avatar{overflow:hidden}.profile-avatar .profile-photo{display:block;width:48px;height:48px;object-fit:cover;border-radius:50%}
+
+.compact-avatar-picker button img{display:block;width:54px;height:54px;margin:0 auto 5px;border-radius:18px;object-fit:cover}.profile-avatar>img:not(.profile-photo){display:block;width:48px;height:48px;border-radius:50%;object-fit:cover}

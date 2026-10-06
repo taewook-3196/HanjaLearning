@@ -1,6 +1,7 @@
 export const PROFILE_AVATARS=[
- {key:"dad",emoji:"👨",label:"아빠"},{key:"mom",emoji:"👩",label:"엄마"},{key:"boy",emoji:"👦",label:"남자아이"},{key:"girl",emoji:"👧",label:"여자아이"},
- {key:"dog",emoji:"🐶",label:"강아지"},{key:"cat",emoji:"🐱",label:"고양이"},{key:"rabbit",emoji:"🐰",label:"토끼"},{key:"bear",emoji:"🐻",label:"곰"},
- {key:"panda",emoji:"🐼",label:"판다"},{key:"fox",emoji:"🦊",label:"여우"},{key:"penguin",emoji:"🐧",label:"펭귄"},{key:"dino",emoji:"🦖",label:"공룡"}
+ {key:"dad",src:"/profile-avatars/dad.svg",label:"아빠"},{key:"mom",src:"/profile-avatars/mom.svg",label:"엄마"},{key:"boy",src:"/profile-avatars/boy.svg",label:"남자아이"},{key:"girl",src:"/profile-avatars/girl.svg",label:"여자아이"},
+ {key:"dog",src:"/profile-avatars/dog.svg",label:"강아지"},{key:"cat",src:"/profile-avatars/cat.svg",label:"고양이"},{key:"rabbit",src:"/profile-avatars/rabbit.svg",label:"토끼"},{key:"bear",src:"/profile-avatars/bear.svg",label:"곰"},
+ {key:"penguin",src:"/profile-avatars/penguin.svg",label:"펭귄"},{key:"elephant",src:"/profile-avatars/elephant.svg",label:"코끼리"},{key:"lion",src:"/profile-avatars/lion.svg",label:"사자"},{key:"fox",src:"/profile-avatars/fox.svg",label:"여우"}
 ] as const;
-export function avatarEmoji(key:string|null|undefined){return PROFILE_AVATARS.find(x=>x.key===key)?.emoji??"👦";}
+export function avatarSrc(key:string|null|undefined){return PROFILE_AVATARS.find(x=>x.key===key)?.src??"/profile-avatars/boy.svg";}
+export function avatarEmoji(key:string|null|undefined){return avatarSrc(key);}

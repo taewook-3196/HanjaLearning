@@ -3,7 +3,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { requireActiveUser } from "@/lib/auth/require-active-user";
 import { buildStudyPlan } from "@/lib/study-plan";
-import { avatarEmoji } from "@/lib/profile-avatars";
+import { avatarSrc } from "@/lib/profile-avatars";
 
 export default async function Home() {
   const { supabase, user } = await requireActiveUser();
@@ -14,7 +14,7 @@ export default async function Home() {
   ]);
   if (!profile?.target_provider || !profile?.target_grade) redirect("/onboarding");
   const avatarUrl=profile.avatar_type==="PHOTO"&&profile.avatar_path?supabase.storage.from("profile-avatars").getPublicUrl(profile.avatar_path).data.publicUrl:null;
-  const profileAvatar=avatarUrl?<Image className="profile-photo" src={avatarUrl} width={48} height={48} alt="" unoptimized />:<span aria-hidden="true">{avatarEmoji(profile.avatar_key)}</span>;
+  const profileAvatar=avatarUrl?<Image className="profile-photo" src={avatarUrl} width={48} height={48} alt="" unoptimized />:<Image src={avatarSrc(profile.avatar_key)} width={48} height={48} alt="" />;
 
   let gradeQuery = supabase.from("exam_grades").select("id,name,cumulative_hanja_count").eq("code", profile.target_grade);
   if (settings?.exam_provider_id) gradeQuery = gradeQuery.eq("provider_id", settings.exam_provider_id);
