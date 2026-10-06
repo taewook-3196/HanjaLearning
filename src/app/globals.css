@@ -352,3 +352,5 @@ button {
 .writing-stage-indicator{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0 10px}
 .writing-stage-indicator span{padding:7px 4px;border-radius:999px;background:#eef1f5;color:#77808d;font-size:12px;font-weight:800;text-align:center}
 .writing-stage-indicator span.active{background:#e5f2ff;color:#1688e5}
+
+.stroke-character-stage{position:relative;display:grid;place-items:center}.stroke-character-stage>div{grid-area:1/1}.stroke-character-fallback{grid-area:1/1;font-family:serif;font-size:clamp(120px,38vw,180px);font-weight:500;line-height:1;color:#555;z-index:1}
