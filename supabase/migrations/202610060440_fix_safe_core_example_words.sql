@@ -29,7 +29,7 @@ union all select 977,id,2 from public.hanja where character='心';
 
 -- Preserve 式 coverage with the common word 方式.
 insert into public.hanja_words(id,word,reading,meaning,child_explanation,content_status,source_note,hanja_form)
-select 1462,'방식','방식','일을 하는 일정한 방법이나 형식','어떤 일을 하거나 문제를 해결하는 방법','approved','grade3 quality review','方式'
+select 1462,'방식','방식','일을 하는 일정한 방법이나 형식','어떤 일을 하거나 문제를 해결하는 방법','PUBLISHED','grade3 quality review','方式'
 where not exists (select 1 from public.hanja_words where id=1462)
   and not exists (select 1 from public.hanja_words where word='방식' and hanja_form='方式');
 
