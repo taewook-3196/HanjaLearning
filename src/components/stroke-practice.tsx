@@ -67,7 +67,7 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
   <p role={mode==="ERROR"?"alert":undefined}>{message}</p>
   <div ref={target} aria-label={character+" 획순과 쓰기 연습"} style={{width:compact?190:260,height:compact?190:260,margin:"0 auto",touchAction:"none"}}/>
   {details}
-  {!disabled&&controlsEnabled?<div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+  {!disabled&&controlsEnabled?<div className="practice-actions">
    <button type="button" className="secondary-button" onClick={animate}>▶ 획순 보기</button>
    <button type="button" onClick={()=>practice(stage)}>{stage===1?"✍️ 따라 쓰기":stage===2?"✍️ 힌트 쓰기":mode==="DONE"?"한 번 더 기억쓰기":"✍️ 기억 쓰기"}</button>
   </div>:null}
