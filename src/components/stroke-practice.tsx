@@ -51,6 +51,8 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
   else if(targetStage===2){writer.current.hideCharacter();writer.current.showOutline();setMessage("2단계 · 흐린 윤곽을 힌트로 써 보세요.");}
   else {writer.current.hideCharacter();writer.current.hideOutline();setMessage("3단계 · 가이드 없이 기억해서 써 보세요.");}
   writer.current.quiz({
+   // Slightly relax stroke matching for small touch screens while keeping stroke order meaningful.
+   leniency:1.25,
    showHintAfterMisses:targetStage===3?3:2,
    highlightOnComplete:true,
    onComplete:()=>{
