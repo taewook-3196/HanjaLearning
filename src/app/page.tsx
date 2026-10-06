@@ -11,7 +11,10 @@ export default async function Home() {
   const [{ data: profile }, { data: settings }, { data: friendUnread }, { count: friendRequests }] = await Promise.all([
     supabase.from("profiles").select("nickname,target_provider,target_grade,avatar_type,avatar_key,avatar_path").eq("user_id", user.id).maybeSingle(),
     supabase.from("user_settings").select("exam_provider_id,target_exam_date").eq("user_id", user.id).maybeSingle(),
+    supabase.rpc("friend_unread_message_count"),
+    supabase.from("friendships").select("*",{count:"exact",head:true}).eq("addressee_id",user.id).eq("status","PENDING"),
   ]);
+  const friendAlertCount=Number(friendUnread??0)+(friendRequests??0);
   if (!profile?.target_provider || !profile?.target_grade) redirect("/onboarding");
   const avatarUrl=profile.avatar_type==="PHOTO"&&profile.avatar_path?await profileAvatarUrl(supabase,profile.avatar_path):null;
   const profileAvatar=avatarUrl?<img className="profile-photo" src={avatarUrl} width={48} height={48} alt="" />:<ProfileAvatarArt avatarKey={profile.avatar_key} size={48} />;
