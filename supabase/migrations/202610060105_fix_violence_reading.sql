@@ -1,0 +1,1 @@
+update public.hanja_readings set reading='폭', meaning='사나울' where hanja_id=(select id from public.hanja where character='暴') and is_primary=true;
