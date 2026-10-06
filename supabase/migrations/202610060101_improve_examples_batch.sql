@@ -9,3 +9,8 @@ insert into public.hanja_words(word,reading,meaning,child_explanation,content_st
 ('차처','차처','이곳','바로 이 장소나 곳을 이르는 말','PUBLISHED','예시어 품질 교정 · 2026-10-06','此處'),
 ('천수','천수','얕은 물','깊이가 얕은 물','PUBLISHED','예시어 품질 교정 · 2026-10-06','淺水'),
 ('풍엽','풍엽','단풍잎','가을에 붉거나 노랗게 물든 단풍나무 잎','PUBLISHED','예시어 품질 교정 · 2026-10-06','楓葉');
+
+insert into public.hanja_word_map(word_id,hanja_id,position)
+select w.id,h.id,x.pos from (values ('범례','凡',1),('범례','例',2),('한심','恨',1),('한심','心',2),('권지','卷',1),('권지','紙',2),('유수','柳',1),('유수','樹',2),('모색','暮',1),('모색','色',2),('차처','此',1),('차처','處',2),('천수','淺',1),('천수','水',2),('풍엽','楓',1),('풍엽','葉',2)) x(word,ch,pos)
+join public.hanja_words w on w.word=x.word and w.content_status='PUBLISHED'
+join public.hanja h on h.character=x.ch on conflict do nothing;
