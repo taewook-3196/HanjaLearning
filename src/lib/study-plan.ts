@@ -12,8 +12,10 @@ export function buildStudyPlan(input:{unseen:number;dueReviews:number;weakNotDue
  const requestedNew=phase==="CATCH_UP"?Math.max(1,catchUpNew):idealNew;
  const masteryBoost=(phase==="MASTER"||phase==="CATCH_UP")?Math.min(4,weak):0;
  const desiredTotal=Math.min(MAX_TOTAL,Math.max(base,due+Math.min(unseen,requestedNew)+masteryBoost));
- // Reserve deadline-driven new learning before filling the remaining capacity with due/weak reviews.
- const newCount=Math.min(unseen,MAX_NEW,requestedNew,desiredTotal);
+ // Protect retention first: overdue reviews reserve the majority of today's capacity.
+ // Deadline-driven new learning still receives the remaining slots so the target can finish before the exam.
+ const reviewReserve=Math.min(due,Math.min(desiredTotal,Math.max(base,Math.ceil(desiredTotal*.55))));
+ const newCount=Math.min(unseen,MAX_NEW,requestedNew,Math.max(0,desiredTotal-reviewReserve));
  const remainingAfterNew=Math.max(0,desiredTotal-newCount);
  const reviewCount=Math.min(due,remainingAfterNew);
  const remainingAfterDue=Math.max(0,remainingAfterNew-reviewCount);
