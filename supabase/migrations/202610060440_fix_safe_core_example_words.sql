@@ -2,7 +2,7 @@
 -- Guard every mutation with the production ID + current word so an unexpected state cannot damage another row.
 
 -- 具景 is an artificial mapping for native Korean '구경'; remove the row.
-delete from public.hanja_word_map where word_id=846;
+delete from public.hanja_word_map m using public.hanja_words w where m.word_id=846 and w.id=846 and w.word='구경';
 delete from public.hanja_words where id=846 and word='구경';
 
 -- 次例 -> 次回
@@ -11,7 +11,7 @@ set word='차회', reading='차회', hanja_form='次回',
     meaning='다음 차례나 다음 번',
     child_explanation='이번 다음에 돌아오는 차례나 번'
 where id=922 and word='차례';
-delete from public.hanja_word_map where word_id=922;
+delete from public.hanja_word_map m using public.hanja_words w where m.word_id=922 and w.id=922 and w.word='차회';
 insert into public.hanja_word_map(word_id,hanja_id,position)
 select 922,id,1 from public.hanja where character='次'
 union all select 922,id,2 from public.hanja where character='回';
@@ -22,7 +22,7 @@ set word='양심', reading='양심', hanja_form='良心',
     meaning='옳고 그름을 스스로 판단하는 마음',
     child_explanation='내 행동이 옳은지 그른지 스스로 생각하고 판단하는 마음'
 where id=977 and word='양식';
-delete from public.hanja_word_map where word_id=977;
+delete from public.hanja_word_map m using public.hanja_words w where m.word_id=977 and w.id=977 and w.word='양심';
 insert into public.hanja_word_map(word_id,hanja_id,position)
 select 977,id,1 from public.hanja where character='良'
 union all select 977,id,2 from public.hanja where character='心';
@@ -47,7 +47,7 @@ set word='구절', reading='구절', hanja_form='句節',
     meaning='한 토막의 말이나 글',
     child_explanation='문장이나 글에서 뜻을 이루는 한 토막'
 where id=1264 and word='구문';
-delete from public.hanja_word_map where word_id=1264;
+delete from public.hanja_word_map m using public.hanja_words w where m.word_id=1264 and w.id=1264 and w.word='구절';
 insert into public.hanja_word_map(word_id,hanja_id,position)
 select 1264,id,1 from public.hanja where character='句'
 union all select 1264,id,2 from public.hanja where character='節';
