@@ -37,7 +37,7 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
  },[character,onAvailabilityChange]);
 
  if(!supportsStrokePractice(character)){
-  return <section className={`stroke-practice${compact?" compact":""}`}><h2>쓰기 연습</h2><p>이 글자는 한국식 자형의 획순 확인이 끝난 뒤 쓰기 연습을 제공할게요.</p></section>;
+  return <section className={`stroke-practice${compact?" compact":""}`}><h2>쓰기 연습</h2><p>이 글자는 획순 자료가 아직 없어요. 글자 모양은 그대로 확인할 수 있어요.</p><div className="stroke-character-stage stroke-static-fallback" aria-label={character+" 글자"}><span className="stroke-character-fallback">{character}</span></div>{details}</section>;
  }
 
  function animate(){
@@ -68,8 +68,8 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
   <div className="stroke-character-stage" style={{width:compact?190:260,height:compact?190:260,margin:"0 auto"}}><div ref={target} aria-label={character+" 획순과 쓰기 연습"} style={{width:"100%",height:"100%",touchAction:"none"}}/>{mode==="ERROR"?<span className="stroke-character-fallback" aria-label={character+" 글자"}>{character}</span>:null}</div>
   {details}
   {!disabled&&controlsEnabled?<div className="practice-actions">
-   <button type="button" className="secondary-button" onClick={animate}>▶ 획순 보기</button>
-   <button type="button" onClick={()=>practice(stage)}>{stage===1?"✍️ 따라 쓰기":stage===2?"✍️ 힌트 쓰기":mode==="DONE"?"한 번 더 기억쓰기":"✍️ 기억 쓰기"}</button>
+   <button type="button" className="secondary-button" onClick={animate}>획순 보기</button>
+   <button type="button" onClick={()=>practice(stage)}>{stage===1?"따라 쓰기":stage===2?"힌트 쓰기":mode==="DONE"?"한 번 더 기억쓰기":"기억 쓰기"}</button>
   </div>:null}
  </section>;
 }
