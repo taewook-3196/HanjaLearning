@@ -359,3 +359,16 @@ button {
 
 .home-app-icon{width:52px;height:52px;border-radius:14px;object-fit:cover;box-shadow:0 2px 8px rgba(15,23,42,.12);flex:0 0 auto}
 .profile-heading{display:flex;align-items:center;gap:12px}.profile-avatar{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:#eef6ff;font-size:30px;flex:0 0 auto}.profile-heading>div{display:flex;flex-direction:column;gap:3px}
+
+/* Compact profile editor */
+.profile-editor{margin:20px 0;padding:18px;border:1px solid var(--line);border-radius:22px;background:#fff}
+.profile-editor h2{margin:0;font-size:20px}.profile-help{margin:5px 0 14px;color:var(--muted);font-size:12px}
+.nickname-row{display:grid;grid-template-columns:48px 1fr;align-items:center;gap:8px}.nickname-row>span{font-weight:800}.nickname-row input{margin:0}
+.profile-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.profile-tabs>*{display:grid;place-items:center;min-height:42px;border-radius:12px;background:#f4f8fc;color:var(--muted);font-size:13px;font-weight:800}.profile-tabs strong{background:#eaf5ff;color:var(--accent)}.profile-tabs label{cursor:pointer}
+.visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.compact-avatar-picker{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important}
+.compact-avatar-picker button{min-width:0!important;min-height:82px!important;padding:8px 4px!important;border:2px solid transparent!important;border-radius:16px!important;background:#f7f9fc!important;color:var(--muted)!important}
+.compact-avatar-picker button[aria-pressed=true]{border-color:var(--accent)!important;background:#eef7ff!important;color:var(--accent)!important}
+.compact-avatar-picker button span{font-size:34px!important;line-height:1}.compact-avatar-picker button small{display:block;margin-top:4px;font-size:11px}
+.photo-preview-row{display:flex;align-items:center;gap:10px;margin:12px 0}.photo-preview-row img{width:56px;height:56px;border-radius:50%;object-fit:cover}.photo-preview-row span{font-size:13px;font-weight:800}
+@media(max-width:380px){.compact-avatar-picker{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
