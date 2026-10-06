@@ -61,11 +61,11 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
  }
 
  const disabled=mode==="LOADING"||mode==="ERROR";
- return <section className="stroke-practice">
+ return <section className={`stroke-practice${compact?" compact":""}`}>
   {!compact?<h2>획순 · 쓰기 연습</h2>:null}
   <div className="writing-stage-indicator" aria-label={"쓰기 "+stage+"단계"}><span className={stage>=1?"active":""}>1 따라쓰기</span><span className={stage>=2?"active":""}>2 힌트쓰기</span><span className={stage>=3?"active":""}>3 기억쓰기</span></div>
   <p role={mode==="ERROR"?"alert":undefined}>{message}</p>
-  <div ref={target} aria-label={character+" 획순과 쓰기 연습"} style={{width:compact?190:260,height:compact?190:260,margin:"0 auto",touchAction:"none"}}/>
+  <div className="stroke-character-stage" style={{width:compact?190:260,height:compact?190:260,margin:"0 auto"}}><div ref={target} aria-label={character+" 획순과 쓰기 연습"} style={{width:"100%",height:"100%",touchAction:"none"}}/>{mode==="ERROR"?<span className="stroke-character-fallback" aria-label={character+" 글자"}>{character}</span>:null}</div>
   {details}
   {!disabled&&controlsEnabled?<div className="practice-actions">
    <button type="button" className="secondary-button" onClick={animate}>▶ 획순 보기</button>

@@ -354,3 +354,5 @@ button {
 .writing-stage-indicator span.active{background:#e5f2ff;color:#1688e5}
 
 .collection-browser{display:grid;gap:18px}.collection-initial-nav{position:sticky;top:8px;z-index:20;display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:8px;border-radius:16px;background:rgba(255,255,255,.94);box-shadow:0 4px 18px rgba(0,0,0,.08);backdrop-filter:blur(8px)}.collection-initial-nav a{display:grid;place-items:center;min-height:36px;border-radius:10px;background:#f5f5f5;font-weight:800;text-decoration:none;color:inherit}.collection-group{scroll-margin-top:110px}.collection-group-title{margin:0 0 8px;padding:4px 2px;font-size:1.2rem;font-weight:900}
+
+.stroke-character-stage{position:relative;display:grid;place-items:center}.stroke-character-stage>div,.stroke-character-fallback{grid-area:1/1}.stroke-character-fallback{font-family:serif;font-size:clamp(120px,38vw,180px);font-weight:500;line-height:1;color:#555;z-index:1}
