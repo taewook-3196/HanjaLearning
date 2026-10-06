@@ -5,7 +5,7 @@ import {createClient} from "@/lib/supabase/client";
 type Ticket={id:number;category:string;title:string;status:string;created_at:string};
 const labels:Record<string,string>={CONTENT_ERROR:"오류·틀린 내용",BUG:"버그",SUGGESTION:"개선 제안",OTHER:"기타"};
 export default function FeedbackPage(){
- const router=useRouter(),params=useSearchParams();const [rows,setRows]=useState<Ticket[]>([]),[category,setCategory]=useState("CONTENT_ERROR"),[title,setTitle]=useState(""),[body,setBody]=useState(""),[message,setMessage]=useState(""),[saving,setSaving]=useState(false);
+ const router=useRouter(),params=useSearchParams();const [rows,setRows]=useState<Ticket[]>([]),[category,setCategory]=useState("CONTENT_ERROR"),[title,setTitle]=useState(()=>{const h=params.get("hanja");return h?`${h} 내용 오류 제보`:"";}),[body,setBody]=useState(""),[message,setMessage]=useState(""),[saving,setSaving]=useState(false);
  async function load(){const s=createClient();const {data:{user}}=await s.auth.getUser();if(!user){router.replace("/login");return;}const {data}=await s.from("feedback_tickets").select("id,category,title,status,created_at").eq("user_id",user.id).order("created_at",{ascending:false});setRows(data??[]);}
  useEffect(()=>{queueMicrotask(()=>{void load();});},[]);
  async function submit(e:FormEvent){e.preventDefault();setSaving(true);setMessage("");const s=createClient();const context={path:params.get("from")||null,hanja:params.get("hanja")||null,question:params.get("question")||null};const {error}=await s.rpc("create_feedback_ticket",{target_category:category,target_title:title,target_body:body,target_context:context});if(error){setMessage("문의를 보내지 못했어요.");setSaving(false);return;}setTitle("");setBody("");setMessage("운영자에게 문의를 보냈어요.");setSaving(false);await load();}
