@@ -1,3 +1,4 @@
+drop function if exists public.list_active_learners();
 create or replace function public.list_active_learners()
 returns table(user_id uuid,nickname text,target_provider text,target_grade text,provider_name text,grade_name text,avatar_type text,avatar_key text,avatar_path text)
 language sql stable security definer set search_path=public as $$
