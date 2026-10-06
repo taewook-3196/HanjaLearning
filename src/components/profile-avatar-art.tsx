@@ -1,19 +1,10 @@
 import type {CSSProperties} from "react";
 
 type Props={avatarKey?:string|null;size?:number;className?:string;style?:CSSProperties};
-const skin="#FFD2B6",ink="#2B2630",blush="#F49B9B";
-function Face({hair,child=false,bow=false}:{hair:string;child?:boolean;bow?:boolean}){
- return <><circle cx="64" cy={child?66:64} r={child?31:33} fill={skin}/><path d={child?"M33 59c2-25 16-35 33-35 20 0 31 13 30 37-8-10-17-16-30-16-13 0-23 5-33 14Z":"M30 58c2-28 17-40 35-40 23 0 35 15 33 42-9-12-19-18-33-18-14 0-24 6-35 16Z"} fill={hair}/><circle cx="51" cy="67" r="3.7" fill={ink}/><circle cx="77" cy="67" r="3.7" fill={ink}/><circle cx="44" cy="80" r="5" fill={blush} opacity=".5"/><circle cx="84" cy="80" r="5" fill={blush} opacity=".5"/><path d="M51 80c8 9 18 9 26 0" fill="none" stroke="#A34F45" strokeWidth="4" strokeLinecap="round"/>{bow?<><circle cx="91" cy="28" r="6" fill="#FF76A8"/><path d="M91 28c-11-10-17-2-11 5m11-5c11-10 17-2 11 5" fill="#FF9FC2"/></>:null}</>;
-}
-function Animal({kind}:{kind:string}){
- const cfg:Record<string,[string,string,string]>={dog:["#F0A23B","#FFF3D7","#7C4A22"],cat:["#8C8791","#F3ECE7","#514C57"],rabbit:["#FFF4F5","#FFD8E2","#B86E7D"],bear:["#A96A3D","#E9B98F","#5B3727"],penguin:["#24344D","#FFFFFF","#F3A52D"],elephant:["#8799C7","#B7C3E5","#5D6C98"],lion:["#D8872E","#F2B85D","#8C4D22"],fox:["#EF6B2E","#FFF0DF","#7E321E"]};const [main,light,dark]=cfg[kind]??cfg.dog;
- if(kind==="rabbit")return <><path d="M43 45C31 12 43 4 53 37M85 45C97 12 85 4 75 37" fill={main} stroke={dark} strokeWidth="4"/><circle cx="64" cy="68" r="36" fill={main}/><ellipse cx="64" cy="77" rx="23" ry="19" fill={light}/><circle cx="51" cy="65" r="4" fill={ink}/><circle cx="77" cy="65" r="4" fill={ink}/><circle cx="64" cy="74" r="4" fill="#D57C88"/><path d="M64 78c-5 7-10 7-14 3m14-3c5 7 10 7 14 3" fill="none" stroke={dark} strokeWidth="3" strokeLinecap="round"/></>;
- if(kind==="elephant")return <><circle cx="64" cy="65" r="35" fill={main}/><circle cx="31" cy="62" r="19" fill={light}/><circle cx="97" cy="62" r="19" fill={light}/><circle cx="51" cy="59" r="4" fill={ink}/><circle cx="77" cy="59" r="4" fill={ink}/><path d="M62 68c-2 14-1 27 8 30 8 2 12-5 7-10" fill="none" stroke={main} strokeWidth="13" strokeLinecap="round"/><path d="M48 79c8 7 16 7 24 0" fill="none" stroke={dark} strokeWidth="3" strokeLinecap="round"/></>;
- if(kind==="penguin")return <><ellipse cx="64" cy="66" rx="36" ry="40" fill={main}/><ellipse cx="64" cy="70" rx="25" ry="29" fill={light}/><circle cx="52" cy="61" r="4" fill={ink}/><circle cx="76" cy="61" r="4" fill={ink}/><path d="M58 69l6-5 6 5-6 5Z" fill={dark}/><path d="M51 82c8 6 18 6 26 0" fill="none" stroke="#D58B27" strokeWidth="3" strokeLinecap="round"/></>;
- const ears=kind==="dog"?"M37 48 25 25c20-5 28 8 28 20M91 48l12-23c-20-5-28 8-28 20":kind==="cat"||kind==="fox"?"M38 45 34 19 55 37M90 45l4-26-21 18":kind==="lion"?"": "M39 43C31 21 47 17 55 36M89 43c8-22-8-26-16-7";
- return <>{kind==="lion"?<circle cx="64" cy="64" r="45" fill={dark}/>:<path d={ears} fill={main} stroke={dark} strokeWidth="3" strokeLinejoin="round"/>}<circle cx="64" cy="66" r="35" fill={main}/><ellipse cx="64" cy="76" rx="24" ry="19" fill={light}/><circle cx="51" cy="62" r="4" fill={ink}/><circle cx="77" cy="62" r="4" fill={ink}/><path d="M59 72q5-5 10 0-5 7-10 0Z" fill={dark}/><path d="M64 78c-5 7-10 7-14 3m14-3c5 7 10 7 14 3" fill="none" stroke={dark} strokeWidth="3" strokeLinecap="round"/>{kind==="cat"?<><path d="M40 75 22 71m18 10-18 4m66-10 18-4m-18 10 18 4" stroke={dark} strokeWidth="2.5" strokeLinecap="round"/></>:null}</>;
-}
+const keys=["dad","mom","boy","girl","dog","cat","rabbit","bear","penguin","elephant","lion","fox"] as const;
 export function ProfileAvatarArt({avatarKey="boy",size=48,className,style}:Props){
- const key=avatarKey??"boy";const bg=key==="mom"||key==="girl"||key==="rabbit"?"#FFF0F5":key==="lion"||key==="fox"||key==="dog"?"#FFF3DD":key==="elephant"||key==="penguin"?"#EEF0FF":"#EAF6FF";
- return <svg className={className} style={style} width={size} height={size} viewBox="0 0 128 128" role="img" aria-label="프로필 캐릭터"><rect width="128" height="128" rx="34" fill={bg}/>{key==="dad"?<Face hair="#55301F"/>:key==="mom"?<Face hair="#6E3828"/>:key==="boy"?<Face hair="#43291F" child/>:key==="girl"?<Face hair="#623428" child bow/>:<Animal kind={key}/>}<path d="M103 19l3 7 7 3-7 3-3 7-3-7-7-3 7-3Z" fill="#FFD84A"/></svg>;
+ const raw=avatarKey??"boy";
+ const index=Math.max(0,keys.indexOf(raw as typeof keys[number]));
+ const position=keys.length===1?0:(index/(keys.length-1))*100;
+ return <span className={className} style={{...style,display:"inline-block",width:size,height:size,flex:"0 0 auto",borderRadius:"28%",backgroundImage:"url(/profile-avatars/avatar-sprite.webp)",backgroundRepeat:"no-repeat",backgroundSize:"1200% 100%",backgroundPosition:`${position}% 50%`}} role="img" aria-label="프로필 캐릭터"/>;
 }
