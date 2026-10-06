@@ -1,22 +1,13 @@
 "use client";
 import {useRef,useState} from "react";
 import CollectionDetail from "@/components/collection-detail";
-
 type Example={word:string;reading:string|null;meaning:string;child_explanation:string|null;chars:{character:string;grade:string|null;isCurrent:boolean;isRegistered:boolean}[]};
 type Row={id:number;character:string;reading:{reading:string;meaning:string|null}|null;progress:{mastery_score:number|null;study_count:number|null}|null;examples:Example[]};
-
+const INITIALS=["ㄱ","ㄴ","ㄷ","ㄹ","ㅁ","ㅂ","ㅅ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"],CHOSEONG=["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+function initialOf(s:string){const n=s.charCodeAt(0)-0xac00;if(n<0||n>11171)return "#";const x=CHOSEONG[Math.floor(n/588)];return x==="ㄲ"?"ㄱ":x==="ㄸ"?"ㄷ":x==="ㅃ"?"ㅂ":x==="ㅆ"?"ㅅ":x==="ㅉ"?"ㅈ":x}
 export default function CollectionGrid({rows,soundEnabled,speechVoice}:{rows:Row[];soundEnabled:boolean;speechVoice:string}){
- const [selected,setSelected]=useState<number|null>(null);
- const selectedTile=useRef<HTMLButtonElement|null>(null);
- function closeDetail(){
-  const tile=selectedTile.current;
-  setSelected(null);
-  requestAnimationFrame(()=>tile?.scrollIntoView({behavior:"smooth",block:"center"}));
- }
- return <section className="collection-grid">
-  {rows.map(x=>{const learned=(x.progress?.study_count??0)>0;const isSelected=selected===x.id;return <div className={"collection-cell"+(isSelected?" detail-open":"")} key={x.id}>
-   {learned?<button ref={isSelected?(el)=>{selectedTile.current=el}:undefined} type="button" className={"hanja-tile learned"+(isSelected?" selected":"")} onClick={(e)=>{selectedTile.current=e.currentTarget;setSelected(x.id)}} aria-pressed={isSelected}><strong>{x.character}</strong><span>{x.reading?.meaning} · {x.reading?.reading}</span><small>숙련도 {x.progress?.mastery_score??0}</small></button>:<article className="hanja-tile locked"><strong>{x.character}</strong><span>아직 안 배웠어요</span></article>}
-   {isSelected&&x.reading?<CollectionDetail id={x.id} character={x.character} reading={x.reading.reading} meaning={x.reading.meaning??""} mastery={x.progress?.mastery_score??0} examples={x.examples} soundEnabled={soundEnabled} speechVoice={speechVoice} onClose={closeDetail}/>:null}
-  </div>})}
- </section>;
+ const [selected,setSelected]=useState<number|null>(null);const selectedTile=useRef<HTMLButtonElement|null>(null);
+ function closeDetail(){const tile=selectedTile.current;setSelected(null);requestAnimationFrame(()=>tile?.scrollIntoView({behavior:"smooth",block:"center"}))}
+ const groups=INITIALS.map(initial=>({initial,rows:rows.filter(x=>initialOf(x.reading?.reading??"")===initial)})).filter(g=>g.rows.length);
+ return <section className="collection-browser"><nav className="collection-initial-nav" aria-label="초성 빠른 이동">{groups.map(g=><a key={g.initial} href={"#collection-"+g.initial}>{g.initial}</a>)}</nav>{groups.map(g=><section className="collection-group" id={"collection-"+g.initial} key={g.initial}><h2 className="collection-group-title">{g.initial}</h2><div className="collection-grid">{g.rows.map(x=>{const learned=(x.progress?.study_count??0)>0,isSelected=selected===x.id;return <div className={"collection-cell"+(isSelected?" detail-open":"")} key={x.id}>{learned?<button ref={isSelected?(el)=>{selectedTile.current=el}:undefined} type="button" className={"hanja-tile learned"+(isSelected?" selected":"")} onClick={(e)=>{selectedTile.current=e.currentTarget;setSelected(x.id)}} aria-pressed={isSelected}><strong>{x.character}</strong><span>{x.reading?.meaning} · {x.reading?.reading}</span><small>숙련도 {x.progress?.mastery_score??0}</small></button>:<article className="hanja-tile locked"><strong>{x.character}</strong><span>아직 안 배웠어요</span></article>}{isSelected&&x.reading?<CollectionDetail id={x.id} character={x.character} reading={x.reading.reading} meaning={x.reading.meaning??""} mastery={x.progress?.mastery_score??0} examples={x.examples} soundEnabled={soundEnabled} speechVoice={speechVoice} onClose={closeDetail}/>:null}</div>})}</div></section>)}</section>;
 }
