@@ -4,4 +4,3 @@ export const PROFILE_AVATARS=[
  {key:"penguin",src:"/profile-avatars/penguin.svg",label:"펭귄"},{key:"elephant",src:"/profile-avatars/elephant.svg",label:"코끼리"},{key:"lion",src:"/profile-avatars/lion.svg",label:"사자"},{key:"fox",src:"/profile-avatars/fox.svg",label:"여우"}
 ] as const;
 export function avatarSrc(key:string|null|undefined){return PROFILE_AVATARS.find(x=>x.key===key)?.src??"/profile-avatars/boy.svg";}
-export function avatarEmoji(key:string|null|undefined){return avatarSrc(key);}
