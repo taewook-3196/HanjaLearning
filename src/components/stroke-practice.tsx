@@ -20,7 +20,7 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
 
  useEffect(()=>{
   let active=true;
-  if(!supportsStrokePractice(character)){onAvailabilityChange?.(false);setMode("ERROR");setMessage("획순 자료가 없어도 글자를 보며 연습할 수 있어요.");return;}
+  if(!supportsStrokePractice(character)){onAvailabilityChange?.(false);return;}
   if(!target.current)return;
   target.current.innerHTML="";
   writer.current=HanziWriter.create(target.current,character,{
