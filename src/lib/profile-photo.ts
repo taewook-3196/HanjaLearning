@@ -15,4 +15,6 @@ export async function cropSquareImage(file:File,options:CropOptions={}):Promise<
   return await new Promise<Blob>((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("이미지를 저장할 수 없습니다.")),"image/webp",0.86));
  }finally{URL.revokeObjectURL(url);}
 }
-export async function profileAvatarUrl(supabase:{storage:{from:(bucket:string)=>{createSignedUrl:(path:string,expiresIn:number)=>Promise<{data:{signedUrl?:string|null}|null;error:unknown}>}}},path:string|null|undefined){\n if(!path)return null;const {data,error}=await supabase.storage.from("profile-avatars").createSignedUrl(path,3600);return error?null:data?.signedUrl??null;\n}
+export async function profileAvatarUrl(supabase:{storage:{from:(bucket:string)=>{createSignedUrl:(path:string,expiresIn:number)=>Promise<{data:{signedUrl?:string|null}|null;error:unknown}>}}},path:string|null|undefined){
+ if(!path)return null;const {data,error}=await supabase.storage.from("profile-avatars").createSignedUrl(path,3600);return error?null:data?.signedUrl??null;
+}
