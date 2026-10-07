@@ -11,11 +11,14 @@ const wordContexts=Array.from({length:30},(_,i)=>({id:i+1,word_id:i+1,sentence:`
 const wordStructures=Array.from({length:8},(_,i)=>({word_id:i+1,structure_type:["SUBJECT_PREDICATE","VERB_OBJECT","MODIFIER_HEAD","PARALLEL"][i%4]}));
 const commonCharacterSets=Array.from({length:4},(_,i)=>({id:i+1,common_hanja_id:i+1,word_ids:[i+1,i+11],word_hanja_ids:{[i+1]:[i+1],[i+11]:[i+1]}}));
 const idioms=Array.from({length:6},(_,i)=>({id:i+1,idiom:`成語${i+1}`,reading:`성어${i+1}`,meaning:`성어뜻${i+1}`,child_explanation:null}));
-const cultureItems=Array.from({length:4},(_,i)=>({id:i+1,prompt_summary:`문화 문제 ${i+1}`,choice_a:`A${i}`,choice_b:`B${i}`,choice_c:`C${i}`,choice_d:`D${i}`,correct_choice:1}));
-const specialReadings=Array.from({length:4},(_,i)=>({id:i+1,hanja_id:i+1,reading:`특음${i+1}`,meaning:`특뜻${i+1}`,usage_note:"특별한 읽기",choice_a:`특음${i+1}`,choice_b:`오답A${i}`,choice_c:`오답B${i}`,choice_d:`오답C${i}`,correct_choice:1}));
-const base={pool,words,relations,wordRelations,metadata,wordContexts,wordStructures,commonCharacterSets,idioms,cultureItems,usageItems:[],specialReadings,imageItems:[],characterById};
+const cultureItems=Array.from({length:12},(_,i)=>({id:i+1,prompt_summary:`문화 문제 ${i+1}`,choice_a:`A${i}`,choice_b:`B${i}`,choice_c:`C${i}`,choice_d:`D${i}`,correct_choice:1}));
+const specialReadings=Array.from({length:12},(_,i)=>({id:i+1,hanja_id:i+1,reading:`특음${i+1}`,meaning:`특뜻${i+1}`,usage_note:"특별한 읽기",choice_a:`특음${i+1}`,choice_b:`오답A${i}`,choice_c:`오답B${i}`,choice_d:`오답C${i}`,correct_choice:1}));
+const usageItems=Array.from({length:12},(_,i)=>({id:i+1,hanja_id:i+1,prompt:`쓰임 문제 ${i+1}`,choice_a:`정답${i}`,choice_b:`오답A${i}`,choice_c:`오답B${i}`,choice_d:`오답C${i}`,correct_choice:1}));
+const imageItems=Array.from({length:6},(_,i)=>({id:i+1,hanja_id:i+1,asset_path:`/exam-images/test-${i+1}.svg`,alt_text:`시험 그림 ${i+1}`}));
+const base={pool,words,relations,wordRelations,metadata,wordContexts,wordStructures,commonCharacterSets,idioms,cultureItems,usageItems,specialReadings,imageItems,characterById};
 
-for(const gradeCode of ["PRE3","3"] as const){
+const gradeCodes=Object.keys(DAEHAN_FIELD_BLUEPRINTS);
+for(const gradeCode of gradeCodes){
  const blueprint=DAEHAN_FIELD_BLUEPRINTS[gradeCode];
  for(let run=0;run<200;run++){
   const qs=generateExamQuestions({...base,questionCount:blueprint.questionCount,blueprint});
@@ -25,4 +28,4 @@ for(const gradeCode of ["PRE3","3"] as const){
   if(qs.some(q=>q.choices.length!==4||new Set(q.choices).size!==4||!q.choices.includes(q.correct)))throw new Error(`${gradeCode} run ${run+1}: invalid choices`);
  }
 }
-console.log("Exam generator invariant checks passed for PRE3 and 3 across 200 runs each.");
+console.log(`Exam generator invariant checks passed for ${gradeCodes.join(", ")} across 200 runs each.`);
