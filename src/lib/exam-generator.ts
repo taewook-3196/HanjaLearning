@@ -1,4 +1,4 @@
-import { VERIFIED_VARIABLE_PATTERNS, type ExamBlueprint, type ExamQuestionType } from "@/lib/exam-blueprints";
+import { VERIFIED_VARIABLE_PATTERNS, type ExamBlueprint, type ExamQuestionType } from "./exam-blueprints.ts";
 
 export type ExampleWord={word:string;reading:string|null;meaning:string;child_explanation:string|null};
 export type ExamQuestion={id:string;type?:string;stem:string;prompt:string;correct:string;choices:string[];examples:ExampleWord[];image?:{src:string;alt:string}};
