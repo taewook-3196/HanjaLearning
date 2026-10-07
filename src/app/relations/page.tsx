@@ -11,5 +11,5 @@ export default async function WordRelationsPage(){
   const from=wm.get(x.from_word_id),to=wm.get(x.to_word_id);
   return from&&to?[{id:x.id,type:x.relation_type,from,to}]:[];
  });
- return <main className="app-shell"><div className="page-top-actions"><Link className="settings-link" href="/">← 홈</Link></div><section className="hero-card"><p className="eyebrow">자유 학습</p><h1>유의·반의어</h1><p className="subtitle">서로 비슷하거나 반대되는 한자어를 짝으로 익혀 보세요.</p></section><WordRelationStudy rows={rows}/></main>;
+ return <main className="app-shell expanded-study-page"><div className="page-top-actions"><Link className="settings-link" href="/">← 홈</Link></div><header className="expanded-study-compact-heading"><span>자유 학습</span><h1>유의·반의어</h1></header><WordRelationStudy rows={rows}/></main>;
 }

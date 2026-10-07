@@ -463,3 +463,13 @@ button {
 .card-mode-selector{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;width:100%}
 .card-mode-selector button{width:100%;min-width:0;min-height:48px;height:48px;margin:0;padding:8px 6px;transform:none;transition:background-color .15s,color .15s,box-shadow .15s}
 .card-mode-selector .primary-button{box-shadow:0 2px 7px rgba(22,136,232,.16)}
+
+/* Expanded free-study modes use compact headings and spacious study surfaces. */
+.expanded-study-compact-heading{display:flex;align-items:baseline;gap:10px;margin:4px 2px 12px}
+.expanded-study-compact-heading span{color:var(--accent);font-size:13px;font-weight:800}
+.expanded-study-compact-heading h1{margin:0;font-size:22px;line-height:1.3}
+.expanded-study-page .page-top-actions{margin-bottom:4px}
+.expanded-study-page .free-study-reveal{min-height:315px;padding:28px 16px;gap:18px}
+.expanded-study-page .free-study-reveal>strong{font-size:clamp(38px,11vw,64px);line-height:1.25}
+.expanded-study-page .free-study-reveal .free-study-detail{font-size:clamp(16px,4vw,20px);line-height:1.5}
+@media(max-width:480px){.expanded-study-page .study-card{padding:16px}}
