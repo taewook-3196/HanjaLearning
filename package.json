@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test:exam": "node --experimental-strip-types --experimental-specifier-resolution=node scripts/test-exam-blueprints.ts"
+    "test:exam": "node --experimental-strip-types scripts/test-exam-blueprints.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
