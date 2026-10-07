@@ -38,6 +38,35 @@ export function examReadinessSummary(input:ExamReadinessInput){
 }
 
 
+export type ExamReadinessIssue={type:string;required:number;available:number};
+
+export function fieldExamReadinessIssues(input:ExamReadinessInput,blueprint:ExamBlueprint):ExamReadinessIssue[]{
+ const summary=examReadinessSummary(input);
+ const required=new Map<string,number>();
+ const add=(type:string,count:number)=>required.set(type,(required.get(type)??0)+count);
+ for(const item of blueprint.items){
+  if(item.type==="VARIABLE_VERIFIED")continue;
+  add(item.type,item.count);
+ }
+ const variableCount=blueprint.items.filter(x=>x.type==="VARIABLE_VERIFIED").reduce((n,x)=>n+x.count,0);
+ if(blueprint.gradeCode==="6"&&variableCount)add("CHARACTER_USAGE",1);
+ if(blueprint.gradeCode==="PRE5"&&variableCount){add("CHARACTER_USAGE",1);add("IDIOM",1);}
+ if(blueprint.gradeCode==="PRE3"&&variableCount)add("CHARACTER_PRINCIPLE",1);
+ const available:Record<string,number>={
+  HANJA_TO_READING_MEANING:summary.HANJA_READING,
+  READING_MEANING_TO_HANJA:summary.HANJA_READING,
+  WORD_READING:summary.WORDS,WORD_MEANING:summary.WORDS,WORD_TO_HANJA:summary.WORDS,
+  CHAR_SYNONYM_ANTONYM:summary.RELATIONS,WORD_SYNONYM_ANTONYM:summary.WORD_RELATIONS,
+  CHARACTER_PRINCIPLE:summary.CHARACTER_PRINCIPLE,DICTIONARY_LOOKUP:summary.DICTIONARY_LOOKUP,
+  CONTEXT_READING:summary.WORD_CONTEXTS,CONTEXT_TO_HANJA:summary.WORD_CONTEXTS,
+  WORD_STRUCTURE:summary.WORD_STRUCTURES,COMMON_CHARACTER:summary.COMMON_CHARACTER_SETS,
+  IDIOM:summary.IDIOMS,CULTURE_ETIQUETTE:summary.CULTURE_CONTENT,
+  CHARACTER_USAGE:summary.USAGE_ITEMS,SPECIAL_READING:summary.SPECIAL_READINGS,
+  IMAGE_RECOGNITION:summary.ORIGINAL_IMAGES
+ };
+ return [...required].flatMap(([type,count])=>(available[type]??0)<count?[{type,required:count,available:available[type]??0}]:[]);
+}
+
 export function validateExamQuestions(questions:ExamQuestion[],expectedCount:number,blueprint?:ExamBlueprint){
  const errors:string[]=[];
  if(questions.length!==expectedCount)errors.push(`expected ${expectedCount} questions, got ${questions.length}`);
