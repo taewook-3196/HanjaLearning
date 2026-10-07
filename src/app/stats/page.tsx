@@ -3,8 +3,13 @@ import { requireActiveUser } from "@/lib/auth/require-active-user";
 import { GrowthStickerArt } from "@/components/growth-sticker-art";
 import { celebrateGrowthSticker, celebrateRepeatableSticker } from "./actions";
 import { levelProgress as getLevelProgress, xpForLevel } from "@/lib/xp-level";
+import { BottomNav } from "@/components/bottom-nav";
+import { ProfileAvatarArt } from "@/components/profile-avatar-art";
+import { profileAvatarUrl } from "@/lib/profile-photo";
 export default async function StatsPage(){
  const {supabase:s,user}=await requireActiveUser();
+ const {data:myProfile}=await s.from("profiles").select("nickname,target_grade,avatar_type,avatar_key,avatar_path").eq("user_id",user.id).maybeSingle();
+ const profilePhoto=myProfile?.avatar_type==="PHOTO"&&myProfile.avatar_path?await profileAvatarUrl(s,myProfile.avatar_path):null;
  const now=new Date(); const since=new Date(now); since.setUTCDate(since.getUTCDate()-7); const sinceIso=since.toISOString();
  const dayKey=(value:Date|string)=>new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(value));
  const todayKey=dayKey(now);
