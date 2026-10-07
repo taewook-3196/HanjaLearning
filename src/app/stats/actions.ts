@@ -9,3 +9,12 @@ export async function celebrateGrowthSticker(formData:FormData){
  await supabase.from("user_growth_stickers").update({celebrated_at:new Date().toISOString()}).eq("user_id",user.id).eq("sticker_key",key).is("celebrated_at",null);
  redirect("/stats");
 }
+
+
+export async function celebrateRepeatableSticker(formData:FormData){
+ const id=Number(formData.get("stickerEventId"));
+ if(!Number.isSafeInteger(id)||id<=0) redirect("/stats");
+ const {supabase,user}=await requireActiveUser();
+ await supabase.from("user_repeatable_sticker_events").update({celebrated_at:new Date().toISOString()}).eq("id",id).eq("user_id",user.id).is("celebrated_at",null);
+ redirect("/stats");
+}
