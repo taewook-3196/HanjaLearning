@@ -42,8 +42,8 @@ export default async function Home() {
   for(let i=0;i<60;i++){if(!activeDays.has(dayKey(cursor)))break;streak++;cursor.setUTCDate(cursor.getUTCDate()-1);}
 
   if (gradeIds.length) {
-    const { data: mappings } = await supabase.from("grade_hanja").select("hanja_id").in("grade_id", gradeIds);
-    const ids = [...new Set((mappings ?? []).map((m) => m.hanja_id))];
+    const scopeRows = (await Promise.all(gradeIds.map((gradeId) => supabase.rpc("list_grade_hanja_ids", { target_grade_id: gradeId })))).flatMap((result) => result.data ?? []);
+    const ids = [...new Set(scopeRows.map((m) => m.hanja_id))];
     targetCount = ids.length;
     if (ids.length) {
       const now = new Date().toISOString();
