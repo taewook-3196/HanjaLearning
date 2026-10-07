@@ -51,6 +51,8 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
   return <section className={`stroke-practice${compact?" compact":""}`}>{!compact?<h2>쓰기 연습</h2>:null}<p>이 글자는 획순 자료가 아직 없어요. 희미한 글자를 보며 자유롭게 따라 써 보세요.</p><FreeWritingPad character={character} compact={compact} onComplete={onPracticeComplete}/>{details}</section>;
  }
 
+ if(mode==="ERROR")return <section className={`stroke-practice${compact?" compact":""}`}>{!compact?<h2>쓰기 연습</h2>:null}<p>{message}</p><FreeWritingPad character={character} compact={compact} onComplete={onPracticeComplete}/>{details}</section>;
+
  function animate(){
   if(!writer.current||mode==="LOADING"||mode==="ERROR")return;
   writer.current.cancelQuiz();setMode("WATCH");setMessage("획순을 천천히 살펴보세요.");writer.current.animateCharacter();
