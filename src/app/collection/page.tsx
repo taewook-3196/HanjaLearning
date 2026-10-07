@@ -11,7 +11,7 @@ export default async function CollectionPage(){
  ]);
  let gq=s.from("exam_grades").select("id,name").eq("code",p?.target_grade??"5");if(st?.exam_provider_id)gq=gq.eq("provider_id",st.exam_provider_id);
  const {data:grades}=await gq;if(!grades?.length)return <main className="app-shell"><section className="study-card"><h1>한자 도감</h1><p>목표 급수를 먼저 설정해 주세요.</p><Link href="/settings">설정하기</Link></section></main>;
- const gradeIds=grades.map(g=>g.id);const {data:maps}=await s.from("grade_hanja").select("hanja_id").in("grade_id",gradeIds);const ids=[...new Set((maps??[]).map(x=>x.hanja_id))];
+ const gradeIds=grades.map(g=>g.id);const scopeRows=(await Promise.all(gradeIds.map(gradeId=>s.rpc("list_grade_hanja_ids",{target_grade_id:gradeId})))).flatMap(result=>result.data??[]);const ids=[...new Set(scopeRows.map(x=>x.hanja_id))];
  const [{data:h},{data:r},{data:prog},{data:wordMaps}]=await Promise.all([
   s.from("hanja").select("id,character").in("id",ids),
   s.from("hanja_readings").select("hanja_id,reading,meaning").in("hanja_id",ids).eq("is_primary",true),
