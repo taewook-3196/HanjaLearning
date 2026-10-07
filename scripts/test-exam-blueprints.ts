@@ -1,4 +1,4 @@
-import { DAEHAN_FIELD_BLUEPRINTS, VERIFIED_VARIABLE_PATTERNS, blueprintCount, validateBlueprints } from "../src/lib/exam-blueprints";
+import { DAEHAN_FIELD_BLUEPRINTS, VERIFIED_VARIABLE_PATTERNS, blueprintCount, validateBlueprints } from "../src/lib/exam-blueprints.ts";
 
 const errors=validateBlueprints(DAEHAN_FIELD_BLUEPRINTS);
 if(errors.length) throw new Error(errors.join("\n"));
