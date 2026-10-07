@@ -1,0 +1,1 @@
+revoke all on function public.mark_feedback_ticket_read(bigint) from public,anon; grant execute on function public.mark_feedback_ticket_read(bigint) to authenticated; revoke all on function public.feedback_unread_reply_count() from public,anon; grant execute on function public.feedback_unread_reply_count() to authenticated;
