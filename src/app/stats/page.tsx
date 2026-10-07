@@ -7,27 +7,29 @@ export default async function StatsPage(){
  const now=new Date(); const since=new Date(now); since.setUTCDate(since.getUTCDate()-7); const sinceIso=since.toISOString();
  const dayKey=(value:Date|string)=>new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(value));
  const todayKey=dayKey(now);
- const [{data:history},{data:progress},{data:sessions}]=await Promise.all([
+ const streakSince=new Date(now); streakSince.setUTCDate(streakSince.getUTCDate()-120); const streakSinceIso=streakSince.toISOString();
+ const [{data:history},{data:progress},{data:sessions},{data:streakHistory}]=await Promise.all([
   s.from("review_history").select("hanja_id,activity_type,question_type,result,created_at").eq("user_id",user.id).gte("created_at",sinceIso).order("created_at",{ascending:false}),
   s.from("user_hanja_progress").select("mastery_score,writing_score,study_count,wrong_streak").eq("user_id",user.id).gt("study_count",0),
-  s.from("study_sessions").select("planned_new,planned_review,planned_wrong,actual_new,actual_review,completed_at").eq("user_id",user.id).gte("started_at",sinceIso)
+  s.from("study_sessions").select("planned_new,planned_review,planned_wrong,actual_new,actual_review,completed_at").eq("user_id",user.id).gte("started_at",sinceIso),
+  s.from("review_history").select("created_at").eq("user_id",user.id).gte("created_at",streakSinceIso)
  ]);
  const attempts=history??[];const recognitionAttempts=attempts.filter(x=>x.activity_type!=="WRITING");const writingAttempts=attempts.filter(x=>x.activity_type==="WRITING"||x.question_type==="STROKE_ORDER");const correct=recognitionAttempts.filter(x=>x.result==="CORRECT"||x.result==="KNOWN").length;const accuracy=recognitionAttempts.length?Math.round(correct/recognitionAttempts.length*100):0;
  const learned=(progress??[]).length;const mastered=(progress??[]).filter(x=>(x.mastery_score??0)>=75).length;const difficult=(progress??[]).filter(x=>(x.wrong_streak??0)>0).length;const written=(progress??[]).filter(x=>(x.writing_score??0)>0);const writtenCount=written.length;const avgWriting=writtenCount?Math.round(written.reduce((sum,x)=>sum+(x.writing_score??0),0)/writtenCount):0;const weeklyWritten=new Set(writingAttempts.map(x=>x.hanja_id)).size;
  const days=new Set(attempts.map(x=>dayKey(x.created_at))).size;
  const todayAttempts=attempts.filter(x=>dayKey(x.created_at)===todayKey&&x.activity_type!=="WRITING");
  const todayAnswered=todayAttempts.filter(x=>["CORRECT","KNOWN","WRONG","UNKNOWN"].includes(x.result));
- const todayPerfect=todayAnswered.length>0&&todayAnswered.every(x=>x.result==="CORRECT"||x.result==="KNOWN");
+ const todayPerfect=todayAnswered.length>=5&&todayAnswered.every(x=>x.result==="CORRECT"||x.result==="KNOWN");
  const todayReviewAttempts=todayAttempts.filter(x=>x.activity_type==="REVIEW");
- const todayReviewPerfect=todayReviewAttempts.length>0&&todayReviewAttempts.every(x=>x.result==="CORRECT"||x.result==="KNOWN");
+ const todayReviewPerfect=todayReviewAttempts.length>=3&&todayReviewAttempts.every(x=>x.result==="CORRECT"||x.result==="KNOWN");
  const todaySessions=(sessions??[]).filter(x=>x.completed_at&&dayKey(x.completed_at)===todayKey);
- const todayPlanComplete=todaySessions.some(x=>(x.actual_new??0)>=(x.planned_new??0)&&(x.actual_review??0)>=(x.planned_review??0)&&((x.planned_new??0)+(x.planned_review??0)+(x.planned_wrong??0)>0));
+ const plannedNew=todaySessions.reduce((n,x)=>n+(x.planned_new??0),0); const plannedReview=todaySessions.reduce((n,x)=>n+(x.planned_review??0),0); const actualNew=todaySessions.reduce((n,x)=>n+(x.actual_new??0),0); const actualReview=todaySessions.reduce((n,x)=>n+(x.actual_review??0),0); const todayPlanComplete=(plannedNew+plannedReview)>0&&actualNew>=plannedNew&&actualReview>=plannedReview;
  if(todayPerfect) await s.from("user_repeatable_sticker_events").upsert({user_id:user.id,sticker_key:"daily_perfect",earned_on:todayKey},{onConflict:"user_id,sticker_key,earned_on",ignoreDuplicates:true});
  if(todayReviewPerfect) await s.from("user_repeatable_sticker_events").upsert({user_id:user.id,sticker_key:"daily_review",earned_on:todayKey},{onConflict:"user_id,sticker_key,earned_on",ignoreDuplicates:true});
  if(todayPlanComplete) await s.from("user_repeatable_sticker_events").upsert({user_id:user.id,sticker_key:"daily_plan",earned_on:todayKey},{onConflict:"user_id,sticker_key,earned_on",ignoreDuplicates:true});
- const activityDays=[...new Set(attempts.map(x=>dayKey(x.created_at)))].sort().reverse();
+ const activityDays=[...new Set((streakHistory??[]).map(x=>dayKey(x.created_at)))].sort().reverse();
  let streak=0; const streakCursor=new Date(now); if(!activityDays.includes(todayKey))streakCursor.setUTCDate(streakCursor.getUTCDate()-1);
- for(let i=0;i<60;i++){const key=dayKey(streakCursor);if(!activityDays.includes(key))break;streak++;streakCursor.setUTCDate(streakCursor.getUTCDate()-1);}
+ for(let i=0;i<120;i++){const key=dayKey(streakCursor);if(!activityDays.includes(key))break;streak++;streakCursor.setUTCDate(streakCursor.getUTCDate()-1);}
  const milestoneXp=streak===100?200:streak===60?140:streak===30?100:streak===14?60:streak===7?35:0;
  const xpEvents=[
   ...(todayAnswered.length>0?[{user_id:user.id,event_key:"daily_activity",event_date:todayKey,xp:10,reason:"오늘 학습"}]:[]),
