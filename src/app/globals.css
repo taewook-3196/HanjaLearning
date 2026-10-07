@@ -142,6 +142,15 @@ button {
   padding: 24px 18px;
 }
 
+.settings-shell {
+  align-content: start;
+  padding-bottom: calc(140px + env(safe-area-inset-bottom));
+}
+
+.settings-shell .auth-card {
+  margin: 0 auto;
+}
+
 .auth-card {
   width: min(100%, 460px);
   padding: 28px;
