@@ -457,3 +457,9 @@ button {
 .bottom-nav{bottom:calc(8px + env(safe-area-inset-bottom));padding:5px 7px;min-height:0;height:auto;align-items:center;grid-auto-rows:44px}
 .bottom-nav a,.bottom-nav span{box-sizing:border-box;min-height:44px;height:44px;padding:0 2px;align-content:center}
 .bottom-nav .nav-badge{height:18px;min-height:18px}
+
+/* Selection changes color and subtle shadow, never button dimensions. */
+.answer-actions button.answer-selected{transform:none;outline:0;box-shadow:0 0 0 2px currentColor,0 3px 9px rgba(15,23,42,.10)}
+.card-mode-selector{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;width:100%}
+.card-mode-selector button{width:100%;min-width:0;min-height:48px;height:48px;margin:0;padding:8px 6px;transform:none;transition:background-color .15s,color .15s,box-shadow .15s}
+.card-mode-selector .primary-button{box-shadow:0 2px 7px rgba(22,136,232,.16)}
