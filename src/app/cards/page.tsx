@@ -21,6 +21,6 @@ export default async function HanjaCardsPage(){
  ]);
  const rm=new Map((r??[]).map(x=>[x.hanja_id,x]));
  const learned=new Set((prog??[]).filter(x=>(x.study_count??0)>0).map(x=>x.hanja_id));
- const cards=(h??[]).map(x=>({id:x.id,character:x.character,reading:rm.get(x.id)?.reading??"",meaning:rm.get(x.id)?.meaning??"",learned:learned.has(x.id)})).sort(()=>Math.random()-.5);
+ const cards=(h??[]).map(x=>({id:x.id,character:x.character,reading:rm.get(x.id)?.reading??"",meaning:rm.get(x.id)?.meaning??"",learned:learned.has(x.id)}));
  return <main className="app-shell"><div className="page-top-actions"><Link className="settings-link" href="/">← 홈</Link></div><section className="hero-card"><p className="eyebrow">{p?.target_grade??"목표 급수"}</p><h1>한자 카드</h1><p className="subtitle">한자를 보고 뜻과 소리를 떠올린 뒤 눌러서 확인해 보세요.</p></section><HanjaCardStudy cards={cards}/></main>;
 }
