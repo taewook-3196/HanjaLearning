@@ -4,6 +4,7 @@ import { requireActiveUser } from "@/lib/auth/require-active-user";
 import { buildStudyPlan } from "@/lib/study-plan";
 import { profileAvatarUrl } from "@/lib/profile-photo";
 import { ProfileAvatarArt } from "@/components/profile-avatar-art";
+import { levelProgress as getLevelProgress } from "@/lib/xp-level";
 
 export default async function Home() {
   const { supabase, user } = await requireActiveUser();
@@ -17,9 +18,7 @@ export default async function Home() {
   const friendAlertCount=Number(friendUnread??0)+(friendRequests??0);
   const {data:xpRows}=await supabase.from("user_xp_events").select("xp").eq("user_id",user.id);
   const totalXp=(xpRows??[]).reduce((sum,x)=>sum+(x.xp??0),0);
-  const level=Math.floor(Math.sqrt(totalXp/50))+1;
-  const levelStart=50*(level-1)*(level-1),levelEnd=50*level*level;
-  const levelProgress=Math.max(0,Math.min(100,Math.round(((totalXp-levelStart)/(levelEnd-levelStart))*100)));
+  const {level,progress:levelProgress}=getLevelProgress(totalXp);
   const growthTitle=level>=15?"한자 달인":level>=10?"한자 탐험대장":level>=7?"꾸준한 탐험가":level>=4?"성장하는 학습가":"새싹 학습가";
   if (!profile?.target_provider || !profile?.target_grade) redirect("/onboarding");
   const avatarUrl=profile.avatar_type==="PHOTO"&&profile.avatar_path?await profileAvatarUrl(supabase,profile.avatar_path):null;
