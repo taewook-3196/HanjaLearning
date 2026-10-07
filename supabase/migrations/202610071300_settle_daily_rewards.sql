@@ -64,8 +64,8 @@ begin
    insert into public.user_xp_events(user_id,event_key,event_date,xp,reason) values(uid,'daily_plan_complete',today_date,25,'오늘 계획 완료') on conflict do nothing;
  end if;
 
- select array_agg(x.day order by x.day desc) into active_days from (
-   select distinct (created_at at time zone 'Asia/Seoul')::date day
+ select array_agg(x.activity_date order by x.activity_date desc) into active_days from (
+   select distinct (created_at at time zone 'Asia/Seoul')::date as activity_date
    from public.review_history where user_id=uid and created_at>=day_start-interval '120 days'
  ) x;
  d:=today_date;
