@@ -402,3 +402,9 @@ button {
 /* Friend activity is important enough to surface without opening Settings first. */
 .friend-home-alert{display:block;margin:0 0 12px;padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:#fff;font-weight:800;text-decoration:none;color:var(--accent)}
 .bottom-nav .nav-has-alert{position:relative}.bottom-nav .nav-badge{position:absolute;top:-9px;right:-12px;display:grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--accent);color:#fff;font-size:10px;line-height:1}
+
+
+/* One-time growth sticker celebration */
+.sticker-celebration{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:20px;background:rgba(15,23,42,.38);backdrop-filter:blur(5px)}
+.sticker-celebration-card{width:min(100%,340px);padding:26px 22px 22px;border:1px solid #dcecff;border-radius:28px;background:#fff;text-align:center;box-shadow:0 24px 70px rgba(15,23,42,.2)}
+.sticker-celebration-card h2{margin:8px 0 5px;font-size:25px}.sticker-celebration-card>p:not(.eyebrow){margin:0 0 18px;color:var(--muted);font-size:14px;line-height:1.6}.sticker-celebration-art{display:grid;width:104px;height:104px;margin:12px auto 8px;place-items:center;border-radius:30px;background:linear-gradient(145deg,#fff8df,#eef8ff);box-shadow:0 10px 28px rgba(15,23,42,.1)}.sticker-celebration-art svg{width:92px;height:92px}.sticker-celebration-card form,.sticker-celebration-card button{width:100%;margin:0}
