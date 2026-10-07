@@ -413,3 +413,9 @@ button {
 .bottom-nav a,.bottom-nav span{position:relative;display:grid;min-width:0;min-height:38px;place-items:center;line-height:1.15;white-space:nowrap}
 .nav-badge{position:absolute;top:0;right:4px;display:grid;min-width:17px;height:17px;padding:0 4px;place-items:center;border-radius:999px;background:#e5484d;color:#fff;font-size:10px;line-height:1}
 @media(max-width:360px){.bottom-nav{width:calc(100% - 16px);padding-left:5px;padding-right:5px}.bottom-nav a,.bottom-nav span{font-size:11px}.nav-badge{right:1px}}
+
+.gift-reward-card{border-color:#f1dfae;background:linear-gradient(145deg,#fffdf7,#fff)}
+.gift-reward-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}
+.gift-reward-summary span{min-width:0;padding:10px 6px;border-radius:12px;background:#fff7df;color:var(--muted);font-size:11px;text-align:center}
+.gift-reward-summary strong{display:block;margin-top:3px;color:var(--text);font-size:15px}
+@media(max-width:360px){.gift-reward-card .section-heading{display:block}.gift-reward-card .section-heading>span{display:block;margin-top:4px}.gift-reward-summary{gap:5px}.gift-reward-summary span{padding:9px 3px;font-size:10px}}
