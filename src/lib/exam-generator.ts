@@ -48,9 +48,12 @@ export function validateExamQuestions(questions:ExamQuestion[],expectedCount:num
   }
  }
  const ids=new Set<string>();
+ const fingerprints=new Set<string>();
  questions.forEach((q,index)=>{
   const label=`question ${index+1}`;
   if(ids.has(q.id))errors.push(`${label}: duplicate id ${q.id}`); else ids.add(q.id);
+  const fingerprint=[q.type??"",q.stem.trim(),q.prompt.trim(),q.correct.trim()].join("|");
+  if(fingerprints.has(fingerprint))errors.push(`${label}: duplicate question content`); else fingerprints.add(fingerprint);
   if(!q.stem.trim())errors.push(`${label}: empty stem`);
   if(!q.prompt.trim())errors.push(`${label}: empty prompt`);if(q.image&&(!q.image.src.startsWith("/exam-images/")||q.image.src.includes("..")||q.image.src.includes("?")||q.image.src.includes("#")||q.image.src.includes("\\")||!q.image.alt.trim()))errors.push(`${label}: invalid image metadata`);
   if(q.choices.length!==4)errors.push(`${label}: expected 4 choices, got ${q.choices.length}`);
