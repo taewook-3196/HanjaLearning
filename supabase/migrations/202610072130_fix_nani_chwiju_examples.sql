@@ -12,11 +12,10 @@ begin
   where id=1169;
 
   -- Preserve the existing mappings but fix their positions after reversing 難易.
-  update public.hanja_word_map set position=0 where word_id=1169;
-  update public.hanja_word_map m set position=1
-  from public.hanja h where m.word_id=1169 and m.hanja_id=h.id and h.character='難';
-  update public.hanja_word_map m set position=2
-  from public.hanja h where m.word_id=1169 and m.hanja_id=h.id and h.character='易';
+  update public.hanja_word_map m
+  set position = case h.character when '難' then 1 when '易' then 2 else m.position end
+  from public.hanja h
+  where m.word_id=1169 and m.hanja_id=h.id and h.character in ('難','易');
 
   if not exists (select 1 from public.hanja_words where id=1210 and word='취풍' and hanja_form='吹風' and content_status='PUBLISHED') then
     raise exception 'Expected 吹風 example not found';
