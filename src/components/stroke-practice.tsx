@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useRef,useState,type ReactNode} from "react";
+import {useEffect,useRef,useState,type PointerEvent as ReactPointerEvent,type ReactNode} from "react";
 import HanziWriter from "hanzi-writer";
 
 type Props={character:string;onPracticeComplete?:()=>void;onAvailabilityChange?:(available:boolean)=>void;compact?:boolean;details?:ReactNode;controlsEnabled?:boolean};
@@ -10,6 +10,17 @@ export function isCompatibilityIdeograph(character:string){
  return cp!==undefined&&((cp>=0xf900&&cp<=0xfaff)||(cp>=0x2f800&&cp<=0x2fa1f));
 }
 export function supportsStrokePractice(character:string){return !isCompatibilityIdeograph(character);}
+
+
+function FreeWritingPad({character,onComplete,compact=false}:{character:string;onComplete?:()=>void;compact?:boolean}){
+ const canvas=useRef<HTMLCanvasElement>(null);const [drawn,setDrawn]=useState(false);const drawing=useRef(false);
+ function point(e:ReactPointerEvent<HTMLCanvasElement>){const el=e.currentTarget,r=el.getBoundingClientRect();return{x:(e.clientX-r.left)*(el.width/r.width),y:(e.clientY-r.top)*(el.height/r.height)};}
+ function down(e:ReactPointerEvent<HTMLCanvasElement>){const el=e.currentTarget,ctx=el.getContext("2d");if(!ctx)return;el.setPointerCapture(e.pointerId);drawing.current=true;const p=point(e);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineCap="round";ctx.lineJoin="round";ctx.lineWidth=compact?12:15;ctx.strokeStyle="#24313d";}
+ function move(e:ReactPointerEvent<HTMLCanvasElement>){if(!drawing.current)return;const ctx=e.currentTarget.getContext("2d");if(!ctx)return;const p=point(e);ctx.lineTo(p.x,p.y);ctx.stroke();setDrawn(true);}
+ function up(){drawing.current=false;}
+ function clear(){const el=canvas.current;if(el)el.getContext("2d")?.clearRect(0,0,el.width,el.height);setDrawn(false);}
+ return <div className="free-writing-wrap"><div className="free-writing-pad"><span aria-hidden="true">{character}</span><canvas ref={canvas} width={512} height={512} aria-label={character+" 자유 쓰기판"} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}/></div><div className="practice-actions"><button type="button" className="secondary-button" onClick={clear}>다시 쓰기</button><button type="button" disabled={!drawn} onClick={onComplete}>쓰기 완료</button></div></div>;
+}
 
 export default function StrokePractice({character,onPracticeComplete,onAvailabilityChange,compact=false,details,controlsEnabled=true}:Props){
  const target=useRef<HTMLDivElement>(null);
@@ -29,7 +40,7 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
    strokeAnimationSpeed:1,delayBetweenStrokes:180,
    onLoadCharDataError:()=>{
     if(!active)return;
-    writer.current=null;onAvailabilityChange?.(false);setMode("ERROR");setMessage("이 글자의 획순 자료를 불러오지 못했어요. 뜻과 소리 학습은 계속할 수 있어요.");
+    writer.current=null;onAvailabilityChange?.(false);setMode("ERROR");setMessage("이 글자의 획순 자료가 없어 자유 쓰기로 연습할 수 있어요.");
    },
    onLoadCharDataSuccess:()=>{if(active){onAvailabilityChange?.(true);setStage(1);setMode("WATCH");setMessage("1단계 · 글자를 보면서 따라 써 보세요.");}},
   });
@@ -37,8 +48,10 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
  },[character,onAvailabilityChange]);
 
  if(!supportsStrokePractice(character)){
-  return <section className={`stroke-practice${compact?" compact":""}`}><h2>쓰기 연습</h2><p>이 글자는 획순 자료가 아직 없어요. 글자 모양은 그대로 확인할 수 있어요.</p><div className="stroke-character-stage stroke-static-fallback" aria-label={character+" 글자"}><span className="stroke-character-fallback">{character}</span></div>{details}</section>;
+  return <section className={`stroke-practice${compact?" compact":""}`}>{!compact?<h2>쓰기 연습</h2>:null}<p>이 글자는 획순 자료가 아직 없어요. 희미한 글자를 보며 자유롭게 따라 써 보세요.</p><FreeWritingPad character={character} compact={compact} onComplete={onPracticeComplete}/>{details}</section>;
  }
+
+ if(mode==="ERROR")return <section className={`stroke-practice${compact?" compact":""}`}>{!compact?<h2>쓰기 연습</h2>:null}<p>{message}</p><FreeWritingPad character={character} compact={compact} onComplete={onPracticeComplete}/>{details}</section>;
 
  function animate(){
   if(!writer.current||mode==="LOADING"||mode==="ERROR")return;
@@ -62,12 +75,12 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
   });
  }
 
- const disabled=mode==="LOADING"||mode==="ERROR";
+ const disabled=mode==="LOADING";
  return <section className={`stroke-practice${compact?" compact":""}`}>
   {!compact?<h2>획순 · 쓰기 연습</h2>:null}
   <div className="writing-stage-indicator" aria-label={"쓰기 "+stage+"단계"}><span className={stage>=1?"active":""}>1 따라쓰기</span><span className={stage>=2?"active":""}>2 힌트쓰기</span><span className={stage>=3?"active":""}>3 기억쓰기</span></div>
-  <p role={mode==="ERROR"?"alert":undefined}>{message}</p>
-  <div className="stroke-character-stage" style={{width:compact?190:260,height:compact?190:260,margin:"0 auto"}}><div ref={target} aria-label={character+" 획순과 쓰기 연습"} style={{width:"100%",height:"100%",touchAction:"none"}}/>{mode==="ERROR"?<span className="stroke-character-fallback" aria-label={character+" 글자"}>{character}</span>:null}</div>
+  <p>{message}</p>
+  <div className="stroke-character-stage" style={{width:compact?190:260,height:compact?190:260,margin:"0 auto"}}><div ref={target} aria-label={character+" 획순과 쓰기 연습"} style={{width:"100%",height:"100%",touchAction:"none"}}/></div>
   {details}
   {!disabled&&controlsEnabled?<div className="practice-actions">
    <button type="button" className="secondary-button" onClick={animate}>획순 보기</button>
