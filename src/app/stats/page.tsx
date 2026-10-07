@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireActiveUser } from "@/lib/auth/require-active-user";
 import { GrowthStickerArt } from "@/components/growth-sticker-art";
 import { celebrateGrowthSticker } from "./actions";
+import { levelProgress as getLevelProgress } from "@/lib/xp-level";
 export default async function StatsPage(){
  const {supabase:s,user}=await requireActiveUser();
  const now=new Date(); const since=new Date(now); since.setUTCDate(since.getUTCDate()-7); const sinceIso=since.toISOString();
@@ -46,7 +47,7 @@ export default async function StatsPage(){
  const totalXp=(xpRows??[]).reduce((sum,x)=>sum+(x.xp??0),0);
  const todayXpRows=(xpRows??[]).filter(x=>x.event_date===todayKey);
  const todayXp=todayXpRows.reduce((sum,x)=>sum+(x.xp??0),0);
- const level=Math.floor(Math.sqrt(totalXp/50))+1; const levelStart=50*(level-1)*(level-1); const levelEnd=50*level*level; const levelXp=totalXp-levelStart; const levelNeed=levelEnd-levelStart;
+ const {level,start:levelStart,end:levelEnd}=getLevelProgress(totalXp); const levelXp=totalXp-levelStart; const levelNeed=levelEnd-levelStart;
  const growthTitle=level>=15?"한자 달인":level>=10?"한자 탐험대장":level>=7?"꾸준한 탐험가":level>=4?"성장하는 학습가":"새싹 학습가";
  const recovered=new Set<string|number>(); const seenWrong=new Set<string|number>(); [...attempts].reverse().forEach(x=>{if(x.result==="WRONG"||x.result==="UNKNOWN")seenWrong.add(x.hanja_id);else if((x.result==="CORRECT"||x.result==="KNOWN")&&seenWrong.has(x.hanja_id))recovered.add(x.hanja_id);});
  const stars=Math.min(99,learned+correct); const badge=learned>=50?"한자 탐험가":learned>=20?"꾸준한 학습가":learned>=5?"첫걸음 완료":"첫걸음 준비"; const stickerRules=[{kind:"first" as const,name:"첫걸음",earned:learned>=1,detail:"한자 1자 학습",message:"한자 여행의 첫걸음을 내디뎠어요!"},{kind:"stack" as const,name:"차곡차곡",earned:learned>=20,detail:"한자 20자 학습",message:"배운 한자가 차곡차곡 쌓이고 있어요."},{kind:"write" as const,name:"쓰기 시작",earned:writtenCount>=5,detail:"5자 쓰기 연습",message:"눈으로만 보지 않고 직접 써 봤어요."},{kind:"retry" as const,name:"다시 도전",earned:recovered.size>0,detail:"틀린 한자를 다시 맞히기",message:"틀려도 다시 도전하는 힘이 자라고 있어요."},{kind:"master" as const,name:"숙달 시작",earned:mastered>=10,detail:"10자 익숙해지기",message:"익숙한 한자가 하나둘 늘고 있어요."},{kind:"week" as const,name:"꾸준한 한 주",earned:days>=5,detail:"최근 7일 중 5일 학습",message:"꾸준함이 가장 멋진 실력이에요."}];
