@@ -423,3 +423,5 @@ button {
 .admin-only-menu{display:grid;gap:8px;margin-top:10px;padding:12px;border:1px solid #e6d9b8;border-radius:14px;background:#fffaf0}
 .admin-only-menu .eyebrow{margin:0 0 2px}
 .admin-only-menu button{width:100%}
+
+.crop-help{margin:0;color:var(--muted);font-size:12px;text-align:center}.crop-preview{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}.crop-preview:active{cursor:grabbing}.crop-preview img{pointer-events:none;-webkit-user-drag:none}@media(max-width:360px){.crop-editor{padding:11px}.crop-preview{width:min(100%,240px)}}
