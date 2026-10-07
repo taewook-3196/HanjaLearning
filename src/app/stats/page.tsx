@@ -28,12 +28,14 @@ export default async function StatsPage(){
  const activityDays=[...new Set(attempts.map(x=>dayKey(x.created_at)))].sort().reverse();
  let streak=0; const streakCursor=new Date(now); if(!activityDays.includes(todayKey))streakCursor.setUTCDate(streakCursor.getUTCDate()-1);
  for(let i=0;i<60;i++){const key=dayKey(streakCursor);if(!activityDays.includes(key))break;streak++;streakCursor.setUTCDate(streakCursor.getUTCDate()-1);}
+ const milestoneXp=streak===100?200:streak===60?140:streak===30?100:streak===14?60:streak===7?35:0;
  const xpEvents=[
   ...(todayAnswered.length>0?[{user_id:user.id,event_key:"daily_activity",event_date:todayKey,xp:10,reason:"오늘 학습"}]:[]),
   ...(todayReviewAttempts.length>0?[{user_id:user.id,event_key:"daily_review",event_date:todayKey,xp:10,reason:"오늘 복습"}]:[]),
   ...(todayPerfect?[{user_id:user.id,event_key:"daily_perfect",event_date:todayKey,xp:10,reason:"오늘 학습 만점"}]:[]),
   ...(todayPlanComplete?[{user_id:user.id,event_key:"daily_plan_complete",event_date:todayKey,xp:25,reason:"오늘 계획 완료"}]:[]),
-  ...(streak>=2?[{user_id:user.id,event_key:"streak_bonus",event_date:todayKey,xp:Math.min(30,5+Math.floor((streak-2)/3)*5),reason:`${streak}일 연속 학습`}]:[])
+  ...(streak>=2?[{user_id:user.id,event_key:"streak_bonus",event_date:todayKey,xp:Math.min(30,5+Math.floor((streak-2)/3)*5),reason:`${streak}일 연속 학습`}]:[]),
+  ...(milestoneXp>0?[{user_id:user.id,event_key:`streak_milestone_${streak}`,event_date:todayKey,xp:milestoneXp,reason:`${streak}일 연속 학습 달성`}]:[])
  ];
  if(xpEvents.length) await s.from("user_xp_events").upsert(xpEvents,{onConflict:"user_id,event_key,event_date",ignoreDuplicates:true});
  const {data:repeatableRows}=await s.from("user_repeatable_sticker_events").select("sticker_key,earned_on").eq("user_id",user.id);
