@@ -142,7 +142,7 @@ button {
   padding: 24px 18px;
 }
 
-.auth-card {
+.settings-shell {\n  align-content: start;\n  padding-bottom: calc(140px + env(safe-area-inset-bottom));\n}\n\n.settings-shell .auth-card {\n  margin: 0 auto;\n}\n\n.auth-card {
   width: min(100%, 460px);
   padding: 28px;
   border: 1px solid var(--line);
