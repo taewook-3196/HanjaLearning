@@ -419,3 +419,7 @@ button {
 .gift-reward-summary span{min-width:0;padding:10px 6px;border-radius:12px;background:#fff7df;color:var(--muted);font-size:11px;text-align:center}
 .gift-reward-summary strong{display:block;margin-top:3px;color:var(--text);font-size:15px}
 @media(max-width:360px){.gift-reward-card .section-heading{display:block}.gift-reward-card .section-heading>span{display:block;margin-top:4px}.gift-reward-summary{gap:5px}.gift-reward-summary span{padding:9px 3px;font-size:10px}}
+
+.admin-only-menu{display:grid;gap:8px;margin-top:10px;padding:12px;border:1px solid #e6d9b8;border-radius:14px;background:#fffaf0}
+.admin-only-menu .eyebrow{margin:0 0 2px}
+.admin-only-menu button{width:100%}
