@@ -19,7 +19,7 @@ begin
  select count(*) into v_correct from jsonb_array_elements(target_questions) with ordinality q(item,ord) where coalesce(target_answers->>(ord-1)::text,'')=item->>'correct';
  v_score:=round(v_correct*100.0/v_count);
  insert into public.exam_attempts(user_id,grade_id,exam_mode,question_count,correct_count,score_percent,passed,submitted_at) values(v_user,target_grade_id,target_exam_mode,v_count,v_correct,v_score,v_score>=v_pass,now()) returning id into v_attempt;
- insert into public.exam_attempt_questions(attempt_id,user_id,position,question_key,question_type,answered_correctly)
+ insert into public.exam_attempt_questions(attempt_id,user_id,position,question_key,question_type,answered_correctly,question_snapshot,selected_answer,correct_answer)
  select v_attempt,v_user,ord,item->>'id',item->>'type',coalesce(target_answers->>(ord-1)::text,'')=item->>'correct' from jsonb_array_elements(target_questions) with ordinality q(item,ord);
  return v_attempt;
 end $$;
