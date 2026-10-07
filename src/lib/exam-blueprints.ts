@@ -167,6 +167,8 @@ export function unsupportedBlueprintItems(blueprint:ExamBlueprint){
   return blueprint.items.filter(item=>!IMPLEMENTED_EXAM_TYPES.has(item.type));
 }
 
+export function supportedVariablePatterns(gradeCode:string){return (VERIFIED_VARIABLE_PATTERNS[gradeCode]??[]).filter(pattern=>pattern.supported)}
+
 export function validateBlueprints(blueprints:Record<string,ExamBlueprint>){
  const errors:string[]=[];
  for(const [key,b] of Object.entries(blueprints)){
@@ -174,6 +176,8 @@ export function validateBlueprints(blueprints:Record<string,ExamBlueprint>){
   if(key!==b.gradeCode)errors.push(`${key}: gradeCode is ${b.gradeCode}`);
   if(total!==b.questionCount)errors.push(`${key}: expected ${b.questionCount}, got ${total}`);
   if(b.items.some(item=>item.count<=0))errors.push(`${key}: item count must be positive`);
+  const variableCount=b.items.filter(item=>item.type==="VARIABLE_VERIFIED").reduce((n,item)=>n+item.count,0);
+  if(variableCount>0&&!supportedVariablePatterns(b.gradeCode).length)errors.push(`${key}: no supported verified variable pattern`);
  }
  return errors;
 }
