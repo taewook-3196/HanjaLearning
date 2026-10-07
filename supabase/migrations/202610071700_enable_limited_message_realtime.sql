@@ -1,0 +1,1 @@
+alter publication supabase_realtime add table public.direct_messages, public.feedback_messages;
