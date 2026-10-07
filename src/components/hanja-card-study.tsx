@@ -2,7 +2,7 @@
 import {useMemo,useRef,useState} from "react";
 import {createClient} from "@/lib/supabase/client";
 
-type Card={id:number;character:string;reading:string;meaning:string;learned:boolean};
+type Card={id:number;character:string;reading:string;meaning:string;learned:boolean;example:{word:string;reading:string|null;meaning:string|null}|null;relation:{label:string;word:string}|null;idiom:{idiom:string;reading:string|null;meaning:string|null}|null};
 
 export default function HanjaCardStudy({cards}:{cards:Card[]}){
  const [onlyLearned,setOnlyLearned]=useState(false);
@@ -24,7 +24,7 @@ export default function HanjaCardStudy({cards}:{cards:Card[]}){
    <p style={{textAlign:"center"}}>{index+1} / {visible.length}</p>
    <button type="button" onClick={reveal} onTouchStart={e=>{touchX.current=e.touches[0]?.clientX??null}} onTouchEnd={e=>{if(touchX.current===null)return;const dx=(e.changedTouches[0]?.clientX??touchX.current)-touchX.current;touchX.current=null;if(Math.abs(dx)>55)move(dx<0?1:-1)}} style={{width:"100%",minHeight:330,border:"1px solid var(--border)",borderRadius:24,background:"var(--card)",padding:24,cursor:"pointer"}}>
     <strong style={{display:"block",fontSize:"clamp(7rem,38vw,12rem)",lineHeight:1}}>{card.character}</strong>
-    {revealed?<span style={{display:"block",fontSize:"1.35rem",marginTop:24,fontWeight:700}}>{card.meaning} · {card.reading}</span>:<span style={{display:"block",marginTop:24}}>눌러서 확인</span>}
+    {revealed?<span style={{display:"block",marginTop:24}}><strong style={{display:"block",fontSize:"1.35rem"}}>{card.meaning} · {card.reading}</strong>{card.example?<span style={{display:"block",marginTop:16}}>예시 단어: {card.example.word}({card.example.reading}){card.example.meaning?` · ${card.example.meaning}`:""}</span>:null}{card.relation?<span style={{display:"block",marginTop:10}}>{card.relation.label}: {card.relation.word}</span>:null}{card.idiom?<span style={{display:"block",marginTop:10}}>사자성어: {card.idiom.idiom}({card.idiom.reading}){card.idiom.meaning?` · ${card.idiom.meaning}`:""}</span>:null}</span>:<span style={{display:"block",marginTop:24}}>눌러서 확인</span>}
    </button>
    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:14}}>
     <button type="button" className="secondary-button" onClick={()=>move(-1)}>← 이전</button>
