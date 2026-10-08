@@ -1,8 +1,8 @@
 import Link from "next/link";
-import {requireActiveUser} from "@/lib/auth/require-active-user";
+import {getTargetGradeScope} from "@/lib/learning/target-grade-scope";
 import IdiomStudy from "@/components/idiom-study";
 export default async function IdiomsPage(){
- const {supabase}=await requireActiveUser();
+ const {supabase,grade,allowed}=await getTargetGradeScope();
  const {data}=await supabase.from("hanja_idioms").select("id,idiom,reading,meaning,child_explanation").eq("content_status","PUBLISHED").order("id");
  const ids=(data??[]).map(x=>x.id);
  const {data:mappings}=ids.length?await supabase.from("hanja_idiom_map").select("idiom_id,hanja_id,position").in("idiom_id",ids).order("position"):{data:[]};
@@ -15,6 +15,10 @@ export default async function IdiomsPage(){
  const rMap=new Map((readings??[]).map(x=>[x.hanja_id,x]));
  const mapped=new Map<number,{character:string;meaning:string;reading:string}[]>();
  for(const m of mappings??[]){const h=hMap.get(m.hanja_id);if(!h)continue;const rd=rMap.get(m.hanja_id);const items=mapped.get(m.idiom_id)??[];items.push({character:h.character,meaning:rd?.meaning??h.primary_meaning??"",reading:rd?.reading??h.primary_reading??""});mapped.set(m.idiom_id,items);}
- const rows=(data??[]).map(x=>({...x,characters:mapped.get(x.id)??[]}));
- return <main className="app-shell"><div className="page-top-actions"><Link className="settings-link" href="/">← 홈</Link></div><header className="free-study-heading"><h1>사자성어</h1><p>카드를 눌러 뜻 확인 · 좌우로 넘기기</p></header><IdiomStudy rows={rows}/></main>;
+ const eligible=new Set<number>();
+ const byId=new Map<number,number[]>();
+ for(const m of mappings??[]){const items=byId.get(m.idiom_id)??[];items.push(m.hanja_id);byId.set(m.idiom_id,items);}
+ for(const [id,items] of byId)if(items.length===4&&items.every(id=>allowed.has(id)))eligible.add(id);
+ const rows=(data??[]).filter(x=>eligible.has(x.id)).map(x=>({...x,characters:mapped.get(x.id)??[]}));
+ return <main className="app-shell"><div className="page-top-actions"><Link className="settings-link" href="/">← 홈</Link></div><header className="free-study-heading"><h1>사자성어</h1><p>목표 {grade}급 · 학습 범위 {rows.length}개</p><p>카드를 눌러 뜻 확인 · 좌우로 넘기기</p></header><IdiomStudy rows={rows}/></main>;
 }
