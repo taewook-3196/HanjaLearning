@@ -88,6 +88,8 @@ export function validateExamQuestions(questions:ExamQuestion[],expectedCount:num
   if(q.choices.length!==4)errors.push(`${label}: expected 4 choices, got ${q.choices.length}`);
   if(new Set(q.choices).size!==q.choices.length)errors.push(`${label}: duplicate choices`);
   if(!q.choices.includes(q.correct))errors.push(`${label}: correct answer is missing from choices`);
+  if(q.type==="WORD_READING"||q.type==="WORD_MEANING"){if(!/^[\u3400-\u9fff\uf900-\ufaff]+$/u.test(q.stem))errors.push(`${label}: expected Hanja word stem`)}
+  if(q.type==="WORD_TO_HANJA"){if(!/^[\u3400-\u9fff\uf900-\ufaff]+$/u.test(q.correct))errors.push(`${label}: expected Hanja answer`);if(!q.choices.every(choice=>/^[\u3400-\u9fff\uf900-\ufaff]+$/u.test(choice)))errors.push(`${label}: expected Hanja choices`)}
  });
  return errors;
 }
