@@ -483,3 +483,8 @@ button {
 .compact-learn .compact-flash-card{padding:10px 12px}
 .compact-learn .compact-flash-card>.eyebrow{font-size:11px;line-height:1.35}
 .compact-learn .compact-examples strong{overflow-wrap:anywhere;word-break:keep-all}
+
+/* Hanja word pairs: ideographs first, Hangul pronunciation second. */
+.free-study-reveal .relation-hanja{display:block;font-family:serif;font-size:clamp(46px,12vw,74px);line-height:1.2;letter-spacing:.02em}
+.free-study-reveal .relation-reading{display:block;font-size:clamp(17px,4vw,22px);font-weight:800;line-height:1.3;color:var(--text)}
+.free-study-reveal .relation-reading+.free-study-detail{font-size:clamp(13px,3.5vw,16px);font-weight:500}
