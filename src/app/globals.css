@@ -539,3 +539,10 @@ button {
 .idiom-character-gloss strong{font-family:serif;font-size:clamp(21px,6vw,32px);line-height:1.15}
 .idiom-character-gloss span{font-size:clamp(10px,2.6vw,13px);line-height:1.3;overflow-wrap:anywhere}
 @media(max-height:750px){.idiom-character-gloss{padding:4px 2px}.idiom-character-gloss strong{font-size:22px}}
+
+/* Keep the four-character breakdown readable on narrow phones. */
+@media(max-width:360px){
+ .idiom-character-glosses{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .idiom-character-gloss{padding:6px 4px}
+ .idiom-character-gloss span{font-size:12px;line-height:1.4}
+}
