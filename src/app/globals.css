@@ -561,3 +561,8 @@ button {
 .free-study-links a:nth-child(3){color:#85511b;background:#fff1dc;border-color:#f1d3a1}
 .free-study-links a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .free-study-links a:active{transform:translateY(1px)}
+
+/* Preserve readable labels on narrow phones and with enlarged system text. */
+.free-study-links a{min-width:0;overflow-wrap:anywhere}
+@media(max-width:380px){.free-study-links{grid-template-columns:1fr;gap:8px}.free-study-links a{min-height:48px;font-size:16px}}
+@media(prefers-reduced-motion:reduce){.free-study-links a:active{transform:none}}
