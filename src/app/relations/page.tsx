@@ -9,10 +9,11 @@ export default async function WordRelationsPage(){
  const wordIds=[...new Set((relations??[]).flatMap(x=>[x.from_word_id,x.to_word_id]))];
  const {data:words}=wordIds.length?await s.from("hanja_words").select("id,word,hanja_form,reading,meaning").in("id",wordIds):{data:[]};
  const wm=new Map((words??[]).map(x=>[x.id,x]));
- const wordHanja=new Map<number,number[]>();
- const {data:wordMaps}=wordIds.length?await s.from("hanja_word_map").select("word_id,hanja_id").in("word_id",wordIds):{data:[]};
- for(const m of wordMaps??[]){const items=wordHanja.get(m.word_id)??[];items.push(m.hanja_id);wordHanja.set(m.word_id,items);}
- const inGrade=(wordId:number)=>{const ids=wordHanja.get(wordId)??[];const word=wm.get(wordId);return !!word?.hanja_form&&ids.length===Array.from(word.hanja_form).length&&ids.every(id=>gradeIds.has(id));};
+ const wordHanja=new Map<number,{hanjaId:number;position:number}[]>();
+ const {data:wordMaps}=wordIds.length?await s.from("hanja_word_map").select("word_id,hanja_id,position").in("word_id",wordIds):{data:[]};
+ for(const m of wordMaps??[]){const items=wordHanja.get(m.word_id)??[];items.push({hanjaId:m.hanja_id,position:m.position});wordHanja.set(m.word_id,items);}
+ const characterById=new Map((hanja??[]).map(h=>[h.id,h.character]));
+ const inGrade=(wordId:number)=>{const mappings=(wordHanja.get(wordId)??[]).slice().sort((a,b)=>a.position-b.position);const word=wm.get(wordId);const characters=Array.from(String(word?.hanja_form??""));return characters.length>0&&mappings.length===characters.length&&mappings.every((m,index)=>gradeIds.has(m.hanjaId)&&characterById.get(m.hanjaId)===characters[index]);};
  const characters=[...new Set((words??[]).flatMap(w=>Array.from(String(w.hanja_form??""))))];
  const {data:hanja}=characters.length?await s.from("hanja").select("id,character").in("character",characters):{data:[]};
  const hanjaIds=(hanja??[]).map(h=>h.id);
