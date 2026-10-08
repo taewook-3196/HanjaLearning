@@ -39,7 +39,7 @@ export default async function HanjaCardsPage(){
   const w=wordById.get(x.word_id);
   if(!w)continue;
   const current=wordMap.get(x.hanja_id);
-  if(!current||w.hanja_form.length<current.hanja_form.length||(w.hanja_form.length===current.hanja_form.length&&w.id<current.id))wordMap.set(x.hanja_id,w);
+  if(!current||(w.hanja_form??w.word).length<(current.hanja_form??current.word).length||((w.hanja_form??w.word).length===(current.hanja_form??current.word).length&&w.id<current.id))wordMap.set(x.hanja_id,w);
  }
  const idiomMap=new Map<number,{idiom:string;reading:string|null;meaning:string|null}>();
  for(const x of idiomMaps??[]){const item=idiomById.get(x.idiom_id);if(item&&!idiomMap.has(x.hanja_id))idiomMap.set(x.hanja_id,item);}
