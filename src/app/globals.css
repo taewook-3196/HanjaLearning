@@ -577,3 +577,7 @@ button {
 .exam-taking-shell{padding-bottom:calc(190px + env(safe-area-inset-bottom))}
 .exam-taking-shell .study-card{padding-bottom:32px}
 @media(max-width:639px){.exam-taking-shell .exam-question-nav{max-height:142px;overscroll-behavior:contain}.exam-taking-shell .study-card>button:last-child{margin-bottom:24px}}
+
+/* Ensure the final exam review card can scroll fully above the fixed tab bar. */
+.exam-result-shell{padding-bottom:calc(180px + env(safe-area-inset-bottom))}
+.exam-result-shell .study-card{padding-bottom:36px}
