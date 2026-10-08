@@ -475,3 +475,11 @@ button {
 .bottom-nav{padding:3px 7px;grid-auto-rows:44px}
 .bottom-nav a,.bottom-nav span{min-height:44px;height:44px;padding:0 2px}
 @media(max-width:480px){.free-study-heading{align-items:flex-start;flex-direction:column;gap:3px}.free-study-heading p{text-align:left}.free-study-card{padding:16px}.free-study-reveal{min-height:205px}}
+
+/* Keep all example Hanja visible on short mobile screens; do not hide the second example. */
+@media(max-height:760px){.compact-learning-details .compact-examples p:nth-child(n+2){display:block}}
+.compact-learn .learn-top{margin-bottom:5px;gap:8px}
+.compact-learn .learn-top strong{font-size:13px}
+.compact-learn .compact-flash-card{padding:10px 12px}
+.compact-learn .compact-flash-card>.eyebrow{font-size:11px;line-height:1.35}
+.compact-learn .compact-examples strong{overflow-wrap:anywhere;word-break:keep-all}
