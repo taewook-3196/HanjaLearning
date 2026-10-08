@@ -488,3 +488,35 @@ button {
 .free-study-reveal .relation-hanja{display:block;font-family:serif;font-size:clamp(46px,12vw,74px);line-height:1.2;letter-spacing:.02em}
 .free-study-reveal .relation-reading{display:block;font-size:clamp(17px,4vw,22px);font-weight:800;line-height:1.3;color:var(--text)}
 .free-study-reveal .relation-reading+.free-study-detail{font-size:clamp(13px,3.5vw,16px);font-weight:500}
+
+
+/* Compact, large-type learning cards: keep controls visible on mobile. */
+.hanja-cards-page .page-top-actions{margin-bottom:6px}
+.hanja-cards-page .hero-card{padding:12px 16px;margin-bottom:10px;border-radius:18px}
+.hanja-cards-page .hero-card .eyebrow{margin-bottom:2px}
+.hanja-cards-page .hero-card h1{font-size:clamp(22px,5.5vw,28px);margin-bottom:2px}
+.hanja-cards-page .hero-card .subtitle{font-size:12px;line-height:1.4}
+.hanja-cards-study{padding:14px}
+.hanja-cards-study .card-mode-selector button{min-height:44px}
+.hanja-cards-study .free-study-counter{margin:0 0 6px}
+.hanja-cards-study .hanja-main-card{min-height:0;height:auto;padding:18px 12px;gap:6px}
+.hanja-cards-study .hanja-main-card .free-study-character{font-size:clamp(136px,35vw,220px);line-height:1.06;overflow-wrap:normal}
+.hanja-cards-study .hanja-main-card>span{font-size:14px}
+.hanja-cards-study .free-study-actions{margin-top:8px}
+.hanja-cards-study .hanja-swipe-hint{margin:8px 0 0;text-align:center;font-size:12px;color:var(--muted)}
+.free-study-reveal>strong:first-child:not(.free-study-character){font-size:clamp(54px,14vw,94px);line-height:1.15}
+.free-study-reveal .relation-hanja{font-size:clamp(58px,15vw,94px);line-height:1.1}
+@media(max-width:480px){
+ .hanja-cards-page{padding-top:8px}
+ .hanja-cards-study{padding:12px}
+ .hanja-cards-study .hanja-main-card .free-study-character{font-size:clamp(132px,37vw,180px)}
+ .free-study-card{gap:8px;padding:12px}
+ .free-study-reveal{min-height:180px;padding:14px 10px;gap:8px}
+ .free-study-reveal .relation-hanja{font-size:clamp(54px,15vw,76px)}
+}
+@media(max-height:750px){
+ .hanja-cards-page .hero-card .subtitle{display:none}
+ .hanja-cards-study .hanja-main-card .free-study-character{font-size:clamp(112px,29vw,160px)}
+ .hanja-cards-study .hanja-swipe-hint{display:none}
+ .free-study-reveal{min-height:150px}
+}
