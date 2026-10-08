@@ -88,6 +88,9 @@ export function validateExamQuestions(questions:ExamQuestion[],expectedCount:num
   if(q.choices.length!==4)errors.push(`${label}: expected 4 choices, got ${q.choices.length}`);
   if(new Set(q.choices).size!==q.choices.length)errors.push(`${label}: duplicate choices`);
   if(!q.choices.includes(q.correct))errors.push(`${label}: correct answer is missing from choices`);
+  if(q.type==="SPECIAL_READING"&&q.correct.trim()&&q.prompt.includes(q.correct.trim()))errors.push(`${label}: special reading answer leaked in prompt`);
+  if(q.type==="COMMON_CHARACTER"&&q.correct.trim()&&q.stem.includes(q.correct.trim()))errors.push(`${label}: common character answer leaked in stem`);
+  if(q.type==="COMMON_CHARACTER"&&!q.stem.includes("□"))errors.push(`${label}: common character blank is missing`);
   if(q.type==="WORD_READING"||q.type==="WORD_MEANING"){if(!/^[\u3400-\u9fff\uf900-\ufaff]+$/u.test(q.stem))errors.push(`${label}: expected Hanja word stem`)}
   if(q.type==="WORD_TO_HANJA"){if(!/^[\u3400-\u9fff\uf900-\ufaff]+$/u.test(q.correct))errors.push(`${label}: expected Hanja answer`);if(!q.choices.every(choice=>/^[\u3400-\u9fff\uf900-\ufaff]+$/u.test(choice)))errors.push(`${label}: expected Hanja choices`)}
  });
