@@ -12,7 +12,7 @@ export default async function WordRelationsPage(){
  const wordHanja=new Map<number,number[]>();
  const {data:wordMaps}=wordIds.length?await s.from("hanja_word_map").select("word_id,hanja_id").in("word_id",wordIds):{data:[]};
  for(const m of wordMaps??[]){const items=wordHanja.get(m.word_id)??[];items.push(m.hanja_id);wordHanja.set(m.word_id,items);}
- const inGrade=(wordId:number)=>{const ids=wordHanja.get(wordId)??[];return ids.length>0&&ids.every(id=>gradeIds.has(id));};
+ const inGrade=(wordId:number)=>{const ids=wordHanja.get(wordId)??[];const word=wm.get(wordId);return !!word?.hanja_form&&ids.length===Array.from(word.hanja_form).length&&ids.every(id=>gradeIds.has(id));};
  const characters=[...new Set((words??[]).flatMap(w=>Array.from(String(w.hanja_form??""))))];
  const {data:hanja}=characters.length?await s.from("hanja").select("id,character").in("character",characters):{data:[]};
  const hanjaIds=(hanja??[]).map(h=>h.id);
