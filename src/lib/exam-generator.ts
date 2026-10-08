@@ -232,7 +232,7 @@ export function generateExamQuestions(args:{recentQuestionKeys?:Set<string>;pool
    usedIds.add(q.id);ordered.push(q);placed++;
   }
   // An official blueprint must never silently substitute another question type.
-  if(placed!==item.count)return[];
+  if(placed!==item.count){console.warn("[exam-generation] insufficient blueprint questions",{grade:blueprint.gradeCode,type:item.type,required:item.count,generated:placed});return[]}
  }
  if(ordered.length!==questionCount)return[];
  return ordered;
