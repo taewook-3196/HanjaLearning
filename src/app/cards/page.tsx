@@ -34,7 +34,13 @@ export default async function HanjaCardsPage(){
  const wordById=new Map((words??[]).map(x=>[x.id,x]));
  const idiomById=new Map((idioms??[]).map(x=>[x.id,x]));
  const wordMap=new Map<number,{id:number;word:string;reading:string|null;meaning:string|null;hanja_form:string|null}>();
- for(const x of wordMaps??[]){const w=wordById.get(x.word_id);if(w&&!wordMap.has(x.hanja_id))wordMap.set(x.hanja_id,w);}
+ // Prefer a short, easy-to-read example; break ties by stable word ID.
+ for(const x of wordMaps??[]){
+  const w=wordById.get(x.word_id);
+  if(!w)continue;
+  const current=wordMap.get(x.hanja_id);
+  if(!current||(w.hanja_form??w.word).length<(current.hanja_form??current.word).length||((w.hanja_form??w.word).length===(current.hanja_form??current.word).length&&w.id<current.id))wordMap.set(x.hanja_id,w);
+ }
  const idiomMap=new Map<number,{idiom:string;reading:string|null;meaning:string|null}>();
  for(const x of idiomMaps??[]){const item=idiomById.get(x.idiom_id);if(item&&!idiomMap.has(x.hanja_id))idiomMap.set(x.hanja_id,item);}
  const relationIds=[...new Set([...wordById.keys()])];
