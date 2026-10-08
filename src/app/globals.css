@@ -572,3 +572,8 @@ button {
 .compact-learn .compact-examples p strong{font-size:15px;font-weight:850}
 .compact-learn .compact-examples .word-grade-row{display:flex;flex-wrap:wrap;gap:4px;margin:5px 0 0}
 .compact-learn .compact-examples .word-grade-row small{font-size:11px;line-height:1.4}
+
+/* Keep the active exam controls clear of the fixed bottom navigation on phones. */
+.exam-taking-shell{padding-bottom:calc(190px + env(safe-area-inset-bottom))}
+.exam-taking-shell .study-card{padding-bottom:32px}
+@media(max-width:639px){.exam-taking-shell .exam-question-nav{max-height:142px;overscroll-behavior:contain}.exam-taking-shell .study-card>button:last-child{margin-bottom:24px}}
