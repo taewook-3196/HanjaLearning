@@ -28,12 +28,12 @@ export default async function HanjaCardsPage(){
  const wordIds=[...new Set((wordMaps??[]).map(x=>x.word_id))];
  const idiomIds=[...new Set((idiomMaps??[]).map(x=>x.idiom_id))];
  const [{data:words},{data:idioms}]=await Promise.all([
-  wordIds.length?s.from("hanja_words").select("id,word,reading,meaning").eq("content_status","PUBLISHED").in("id",wordIds):Promise.resolve({data:[]}),
+  wordIds.length?s.from("hanja_words").select("id,word,reading,meaning,hanja_form").eq("content_status","PUBLISHED").in("id",wordIds):Promise.resolve({data:[]}),
   idiomIds.length?s.from("hanja_idioms").select("id,idiom,reading,meaning").eq("content_status","PUBLISHED").in("id",idiomIds):Promise.resolve({data:[]})
  ]);
  const wordById=new Map((words??[]).map(x=>[x.id,x]));
  const idiomById=new Map((idioms??[]).map(x=>[x.id,x]));
- const wordMap=new Map<number,{id:number;word:string;reading:string|null;meaning:string|null}>();
+ const wordMap=new Map<number,{id:number;word:string;reading:string|null;meaning:string|null;hanja_form:string|null}>();
  for(const x of wordMaps??[]){const w=wordById.get(x.word_id);if(w&&!wordMap.has(x.hanja_id))wordMap.set(x.hanja_id,w);}
  const idiomMap=new Map<number,{idiom:string;reading:string|null;meaning:string|null}>();
  for(const x of idiomMaps??[]){const item=idiomById.get(x.idiom_id);if(item&&!idiomMap.has(x.hanja_id))idiomMap.set(x.hanja_id,item);}
