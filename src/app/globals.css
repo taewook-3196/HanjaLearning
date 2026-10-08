@@ -566,3 +566,9 @@ button {
 .free-study-links a{min-width:0;overflow-wrap:anywhere}
 @media(max-width:380px){.free-study-links{grid-template-columns:1fr;gap:8px}.free-study-links a{min-height:48px;font-size:16px}}
 @media(prefers-reduced-motion:reduce){.free-study-links a:active{transform:none}}
+
+/* Learning examples: readable Hanja and pronunciation without enlarging the entire card. */
+.compact-learn .compact-examples p{font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.compact-learn .compact-examples p strong{font-size:15px;font-weight:850}
+.compact-learn .compact-examples .word-grade-row{display:flex;flex-wrap:wrap;gap:4px;margin:5px 0 0}
+.compact-learn .compact-examples .word-grade-row small{font-size:11px;line-height:1.4}
