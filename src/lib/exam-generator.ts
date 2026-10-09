@@ -93,9 +93,11 @@ export function validateExamQuestions(questions:ExamQuestion[],expectedCount:num
  const errors:string[]=[];
  if(questions.length!==expectedCount)errors.push(`expected ${expectedCount} questions, got ${questions.length}`);
  if(blueprint){
-  for(const item of blueprint.items){
-   const actual=questions.filter(q=>q.type===item.type).length;
-   if(actual!==item.count)errors.push(`blueprint ${item.type}: expected ${item.count}, got ${actual}`);
+  const expectedByType=new Map<string,number>();
+  for(const item of blueprint.items)expectedByType.set(item.type,(expectedByType.get(item.type)??0)+item.count);
+  for(const [type,required] of expectedByType){
+   const actual=questions.filter(q=>q.type===type).length;
+   if(actual!==required)errors.push(`blueprint ${type}: expected ${required}, got ${actual}`);
   }
  }
  const ids=new Set<string>();
