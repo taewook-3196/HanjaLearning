@@ -56,7 +56,8 @@ begin
       coalesce(old_row.study_count,0)+1,
       coalesce(old_row.correct_count,0)+(case when is_correct then 1 else 0 end),
       coalesce(old_row.wrong_count,0)+(case when is_correct then 0 else 1 end),
-      case when is_correct then coalesce(old_row.correct_streak,0)+1 else 0 end,
+      case when is_correct and eligible_review then coalesce(old_row.correct_streak,0)+1
+        when is_correct then coalesce(old_row.correct_streak,0) else 0 end,
       case when is_correct then 0 else coalesce(old_row.wrong_streak,0)+1 end,
       new_stage,next_at,now_at,coalesce(old_row.first_learned_at,now_at),now_at)
     on conflict(user_id,hanja_id) do update set
