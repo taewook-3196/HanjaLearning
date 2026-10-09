@@ -32,7 +32,7 @@ export function examReadinessSummary(input:ExamReadinessInput){
   IDIOMS:input.idioms.length,
   CULTURE_CONTENT:input.cultureItems.length,
   USAGE_ITEMS:input.usageItems.length,
-  SPECIAL_READINGS:input.specialReadings.length,
+  SPECIAL_READINGS:input.specialReadings.filter(x=>x.reading&&x.meaning&&input.pool.some(h=>h.id===x.hanja_id)&&x.correct_choice>=1&&x.correct_choice<=4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d].every(Boolean)&&new Set([x.choice_a,x.choice_b,x.choice_c,x.choice_d]).size===4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d][x.correct_choice-1]===x.reading).length,
   ORIGINAL_IMAGES:input.imageItems.length,
  };
 }
