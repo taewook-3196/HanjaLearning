@@ -60,6 +60,7 @@ export default async function Home() {
   if (targetCount === 0) {
     return <main className="app-shell"><header className="home-header"><div className="profile-heading"><span className="profile-avatar">{profileAvatar}</span><div><strong>{profile.nickname}</strong></div></div><img className="home-app-icon" src="/app-icon.webp" width={52} height={52} alt="아빠한자" /></header><section className="study-card"><div><p className="eyebrow">목표급수 확인</p><h2>{profile.target_grade}은(는) 아직 학습할 수 없어요.</h2><p className="subtitle">지금 학습 가능한 급수로 목표를 바꿔 주세요. 기존 학습 기록은 그대로 남습니다.</p></div><Link className="primary-link" href="/settings">학습 가능한 급수 선택하기</Link></section></main>;
   }
+  // The learn page excludes mastered items and does not schedule early mastery reviews without an exam date.
   const plan=buildStudyPlan({unseen:Math.max(0,targetCount-learnedCount),dueReviews:reviewCount,weakNotDue:Math.max(0,learnedCount-masteredCount-reviewCount),examDate:settings?.target_exam_date});
   const todayReviewCount=plan.reviewCount;
   const newCount=plan.newCount;
