@@ -29,3 +29,29 @@ for(const gradeCode of gradeCodes){
  }
 }
 console.log(`Exam generator invariant checks passed for ${gradeCodes.join(", ")} across 200 runs each.`);
+
+
+const confusablePool:HanjaPoolItem[]=[
+ {id:1001,character:"田",answer:"밭 전",examples:[]},
+ {id:1002,character:"甲",answer:"갑옷 갑",examples:[]},
+ {id:1003,character:"由",answer:"말미암을 유",examples:[]},
+ {id:1004,character:"申",answer:"펼 신",examples:[]},
+ {id:1005,character:"日",answer:"날 일",examples:[]},
+ {id:1006,character:"目",answer:"눈 목",examples:[]},
+ {id:1007,character:"木",answer:"나무 목",examples:[]},
+ {id:1008,character:"本",answer:"근본 본",examples:[]},
+];
+const confusableBase={...base,pool:confusablePool,characterById:new Map(confusablePool.map(x=>[x.id,x.character]))};
+for(let run=0;run<100;run++){
+ const qs=generateExamQuestions({...confusableBase,questionCount:confusablePool.length});
+ const target=qs.find(q=>q.stem==="田");
+ if(!target)throw new Error("田 question missing");
+ if(!target.choices.includes("갑옷 갑")||!target.choices.includes("말미암을 유")||!target.choices.includes("펼 신"))throw new Error("田 should prioritize 甲/由/申 distractors");
+ if(qs.some(q=>!q.stem||q.stem==="-"))throw new Error("invalid Hanja stem generated");
+}
+const invalidPool=[...confusablePool,{id:1009,character:"-",answer:"잘못된 자료",examples:[]}];
+for(let run=0;run<30;run++){
+ const qs=generateExamQuestions({...confusableBase,pool:invalidPool,questionCount:invalidPool.length});
+ if(qs.some(q=>q.stem==="-"))throw new Error("invalid Hanja stem generated");
+}
+console.log("Confusable character distractor checks passed.");
