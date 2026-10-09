@@ -51,7 +51,7 @@ export default async function Home() {
         supabase.from("user_hanja_progress").select("*",{count:"exact",head:true}).eq("user_id",user.id).in("hanja_id",ids).gt("study_count",0),
         supabase.from("user_hanja_progress").select("*",{count:"exact",head:true}).eq("user_id",user.id).in("hanja_id",ids).eq("learning_state","MASTERED"),
         supabase.from("user_hanja_progress").select("*",{count:"exact",head:true}).eq("user_id",user.id).in("hanja_id",ids).eq("learning_state","FAMILIAR"),
-        supabase.from("user_hanja_progress").select("*",{count:"exact",head:true}).eq("user_id",user.id).in("hanja_id",ids).gt("study_count",0).lte("next_review_at",now),
+        supabase.from("user_hanja_progress").select("*",{count:"exact",head:true}).eq("user_id",user.id).in("hanja_id",ids).gt("study_count",0).neq("learning_state","MASTERED").lte("next_review_at",now),
         supabase.from("user_hanja_progress").select("*",{count:"exact",head:true}).eq("user_id",user.id).in("hanja_id",ids).gt("study_count",0).gt("wrong_streak",0),
       ]);
       learnedCount=learned??0; masteredCount=mastered??0; familiarCount=familiar??0; reviewCount=review??0; wrongCount=wrong??0;
