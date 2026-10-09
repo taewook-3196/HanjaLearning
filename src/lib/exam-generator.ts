@@ -67,6 +67,26 @@ export function fieldExamReadinessIssues(input:ExamReadinessInput,blueprint:Exam
  return [...required].flatMap(([type,count])=>(available[type]??0)<count?[{type,required:count,available:available[type]??0}]:[]);
 }
 
+/** Flags types that can repeat across consecutive exams even when generation succeeds. */
+export function examRotationShortages(input:ExamReadinessInput,blueprint:ExamBlueprint,examCount=3):ExamReadinessIssue[]{
+ const summary=examReadinessSummary(input);
+ const available:Record<string,number>={
+  HANJA_TO_READING_MEANING:summary.HANJA_READING,READING_MEANING_TO_HANJA:summary.HANJA_READING,
+  WORD_READING:summary.WORDS,WORD_MEANING:summary.WORDS,WORD_TO_HANJA:summary.WORDS,
+  CHAR_SYNONYM_ANTONYM:summary.RELATIONS,WORD_SYNONYM_ANTONYM:summary.WORD_RELATIONS,
+  CHARACTER_PRINCIPLE:summary.CHARACTER_PRINCIPLE,DICTIONARY_LOOKUP:summary.DICTIONARY_LOOKUP,
+  CONTEXT_READING:summary.WORD_CONTEXTS,CONTEXT_TO_HANJA:summary.WORD_CONTEXTS,
+  WORD_STRUCTURE:summary.WORD_STRUCTURES,COMMON_CHARACTER:summary.COMMON_CHARACTER_SETS,
+  IDIOM:summary.IDIOMS,CULTURE_ETIQUETTE:summary.CULTURE_CONTENT,
+  CHARACTER_USAGE:summary.USAGE_ITEMS,SPECIAL_READING:summary.SPECIAL_READINGS,
+  IMAGE_RECOGNITION:summary.ORIGINAL_IMAGES
+ };
+ return blueprint.items.filter(x=>x.type!=="VARIABLE_VERIFIED").flatMap(x=>{
+  const needed=x.count*examCount;
+  return (available[x.type]??0)<needed?[{type:x.type,required:needed,available:available[x.type]??0}]:[];
+ });
+}
+
 export function validateExamQuestions(questions:ExamQuestion[],expectedCount:number,blueprint?:ExamBlueprint){
  const errors:string[]=[];
  if(questions.length!==expectedCount)errors.push(`expected ${expectedCount} questions, got ${questions.length}`);
