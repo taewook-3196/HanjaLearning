@@ -29,7 +29,7 @@ const day=86400000;
 let p=applyKnown(null,0);
 assert.deepEqual(p,{score:8,stage:1,streak:1,nextReviewAt:day});
 for(let i=0;i<20;i++)p=applyKnown(p,0);
-assert.deepEqual(p,{score:8,stage:1,nextReviewAt:day},"same-day repeats must not advance");
+assert.deepEqual(p,{score:8,stage:1,streak:1,nextReviewAt:day},"same-day repeats must not advance");
 p=applyKnown(p,day);
 assert.deepEqual(p,{score:16,stage:2,streak:2,nextReviewAt:day+3*day});
 p=applyKnown(p,day+day);
