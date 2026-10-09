@@ -81,10 +81,12 @@ export function examRotationShortages(input:ExamReadinessInput,blueprint:ExamBlu
   CHARACTER_USAGE:summary.USAGE_ITEMS,SPECIAL_READING:summary.SPECIAL_READINGS,
   IMAGE_RECOGNITION:summary.ORIGINAL_IMAGES
  };
- return blueprint.items.filter(x=>x.type!=="VARIABLE_VERIFIED").flatMap(x=>{
-  const needed=x.count*examCount;
-  return (available[x.type]??0)<needed?[{type:x.type,required:needed,available:available[x.type]??0}]:[];
- });
+ const required=new Map<string,number>();
+ for(const item of blueprint.items){
+  if(item.type==="VARIABLE_VERIFIED")continue;
+  required.set(item.type,(required.get(item.type)??0)+item.count*examCount);
+ }
+ return [...required].flatMap(([type,needed])=>(available[type]??0)<needed?[{type,required:needed,available:available[type]??0}]:[]);
 }
 
 export function validateExamQuestions(questions:ExamQuestion[],expectedCount:number,blueprint?:ExamBlueprint){
