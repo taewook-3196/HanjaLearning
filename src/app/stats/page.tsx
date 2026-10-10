@@ -1,3 +1,4 @@
+import { officialGradeDisplayName } from "@/lib/grade-display";
 import Link from "next/link";
 import { requireActiveUser } from "@/lib/auth/require-active-user";
 import { GrowthStickerArt } from "@/components/growth-sticker-art";
