@@ -197,12 +197,12 @@ export function generateExamQuestions(args:{recentQuestionKeys?:Set<string>;pool
   .filter(ctx=>{
    const w=wordById.get(ctx.word_id);
    if(!w||ctx.blank_text!==w.reading||!ctx.sentence.includes(ctx.blank_text))return false;
-   return new Set(goodWords.filter(x=>x.id!==w.id&&x.word!==w.word).map(x=>x.word)).size>=3;
+   return new Set(goodWords.filter(x=>x.id!==w.id&&x.word!==w.word&&!ctx.sentence.includes(x.reading??"")&&Boolean(x.reading)).map(x=>x.word)).size>=3;
   })
   .slice(0,contextHanjaCount)
   .map(ctx=>{
    const w=wordById.get(ctx.word_id)!;
-   const wrong=[...new Set(shuffle(goodWords.filter(x=>x.id!==w.id&&x.word!==w.word)).map(x=>x.word))].slice(0,3);
+   const wrong=[...new Set(shuffle(goodWords.filter(x=>x.id!==w.id&&x.word!==w.word&&!ctx.sentence.includes(x.reading??"")&&Boolean(x.reading))).map(x=>x.word))].slice(0,3);
    const stem=ctx.sentence.replace(ctx.blank_text,"【　　】");
    return{id:`context-hanja:${ctx.id}`,stem,prompt:"빈칸에 알맞은 한자어를 고르세요.",correct:w.word,choices:shuffle([w.word,...wrong]),examples:[]};
   })
