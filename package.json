@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test:exam": "node --experimental-strip-types scripts/test-exam-blueprints.ts && node --experimental-strip-types scripts/test-exam-generator.ts && node --experimental-strip-types scripts/test-exam-culture.ts && node --experimental-strip-types scripts/test-mastery-spacing.ts"
+    "test:exam": "node --experimental-strip-types scripts/test-exam-blueprints.ts && node --experimental-strip-types scripts/test-exam-generator.ts && node --experimental-strip-types scripts/test-exam-culture.ts && node --experimental-strip-types scripts/test-mastery-spacing.ts && node --experimental-strip-types scripts/test-grade-switch-preservation.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
