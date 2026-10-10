@@ -25,7 +25,7 @@ export function examReadinessSummary(input:ExamReadinessInput){
   RELATIONS:input.relations.length,
   WORD_RELATIONS:input.wordRelations.length,
   CHARACTER_PRINCIPLE:input.metadata.filter(x=>Boolean(x.formation_type)).length,
-  DICTIONARY_LOOKUP:input.metadata.filter(x=>Boolean(x.radical)||typeof x.total_strokes==="number").length,
+  DICTIONARY_LOOKUP:input.metadata.filter(x=>input.pool.some(h=>h.id===x.hanja_id)&&Boolean(x.radical)&&x.radical!==input.pool.find(h=>h.id===x.hanja_id)?.character).length+input.metadata.filter(x=>input.pool.some(h=>h.id===x.hanja_id)&&typeof x.total_strokes==="number").length,
   WORD_CONTEXTS:input.wordContexts.length,
   WORD_STRUCTURES:input.wordStructures.length,
   COMMON_CHARACTER_SETS:input.commonCharacterSets.length,
