@@ -2,7 +2,7 @@ import {DAEHAN_FIELD_BLUEPRINTS} from "../src/lib/exam-blueprints.ts";
 import {generateExamQuestions,validateExamQuestions,examReadinessSummary,examRotationShortages,type HanjaPoolItem,type PublishedWord} from "../src/lib/exam-generator.ts";
 
 const pool:HanjaPoolItem[]=Array.from({length:80},(_,i)=>({id:i+1,character:String.fromCodePoint(0x4e00+i),answer:`뜻${i+1} 음${i+1}`,examples:[]}));
-const words:PublishedWord[]=Array.from({length:80},(_,i)=>({id:i+1,word:`詞${String.fromCodePoint(0x4e00+i)}`,reading:`읽기${i+1}`,meaning:`뜻풀이${i+1}`}));
+const words:PublishedWord[]=Array.from({length:80},(_,i)=>({id:i+1,word:i<4?`詞${String.fromCodePoint(0x4e00+i)}`:i>=10&&i<14?`${String.fromCodePoint(0x4e00+i-10)}詞`:`詞${String.fromCodePoint(0x4e00+i)}`,reading:`읽기${i+1}`,meaning:`뜻풀이${i+1}`}));
 const characterById=new Map(pool.map(x=>[x.id,x.character]));
 const metadata=pool.slice(0,12).map((x,i)=>({hanja_id:x.id,radical:`부수${i}`,total_strokes:i+1,formation_type:["PICTOGRAPH","IDEOGRAPH","COMPOUND_IDEOGRAPH","PHONO_SEMANTIC"][i%4]}));
 const relations=Array.from({length:8},(_,i)=>({from_hanja_id:i+1,to_hanja_id:i+21,relation_type:i%2?"SIMILAR":"ANTONYM"}));
@@ -26,6 +26,7 @@ for(const gradeCode of gradeCodes){
   if(errors.length)throw new Error(`${gradeCode} run ${run+1}: ${errors.join("; ")}`);
   if(new Set(qs.map(q=>q.id)).size!==qs.length)throw new Error(`${gradeCode} run ${run+1}: duplicate ids`);
   if(qs.some(q=>q.choices.length!==4||new Set(q.choices).size!==4||!q.choices.includes(q.correct)))throw new Error(`${gradeCode} run ${run+1}: invalid choices`);
+  if(qs.some(q=>q.id.startsWith("common-character:")&&(q.stem.includes(q.correct)||q.stem.split("□").length-1<2)))throw new Error(`${gradeCode} run ${run+1}: invalid common-character blanks`);
  }
 }
 console.log(`Exam generator invariant checks passed for ${gradeCodes.join(", ")} across 200 runs each.`);
