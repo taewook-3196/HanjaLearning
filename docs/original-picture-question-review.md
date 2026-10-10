@@ -1,6 +1,6 @@
 # 자체 제작 그림 문제 후보 (검수 전)
 
-8급: original-sun.svg(日), original-moon.svg(月), original-tree.svg(木), original-fire.svg(火), original-water.svg(水), original-person.svg(人), original-earth.svg(土), original-gate.svg(門), original-sunrise.svg(母 후보, 파일명 교체 필요).
+8급: original-sun.svg(日), original-moon.svg(月), original-tree.svg(木), original-fire.svg(火), original-water.svg(水), original-person.svg(人), original-earth.svg(土), original-gate.svg(門), original-mother.svg(母 후보, 파일명 교체 완료).
 
 7급 추가: original-mountain.svg(山), original-mouth.svg(口), original-hand.svg(手).
 
@@ -16,7 +16,7 @@
 - **보류: original-gate.svg** — 대문의 윤곽은 있으나 중앙 세로선과 대칭 구조가 門 자체의 자형 힌트가 되어 그림의 의미를 묻는 문제인지 자형 맞히기인지 혼재합니다.
 - **보류: original-mouth.svg** — 곡선이 웃는 입인지 구분할 수 있지만 얼굴 맥락이 없어 다른 곡선 형태로 읽힐 수 있습니다.
 - **보류: original-hand.svg** — 손가락 윤곽이 겹쳐 작은 모바일 화면에서 식별이 어려울 수 있습니다.
-- **보류: original-sunrise.svg** — original-sun.svg와 정답 日 중복으로 연속 회차 다양성이 부족합니다.
+- **보류: original-mother.svg** — original-sun.svg와 정답 日 중복으로 연속 회차 다양성이 부족합니다.
 - **조건부 후보: original-sun.svg, original-moon.svg, original-tree.svg, original-fire.svg, original-water.svg, original-person.svg, original-mountain.svg** — 정적 SVG 경로와 도형 의미는 검토했으나 실제 기기 렌더링·아동 사용성 검수는 아직 수행하지 않았습니다.
 
 **결론:** 12개 모두 운영 게시 금지 유지. 의미가 불명확한 4개는 도안 수정, 日 중복 1개는 다른 8급 한자로 교체한 뒤 이미지 표시/정답/오답 난이도를 검증해야 합니다.
@@ -27,6 +27,6 @@
 - original-gate.svg: 아치형 대문 형태로 수정하여 門 자형 직접 모사를 줄임.
 - original-mouth.svg: 입술·입안 선을 구분하도록 수정.
 - original-hand.svg: 손바닥·손가락 윤곽을 정리.
-- original-sunrise.svg: 日 중복을 피하도록 **母(어머니와 아이)** 그림 후보로 내용 변경. **파일명은 임시이며 게시 전 original-mother.svg로 변경 필요**.
+- original-mother.svg: 日 중복을 피하도록 **母(어머니와 아이)** 그림 후보로 내용 변경. 파일명은 original-mother.svg로 정리 완료.
 
 이 수정은 SVG 경로의 정적 검토만 수행했습니다. 실제 기기 렌더링 및 아동 검수는 미완료이며, DB에 등록하지 않습니다.
