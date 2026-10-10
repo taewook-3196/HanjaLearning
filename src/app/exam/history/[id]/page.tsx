@@ -1,4 +1,5 @@
 "use client";
+import { officialGradeDisplayName } from "@/lib/grade-display";
 import Link from "next/link";
 import {useEffect,useState} from "react";
 import {useParams,useRouter} from "next/navigation";
