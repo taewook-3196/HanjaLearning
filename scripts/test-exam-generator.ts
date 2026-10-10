@@ -1,5 +1,5 @@
 import {DAEHAN_FIELD_BLUEPRINTS} from "../src/lib/exam-blueprints.ts";
-import {generateExamQuestions,validateExamQuestions,type HanjaPoolItem,type PublishedWord} from "../src/lib/exam-generator.ts";
+import {generateExamQuestions,validateExamQuestions,examReadinessSummary,examRotationShortages,type HanjaPoolItem,type PublishedWord} from "../src/lib/exam-generator.ts";
 
 const pool:HanjaPoolItem[]=Array.from({length:80},(_,i)=>({id:i+1,character:String.fromCodePoint(0x4e00+i),answer:`뜻${i+1} 음${i+1}`,examples:[]}));
 const words:PublishedWord[]=Array.from({length:80},(_,i)=>({id:i+1,word:`詞${String.fromCodePoint(0x4e00+i)}`,reading:`읽기${i+1}`,meaning:`뜻풀이${i+1}`}));
@@ -55,3 +55,18 @@ for(let run=0;run<30;run++){
  if(qs.some(q=>q.stem==="-"))throw new Error("invalid Hanja stem generated");
 }
 console.log("Confusable character distractor checks passed.");
+
+// Dictionary readiness must count two independently selectable questions per valid character.
+const dictionarySummary=examReadinessSummary(base);
+if(dictionarySummary.DICTIONARY_LOOKUP!==metadata.length*2)throw new Error(`Expected ${metadata.length*2} dictionary variants, got ${dictionarySummary.DICTIONARY_LOOKUP}`);
+const dictionaryBlueprint=DAEHAN_FIELD_BLUEPRINTS.PRE4;
+const shortages=examRotationShortages({...base,specialReadings:specialReadings.slice(0,2)},dictionaryBlueprint,3);
+const specialShortage=shortages.find(x=>x.type==="SPECIAL_READING");
+if(!specialShortage||specialShortage.required!==6||specialShortage.available!==2)throw new Error("Special reading three-exam shortage must be reported as 6 required and 2 available");
+const recentDictionaryIds=new Set(metadata.map(m=>`radical:${m.hanja_id}`));
+for(let run=0;run<40;run++){
+ const qs=generateExamQuestions({...base,questionCount:dictionaryBlueprint.questionCount,blueprint:dictionaryBlueprint,recentQuestionKeys:recentDictionaryIds});
+ const dictionary=qs.filter(q=>q.type==="DICTIONARY_LOOKUP");
+ if(dictionary.length!==1||!dictionary[0].id.startsWith("strokes:"))throw new Error("Dictionary rotation should prefer unasked stroke variants");
+}
+console.log("Dictionary variant counting, rotation, and special-reading shortage checks passed.");
