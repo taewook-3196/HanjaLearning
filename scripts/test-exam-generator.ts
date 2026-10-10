@@ -17,6 +17,17 @@ const usageItems=Array.from({length:12},(_,i)=>({id:i+1,hanja_id:i+1,prompt:`쓰
 const imageItems=Array.from({length:6},(_,i)=>({id:i+1,hanja_id:i+1,asset_path:`/exam-images/test-${i+1}.svg`,alt_text:`시험 그림 ${i+1}`}));
 const base={pool,words,relations,wordRelations,metadata,wordContexts,wordStructures,commonCharacterSets,idioms,cultureItems,usageItems,specialReadings,imageItems,characterById};
 
+// Context reading and context-to-Hanja share a source bank across three exams.
+for(const [gradeCode,blueprint] of Object.entries(DAEHAN_FIELD_BLUEPRINTS)){
+ const contextPerExam=blueprint.items.filter(x=>x.type==="CONTEXT_READING"||x.type==="CONTEXT_TO_HANJA").reduce((sum,x)=>sum+x.count,0);
+ if(!contextPerExam)continue;
+ const required=contextPerExam*3;
+ const input={...base,wordContexts:wordContexts.slice(0,required-1)};
+ const issue=examRotationShortages(input,blueprint,3).find(x=>x.type==="CONTEXT_SHARED_POOL");
+ if(!issue||issue.required!==required||issue.available!==required-1)throw new Error(`${gradeCode}: combined context bank shortage not detected`);
+}
+console.log("All nine grade shared-context rotation checks passed.");
+
 // Every supported grade must report a three-exam rotation shortage when a required bank is empty.
 for(const [gradeCode,blueprint] of Object.entries(DAEHAN_FIELD_BLUEPRINTS)){
  const blankBank={...base,wordContexts:[],specialReadings:[],imageItems:[],wordStructures:[]};
