@@ -69,4 +69,11 @@ for(let run=0;run<40;run++){
  const dictionary=qs.filter(q=>q.type==="DICTIONARY_LOOKUP");
  if(dictionary.length!==1||!dictionary[0].id.startsWith("strokes:"))throw new Error("Dictionary rotation should prefer unasked stroke variants");
 }
+// The readiness count must exclude variants that cannot form four distinct answers.
+const sparseMetadata=metadata.slice(0,3);
+const sparseSummary=examReadinessSummary({...base,metadata:sparseMetadata});
+if(sparseSummary.DICTIONARY_LOOKUP!==0)throw new Error("Dictionary candidates without three distractors must be excluded");
+const limitedPool=pool.slice(0,4);
+const limitedSummary=examReadinessSummary({...base,pool:limitedPool});
+if(limitedSummary.DICTIONARY_LOOKUP!==8)throw new Error("Dictionary candidates must be limited to eligible grade characters");
 console.log("Dictionary variant counting, rotation, and special-reading shortage checks passed.");
