@@ -59,7 +59,7 @@ console.log("Confusable character distractor checks passed.");
 
 for(let run=0;run<20;run++){
  const contextualSpecial={...specialReadings[0],usage_note:"音樂(음악)에서 樂을 읽는 소리",reading:"특음1"};
- const specialQuestions=generateExamQuestions({...base,specialReadings:[contextualSpecial,...specialReadings.slice(1)],questionCount:DAEHAN_FIELD_BLUEPRINTS.PRE4.questionCount,blueprint:DAEHAN_FIELD_BLUEPRINTS.PRE4});
+ const specialQuestions=generateExamQuestions({...base,specialReadings:[contextualSpecial,...specialReadings.slice(1)],recentQuestionKeys:new Set(specialReadings.slice(1).map(x=>`special-reading:${x.id}`)),questionCount:DAEHAN_FIELD_BLUEPRINTS.PRE4.questionCount,blueprint:DAEHAN_FIELD_BLUEPRINTS.PRE4});
  const target=specialQuestions.find(q=>q.id==="special-reading:1");
  if(!target)throw new Error("Special-reading context question missing");
  if(!target.prompt.includes("音樂")||target.prompt.includes("(음악)"))throw new Error("Special-reading prompt must preserve Hanja context without leaking Korean reading");
