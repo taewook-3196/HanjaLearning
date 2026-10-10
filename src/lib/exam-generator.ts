@@ -128,7 +128,7 @@ const formationLabels:Record<string,string>={PICTOGRAPH:"상형",IDEOGRAPH:"지�
 export function generateExamQuestions(args:{recentQuestionKeys?:Set<string>;pool:HanjaPoolItem[];words:PublishedWord[];relations:Relation[];wordRelations:WordRelation[];metadata:Metadata[];wordContexts:WordContext[];wordStructures:WordStructure[];commonCharacterSets:CommonCharacterSet[];idioms:Idiom[];cultureItems:CultureItem[];usageItems:UsageItem[];specialReadings:SpecialReading[];imageItems:ImageItem[];characterById:Map<number,string>;questionCount:number;blueprint?:ExamBlueprint}):ExamQuestion[]{
  const {pool,words,relations,wordRelations,metadata,wordContexts,wordStructures,commonCharacterSets,idioms,cultureItems,usageItems,specialReadings,imageItems,characterById,questionCount,blueprint}=args;
  const recentQuestionKeys=args.recentQuestionKeys??new Set<string>();
- const preferFresh=<T>(items:T[],key:(item:T)=>string)=>{const shuffled=shuffle(items);return [...shuffled.filter(x=>!recentQuestionKeys.has(key(x))),...shuffled.filter(x=>recentQuestionKeys.has(key(x)))];};
+ const preferFresh=<T>(items:T[],key:(item:T)=>string)=>{const shuffled=shuffle(items);const fresh:T[]=[],recent:T[]=[];for(const item of shuffled)(recentQuestionKeys.has(key(item))?recent:fresh).push(item);return [...fresh,...recent];};
  const forwardCount=blueprint?.items.filter(x=>x.type==="HANJA_TO_READING_MEANING").reduce((n,x)=>n+x.count,0)??0;
  const reverseCount=blueprint?.items.filter(x=>x.type==="READING_MEANING_TO_HANJA").reduce((n,x)=>n+x.count,0)??0;
  const wordReadingCount=blueprint?.items.filter(x=>x.type==="WORD_READING").reduce((n,x)=>n+x.count,0)??0;
