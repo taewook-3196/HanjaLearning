@@ -17,6 +17,20 @@ const usageItems=Array.from({length:12},(_,i)=>({id:i+1,hanja_id:i+1,prompt:`쓰
 const imageItems=Array.from({length:6},(_,i)=>({id:i+1,hanja_id:i+1,asset_path:`/exam-images/test-${i+1}.svg`,alt_text:`시험 그림 ${i+1}`}));
 const base={pool,words,relations,wordRelations,metadata,wordContexts,wordStructures,commonCharacterSets,idioms,cultureItems,usageItems,specialReadings,imageItems,characterById};
 
+// Every supported grade must report a three-exam rotation shortage when a required bank is empty.
+for(const [gradeCode,blueprint] of Object.entries(DAEHAN_FIELD_BLUEPRINTS)){
+ const blankBank={...base,wordContexts:[],specialReadings:[],imageItems:[],wordStructures:[]};
+ const issues=examRotationShortages(blankBank,blueprint,3);
+ for(const item of blueprint.items){
+  if(item.type==="VARIABLE_VERIFIED")continue;
+  if(["CONTEXT_READING","CONTEXT_TO_HANJA","SPECIAL_READING","IMAGE_RECOGNITION","WORD_STRUCTURE"].includes(item.type)){
+   const issue=issues.find(x=>x.type===item.type);
+   if(!issue||issue.required!==item.count*3||issue.available!==0)throw new Error(`${gradeCode}: missing three-exam shortage for ${item.type}`);
+  }
+ }
+}
+console.log("All nine grade rotation-shortage checks passed.");
+
 const gradeCodes=Object.keys(DAEHAN_FIELD_BLUEPRINTS);
 for(const gradeCode of gradeCodes){
  const blueprint=DAEHAN_FIELD_BLUEPRINTS[gradeCode];
