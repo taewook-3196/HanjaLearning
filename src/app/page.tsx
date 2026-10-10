@@ -1,3 +1,4 @@
+import { officialGradeDisplayName, gradeDisplayName } from "@/lib/grade-display";
 import Link from "next/link";
 import { BottomNav } from "@/components/bottom-nav";
 import { redirect } from "next/navigation";
@@ -58,7 +59,7 @@ export default async function Home() {
     }
   }
   if (targetCount === 0) {
-    return <main className="app-shell"><header className="home-header"><div className="profile-heading"><span className="profile-avatar">{profileAvatar}</span><div><strong>{profile.nickname}</strong></div></div><img className="home-app-icon" src="/app-icon.webp" width={52} height={52} alt="아빠한자" /></header><section className="study-card"><div><p className="eyebrow">목표급수 확인</p><h2>{profile.target_grade}은(는) 아직 학습할 수 없어요.</h2><p className="subtitle">지금 학습 가능한 급수로 목표를 바꿔 주세요. 기존 학습 기록은 그대로 남습니다.</p></div><Link className="primary-link" href="/settings">학습 가능한 급수 선택하기</Link></section></main>;
+    return <main className="app-shell"><header className="home-header"><div className="profile-heading"><span className="profile-avatar">{profileAvatar}</span><div><strong>{profile.nickname}</strong></div></div><img className="home-app-icon" src="/app-icon.webp" width={52} height={52} alt="아빠한자" /></header><section className="study-card"><div><p className="eyebrow">목표급수 확인</p><h2>{officialGradeDisplayName(profile.target_grade)}은(는) 아직 학습할 수 없어요.</h2><p className="subtitle">지금 학습 가능한 급수로 목표를 바꿔 주세요. 기존 학습 기록은 그대로 남습니다.</p></div><Link className="primary-link" href="/settings">학습 가능한 급수 선택하기</Link></section></main>;
   }
   const plan=buildStudyPlan({unseen:Math.max(0,targetCount-learnedCount),dueReviews:reviewCount,weakNotDue:Math.max(0,learnedCount-masteredCount-reviewCount),examDate:settings?.target_exam_date});
   const todayReviewCount=plan.reviewCount;
@@ -70,7 +71,7 @@ export default async function Home() {
   const needsMastery=Math.max(0,targetCount-masteredCount);
   const providerRows=await supabase.from("exam_providers").select("name").eq("code",profile.target_provider).maybeSingle();
   const providerLabel=providerRows.data?.name??(profile.target_provider==="ALL"?"전체":profile.target_provider);
-  const gradeLabel=grades?.[0]?.name??profile.target_grade;
+  const gradeLabel=grades?.[0]?.name??gradeDisplayName(profile.target_grade);
 
   return <main className="app-shell">
     <header className="home-header"><div className="profile-heading"><span className="profile-avatar">{profileAvatar}</span><div><strong>{profile.nickname} <small className="home-level">Lv.{level}</small></strong><span>{providerLabel} · {gradeLabel} 도전</span></div></div><img className="home-app-icon" src="/app-icon.webp" width={52} height={52} alt="아빠한자" /></header>
