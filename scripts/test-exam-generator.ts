@@ -76,4 +76,14 @@ if(sparseSummary.DICTIONARY_LOOKUP!==0)throw new Error("Dictionary candidates wi
 const limitedPool=pool.slice(0,4);
 const limitedSummary=examReadinessSummary({...base,pool:limitedPool});
 if(limitedSummary.DICTIONARY_LOOKUP!==8)throw new Error("Dictionary candidates must be limited to eligible grade characters");
+// Out-of-grade metadata must never become a generated dictionary question.
+const outOfGradeMetadata=[...metadata,{hanja_id:99999,radical:"외부부수",total_strokes:99,formation_type:null}];
+const outOfGradeCharacterById=new Map(characterById);
+outOfGradeCharacterById.set(99999,"龍");
+const outOfGradeSummary=examReadinessSummary({...base,metadata:outOfGradeMetadata});
+if(outOfGradeSummary.DICTIONARY_LOOKUP!==metadata.length*2)throw new Error("Out-of-grade metadata must not increase dictionary readiness");
+for(let run=0;run<40;run++){
+ const qs=generateExamQuestions({...base,metadata:outOfGradeMetadata,characterById:outOfGradeCharacterById,questionCount:dictionaryBlueprint.questionCount,blueprint:dictionaryBlueprint});
+ if(qs.some(q=>q.id==="radical:99999"||q.id==="strokes:99999"))throw new Error("Out-of-grade dictionary question generated");
+}
 console.log("Dictionary variant counting, rotation, and special-reading shortage checks passed.");
