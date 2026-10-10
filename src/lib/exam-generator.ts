@@ -102,7 +102,10 @@ export function examRotationShortages(input:ExamReadinessInput,blueprint:ExamBlu
   if(item.type==="VARIABLE_VERIFIED")continue;
   required.set(item.type,(required.get(item.type)??0)+item.count*examCount);
  }
- return [...required].flatMap(([type,needed])=>(available[type]??0)<needed?[{type,required:needed,available:available[type]??0}]:[]);
+ const issues=[...required].flatMap(([type,needed])=>(available[type]??0)<needed?[{type,required:needed,available:available[type]??0}]:[]);
+ const sharedContextDemand=(required.get("CONTEXT_READING")??0)+(required.get("CONTEXT_TO_HANJA")??0);
+ if(sharedContextDemand>0&&summary.WORD_CONTEXTS<sharedContextDemand)issues.push({type:"CONTEXT_SHARED_POOL",required:sharedContextDemand,available:summary.WORD_CONTEXTS});
+ return issues;
 }
 
 export function validateExamQuestions(questions:ExamQuestion[],expectedCount:number,blueprint?:ExamBlueprint){
