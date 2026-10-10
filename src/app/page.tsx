@@ -1,3 +1,4 @@
+import { officialGradeDisplayName, gradeDisplayName } from "@/lib/grade-display";
 import Link from "next/link";
 import { BottomNav } from "@/components/bottom-nav";
 import { redirect } from "next/navigation";
