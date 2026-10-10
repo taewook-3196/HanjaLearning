@@ -215,9 +215,11 @@ export function generateExamQuestions(args:{recentQuestionKeys?:Set<string>;pool
  const goodSpecial=specialReadings.filter(x=>x.reading&&x.meaning&&characterById.has(x.hanja_id)&&x.correct_choice>=1&&x.correct_choice<=4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d].every(Boolean)&&new Set([x.choice_a,x.choice_b,x.choice_c,x.choice_d]).size===4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d][x.correct_choice-1]===x.reading);const specialQs=preferFresh(goodSpecial,x=>`special-reading:${x.id}`).slice(0,specialReadingCount).map(x=>{const choices=[x.choice_a,x.choice_b,x.choice_c,x.choice_d];return{id:`special-reading:${x.id}`,stem:characterById.get(x.hanja_id)!,prompt:`${x.usage_note.replace(/\([^)]*\)/g,"")} — 이때의 읽기로 알맞은 것을 고르세요.`,correct:choices[x.correct_choice-1],choices:shuffle(choices),examples:[]}});
  const principleQs:ExamQuestion[]=[];for(const m of preferFresh(metadata.filter(x=>Boolean(x.formation_type)),m=>`formation:${m.hanja_id}`)){if(principleQs.length>=principleCount)break;const stem=characterById.get(m.hanja_id),correct=m.formation_type?formationLabels[m.formation_type]:undefined;if(!validCharacter(stem)||!correct)continue;const wrong=shuffle(Object.entries(formationLabels).filter(([k])=>k!==m.formation_type).map(([,v])=>v)).slice(0,3);if(wrong.length===3)principleQs.push({id:`formation:${m.hanja_id}`,stem,prompt:"이 한자의 만들어진 원리로 알맞은 것을 고르세요.",correct,choices:shuffle([correct,...wrong]),examples:[]})}
  const dictionaryCandidates:ExamQuestion[]=[];
+ const eligibleDictionaryIds=new Set(pool.filter(h=>validCharacter(h.character)).map(h=>h.id));
  const allRadicals=[...new Set(metadata.map(x=>x.radical).filter((x):x is string=>Boolean(x)))];
  const allStrokes=[...new Set(metadata.map(x=>x.total_strokes).filter((x):x is number=>typeof x==="number"))];
  for(const m of metadata){
+  if(!eligibleDictionaryIds.has(m.hanja_id))continue;
   const stem=characterById.get(m.hanja_id);
   if(!validCharacter(stem))continue;
   if(m.radical&&m.radical!==stem){
