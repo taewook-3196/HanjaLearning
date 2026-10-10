@@ -18,6 +18,20 @@ export type ImageItem={id:number;hanja_id:number;asset_path:string;alt_text:stri
 
 export type ExamReadinessInput={pool:HanjaPoolItem[];words:PublishedWord[];relations:Relation[];wordRelations:WordRelation[];metadata:Metadata[];wordContexts:WordContext[];wordStructures:WordStructure[];commonCharacterSets:CommonCharacterSet[];idioms:Idiom[];cultureItems:CultureItem[];usageItems:UsageItem[];specialReadings:SpecialReading[];imageItems:ImageItem[]};
 
+function countDictionaryCandidates(input:ExamReadinessInput):number{
+ const characters=new Map(input.pool.map(h=>[h.id,h.character]));
+ const radicals=new Set(input.metadata.map(m=>m.radical).filter((v):v is string=>Boolean(v)));
+ const strokes=new Set(input.metadata.map(m=>m.total_strokes).filter((v):v is number=>typeof v==="number"));
+ let count=0;
+ for(const m of input.metadata){
+  const character=characters.get(m.hanja_id);
+  if(!character||!validCharacter(character))continue;
+  if(m.radical&&m.radical!==character&&radicals.size-(radicals.has(m.radical)?1:0)>=3)count++;
+  if(typeof m.total_strokes==="number"&&strokes.size-(strokes.has(m.total_strokes)?1:0)>=3)count++;
+ }
+ return count;
+}
+
 export function examReadinessSummary(input:ExamReadinessInput){
  return {
   HANJA_READING:input.pool.length,
@@ -25,14 +39,14 @@ export function examReadinessSummary(input:ExamReadinessInput){
   RELATIONS:input.relations.length,
   WORD_RELATIONS:input.wordRelations.length,
   CHARACTER_PRINCIPLE:input.metadata.filter(x=>Boolean(x.formation_type)).length,
-  DICTIONARY_LOOKUP:input.metadata.filter(x=>Boolean(x.radical)||typeof x.total_strokes==="number").length,
+  DICTIONARY_LOOKUP:countDictionaryCandidates(input),
   WORD_CONTEXTS:input.wordContexts.length,
   WORD_STRUCTURES:input.wordStructures.length,
   COMMON_CHARACTER_SETS:input.commonCharacterSets.length,
   IDIOMS:input.idioms.length,
   CULTURE_CONTENT:input.cultureItems.length,
   USAGE_ITEMS:input.usageItems.length,
-  SPECIAL_READINGS:input.specialReadings.length,
+  SPECIAL_READINGS:input.specialReadings.filter(x=>x.reading&&x.meaning&&input.pool.some(h=>h.id===x.hanja_id)&&x.correct_choice>=1&&x.correct_choice<=4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d].every(Boolean)&&new Set([x.choice_a,x.choice_b,x.choice_c,x.choice_d]).size===4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d][x.correct_choice-1]===x.reading).length,
   ORIGINAL_IMAGES:input.imageItems.length,
  };
 }
@@ -67,13 +81,37 @@ export function fieldExamReadinessIssues(input:ExamReadinessInput,blueprint:Exam
  return [...required].flatMap(([type,count])=>(available[type]??0)<count?[{type,required:count,available:available[type]??0}]:[]);
 }
 
+/** Flags types that can repeat across consecutive exams even when generation succeeds. */
+export function examRotationShortages(input:ExamReadinessInput,blueprint:ExamBlueprint,examCount=3):ExamReadinessIssue[]{
+ const summary=examReadinessSummary(input);
+ const available:Record<string,number>={
+  HANJA_TO_READING_MEANING:summary.HANJA_READING,READING_MEANING_TO_HANJA:summary.HANJA_READING,
+  WORD_READING:summary.WORDS,WORD_MEANING:summary.WORDS,WORD_TO_HANJA:summary.WORDS,
+  CHAR_SYNONYM_ANTONYM:summary.RELATIONS,WORD_SYNONYM_ANTONYM:summary.WORD_RELATIONS,
+  CHARACTER_PRINCIPLE:summary.CHARACTER_PRINCIPLE,DICTIONARY_LOOKUP:summary.DICTIONARY_LOOKUP,
+  CONTEXT_READING:summary.WORD_CONTEXTS,CONTEXT_TO_HANJA:summary.WORD_CONTEXTS,
+  WORD_STRUCTURE:summary.WORD_STRUCTURES,COMMON_CHARACTER:summary.COMMON_CHARACTER_SETS,
+  IDIOM:summary.IDIOMS,CULTURE_ETIQUETTE:summary.CULTURE_CONTENT,
+  CHARACTER_USAGE:summary.USAGE_ITEMS,SPECIAL_READING:summary.SPECIAL_READINGS,
+  IMAGE_RECOGNITION:summary.ORIGINAL_IMAGES
+ };
+ const required=new Map<string,number>();
+ for(const item of blueprint.items){
+  if(item.type==="VARIABLE_VERIFIED")continue;
+  required.set(item.type,(required.get(item.type)??0)+item.count*examCount);
+ }
+ return [...required].flatMap(([type,needed])=>(available[type]??0)<needed?[{type,required:needed,available:available[type]??0}]:[]);
+}
+
 export function validateExamQuestions(questions:ExamQuestion[],expectedCount:number,blueprint?:ExamBlueprint){
  const errors:string[]=[];
  if(questions.length!==expectedCount)errors.push(`expected ${expectedCount} questions, got ${questions.length}`);
  if(blueprint){
-  for(const item of blueprint.items){
-   const actual=questions.filter(q=>q.type===item.type).length;
-   if(actual!==item.count)errors.push(`blueprint ${item.type}: expected ${item.count}, got ${actual}`);
+  const expectedByType=new Map<string,number>();
+  for(const item of blueprint.items)expectedByType.set(item.type,(expectedByType.get(item.type)??0)+item.count);
+  for(const [type,required] of expectedByType){
+   const actual=questions.filter(q=>q.type===type).length;
+   if(actual!==required)errors.push(`blueprint ${type}: expected ${required}, got ${actual}`);
   }
  }
  const ids=new Set<string>();
@@ -104,7 +142,7 @@ const formationLabels:Record<string,string>={PICTOGRAPH:"상형",IDEOGRAPH:"지�
 export function generateExamQuestions(args:{recentQuestionKeys?:Set<string>;pool:HanjaPoolItem[];words:PublishedWord[];relations:Relation[];wordRelations:WordRelation[];metadata:Metadata[];wordContexts:WordContext[];wordStructures:WordStructure[];commonCharacterSets:CommonCharacterSet[];idioms:Idiom[];cultureItems:CultureItem[];usageItems:UsageItem[];specialReadings:SpecialReading[];imageItems:ImageItem[];characterById:Map<number,string>;questionCount:number;blueprint?:ExamBlueprint}):ExamQuestion[]{
  const {pool,words,relations,wordRelations,metadata,wordContexts,wordStructures,commonCharacterSets,idioms,cultureItems,usageItems,specialReadings,imageItems,characterById,questionCount,blueprint}=args;
  const recentQuestionKeys=args.recentQuestionKeys??new Set<string>();
- const preferFresh=<T>(items:T[],key:(item:T)=>string)=>{const shuffled=shuffle(items);return [...shuffled.filter(x=>!recentQuestionKeys.has(key(x))),...shuffled.filter(x=>recentQuestionKeys.has(key(x)))];};
+ const preferFresh=<T>(items:T[],key:(item:T)=>string)=>{const shuffled=shuffle(items);const fresh:T[]=[],recent:T[]=[];for(const item of shuffled)(recentQuestionKeys.has(key(item))?recent:fresh).push(item);return [...fresh,...recent];};
  const forwardCount=blueprint?.items.filter(x=>x.type==="HANJA_TO_READING_MEANING").reduce((n,x)=>n+x.count,0)??0;
  const reverseCount=blueprint?.items.filter(x=>x.type==="READING_MEANING_TO_HANJA").reduce((n,x)=>n+x.count,0)??0;
  const wordReadingCount=blueprint?.items.filter(x=>x.type==="WORD_READING").reduce((n,x)=>n+x.count,0)??0;
@@ -174,9 +212,26 @@ export function generateExamQuestions(args:{recentQuestionKeys?:Set<string>;pool
  const cultureQs=preferFresh(cultureItems,i=>`culture:${i.id}`).filter(i=>{const cs=[i.choice_a,i.choice_b,i.choice_c,i.choice_d];return i.correct_choice>=1&&i.correct_choice<=4&&cs.every(Boolean)&&new Set(cs).size===4}).slice(0,cultureCount).map(i=>{const choices=[i.choice_a,i.choice_b,i.choice_c,i.choice_d];const correct=choices[i.correct_choice-1];return{id:`culture:${i.id}`,stem:i.prompt_summary,prompt:"알맞은 답을 고르세요.",correct,choices:shuffle(choices),examples:[],explanation:i.correct_explanation?.trim()||undefined}}).filter(q=>Boolean(q.correct)&&q.choices.length===4&&new Set(q.choices).size===4);
  const imageQs=preferFresh(imageItems,x=>`image:${x.id}`).filter(x=>characterById.has(x.hanja_id)&&new Set(pool.filter(h=>h.id!==x.hanja_id&&h.character!==characterById.get(x.hanja_id)).map(h=>h.character)).size>=3).slice(0,imageCount).map(x=>{const correct=characterById.get(x.hanja_id)!;const wrong=[...new Set(shuffle(pool.filter(h=>h.id!==x.hanja_id&&h.character!==correct)).map(h=>h.character))].slice(0,3);return{id:`image:${x.id}`,stem:"그림 한자 찾기",prompt:"그림과 알맞은 한자를 고르세요.",correct,choices:shuffle([correct,...wrong]),examples:[],image:{src:x.asset_path,alt:x.alt_text}}}).filter(q=>q.choices.length===4);
  const usageQs=preferFresh(usageItems,i=>`usage:${i.id}`).filter(i=>{const cs=[i.choice_a,i.choice_b,i.choice_c,i.choice_d];return i.correct_choice>=1&&i.correct_choice<=4&&cs.every(Boolean)&&new Set(cs).size===4}).slice(0,usageCount).map(i=>{const choices=[i.choice_a,i.choice_b,i.choice_c,i.choice_d],correct=choices[i.correct_choice-1];return{id:`usage:${i.id}`,stem:i.prompt,prompt:"한자의 쓰임이 알맞은 것을 고르세요.",correct,choices,examples:[]}}).filter(q=>Boolean(q.correct)&&q.choices.length===4&&new Set(q.choices).size===4);
- const goodSpecial=specialReadings.filter(x=>x.reading&&x.meaning&&characterById.has(x.hanja_id));const specialQs=preferFresh(goodSpecial,x=>`special-reading:${x.id}`).filter(x=>{const choices=[x.choice_a,x.choice_b,x.choice_c,x.choice_d];return characterById.has(x.hanja_id)&&x.correct_choice>=1&&x.correct_choice<=4&&choices.every(Boolean)&&new Set(choices).size===4&&choices[x.correct_choice-1]===x.reading}).slice(0,specialReadingCount).map(x=>{const choices=[x.choice_a,x.choice_b,x.choice_c,x.choice_d];return{id:`special-reading:${x.id}`,stem:characterById.get(x.hanja_id)!,prompt:`${x.usage_note.replace(/\([^)]*\)/g,"")} — 이때의 읽기로 알맞은 것을 고르세요.`,correct:choices[x.correct_choice-1],choices:shuffle(choices),examples:[]}});
+ const goodSpecial=specialReadings.filter(x=>x.reading&&x.meaning&&characterById.has(x.hanja_id)&&x.correct_choice>=1&&x.correct_choice<=4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d].every(Boolean)&&new Set([x.choice_a,x.choice_b,x.choice_c,x.choice_d]).size===4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d][x.correct_choice-1]===x.reading);const specialQs=preferFresh(goodSpecial,x=>`special-reading:${x.id}`).slice(0,specialReadingCount).map(x=>{const choices=[x.choice_a,x.choice_b,x.choice_c,x.choice_d];return{id:`special-reading:${x.id}`,stem:characterById.get(x.hanja_id)!,prompt:`${x.usage_note.replace(/\([^)]*\)/g,"")} — 이때의 읽기로 알맞은 것을 고르세요.`,correct:choices[x.correct_choice-1],choices:shuffle(choices),examples:[]}});
  const principleQs:ExamQuestion[]=[];for(const m of preferFresh(metadata.filter(x=>Boolean(x.formation_type)),m=>`formation:${m.hanja_id}`)){if(principleQs.length>=principleCount)break;const stem=characterById.get(m.hanja_id),correct=m.formation_type?formationLabels[m.formation_type]:undefined;if(!validCharacter(stem)||!correct)continue;const wrong=shuffle(Object.entries(formationLabels).filter(([k])=>k!==m.formation_type).map(([,v])=>v)).slice(0,3);if(wrong.length===3)principleQs.push({id:`formation:${m.hanja_id}`,stem,prompt:"이 한자의 만들어진 원리로 알맞은 것을 고르세요.",correct,choices:shuffle([correct,...wrong]),examples:[]})}
- const dictionaryQs:ExamQuestion[]=[];for(const m of preferFresh(metadata.filter(x=>Boolean(x.radical)||typeof x.total_strokes==="number"),m=>recentQuestionKeys.has(`radical:${m.hanja_id}`)?`radical:${m.hanja_id}`:`strokes:${m.hanja_id}`)){if(dictionaryQs.length>=dictionaryCount)break;const stem=characterById.get(m.hanja_id);if(!validCharacter(stem))continue;if(m.radical&&m.radical!==stem){const radicals=[...new Set(metadata.map(x=>x.radical).filter((x):x is string=>Boolean(x)&&x!==m.radical))];if(radicals.length>=3){dictionaryQs.push({id:`radical:${m.hanja_id}`,stem,prompt:"이 한자의 부수로 알맞은 것을 고르세요.",correct:m.radical,choices:shuffle([m.radical,...shuffle(radicals).slice(0,3)]),examples:[]});continue}}if(typeof m.total_strokes==="number"){const nums=[...new Set(metadata.map(x=>x.total_strokes).filter((x):x is number=>typeof x==="number"&&x!==m.total_strokes))];if(nums.length>=3){const correct=`${m.total_strokes}획`;dictionaryQs.push({id:`strokes:${m.hanja_id}`,stem,prompt:"이 한자의 총획으로 알맞은 것을 고르세요.",correct,choices:shuffle([correct,...shuffle(nums).slice(0,3).map(x=>`${x}획`)]),examples:[]})}}}
+ const dictionaryCandidates:ExamQuestion[]=[];
+ const eligibleDictionaryIds=new Set(pool.filter(h=>validCharacter(h.character)).map(h=>h.id));
+ const allRadicals=[...new Set(metadata.map(x=>x.radical).filter((x):x is string=>Boolean(x)))];
+ const allStrokes=[...new Set(metadata.map(x=>x.total_strokes).filter((x):x is number=>typeof x==="number"))];
+ for(const m of metadata){
+  if(!eligibleDictionaryIds.has(m.hanja_id))continue;
+  const stem=characterById.get(m.hanja_id);
+  if(!validCharacter(stem))continue;
+  if(m.radical&&m.radical!==stem){
+   const distractors=allRadicals.filter(x=>x!==m.radical);
+   if(distractors.length>=3)dictionaryCandidates.push({id:`radical:${m.hanja_id}`,stem,prompt:"이 한자의 부수로 알맞은 것을 고르세요.",correct:m.radical,choices:shuffle([m.radical,...shuffle(distractors).slice(0,3)]),examples:[]});
+  }
+  if(typeof m.total_strokes==="number"){
+   const distractors=allStrokes.filter(x=>x!==m.total_strokes);
+   if(distractors.length>=3){const correct=`${m.total_strokes}획`;dictionaryCandidates.push({id:`strokes:${m.hanja_id}`,stem,prompt:"이 한자의 총획으로 알맞은 것을 고르세요.",correct,choices:shuffle([correct,...shuffle(distractors).slice(0,3).map(x=>`${x}획`)]),examples:[]});}
+  }
+ }
+ const dictionaryQs=preferFresh(dictionaryCandidates,q=>q.id).slice(0,dictionaryCount);
  const buckets:Partial<Record<string,ExamQuestion[]>>={
   HANJA_TO_READING_MEANING:[...first],
   READING_MEANING_TO_HANJA:[...second],
