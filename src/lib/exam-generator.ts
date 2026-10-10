@@ -202,7 +202,7 @@ export function generateExamQuestions(args:{recentQuestionKeys?:Set<string>;pool
   .slice(0,contextHanjaCount)
   .map(ctx=>{
    const w=wordById.get(ctx.word_id)!;
-   const wrong=[...new Set(shuffle(goodWords.filter(x=>x.id!==w.id&&x.word!==w.word&&!ctx.sentence.includes(x.reading??"")&&Boolean(x.reading))).map(x=>x.word))].slice(0,3);
+   const candidates=shuffle(goodWords.filter(x=>x.id!==w.id&&x.word!==w.word&&!ctx.sentence.includes(x.reading??"")&&Boolean(x.reading)));const similarity=(x:PublishedWord)=>[...x.word].filter(ch=>[...w.word].includes(ch)).length;const ranked=[...candidates.filter(x=>similarity(x)>0).sort((a,b)=>similarity(b)-similarity(a)),...candidates.filter(x=>similarity(x)===0)];const wrong=[...new Set(ranked.map(x=>x.word))].slice(0,3);
    const stem=ctx.sentence.replace(ctx.blank_text,"【　　】");
    return{id:`context-hanja:${ctx.id}`,stem,prompt:"빈칸에 알맞은 한자어를 고르세요.",correct:w.word,choices:shuffle([w.word,...wrong]),examples:[]};
   })
