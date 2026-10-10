@@ -18,6 +18,20 @@ export type ImageItem={id:number;hanja_id:number;asset_path:string;alt_text:stri
 
 export type ExamReadinessInput={pool:HanjaPoolItem[];words:PublishedWord[];relations:Relation[];wordRelations:WordRelation[];metadata:Metadata[];wordContexts:WordContext[];wordStructures:WordStructure[];commonCharacterSets:CommonCharacterSet[];idioms:Idiom[];cultureItems:CultureItem[];usageItems:UsageItem[];specialReadings:SpecialReading[];imageItems:ImageItem[]};
 
+function countDictionaryCandidates(input:ExamReadinessInput):number{
+ const characters=new Map(input.pool.map(h=>[h.id,h.character]));
+ const radicals=new Set(input.metadata.map(m=>m.radical).filter((v):v is string=>Boolean(v)));
+ const strokes=new Set(input.metadata.map(m=>m.total_strokes).filter((v):v is number=>typeof v==="number"));
+ let count=0;
+ for(const m of input.metadata){
+  const character=characters.get(m.hanja_id);
+  if(!character||!validCharacter(character))continue;
+  if(m.radical&&m.radical!==character&&radicals.size-(radicals.has(m.radical)?1:0)>=3)count++;
+  if(typeof m.total_strokes==="number"&&strokes.size-(strokes.has(m.total_strokes)?1:0)>=3)count++;
+ }
+ return count;
+}
+
 export function examReadinessSummary(input:ExamReadinessInput){
  return {
   HANJA_READING:input.pool.length,
@@ -25,7 +39,7 @@ export function examReadinessSummary(input:ExamReadinessInput){
   RELATIONS:input.relations.length,
   WORD_RELATIONS:input.wordRelations.length,
   CHARACTER_PRINCIPLE:input.metadata.filter(x=>Boolean(x.formation_type)).length,
-  DICTIONARY_LOOKUP:input.metadata.filter(x=>input.pool.some(h=>h.id===x.hanja_id)&&Boolean(x.radical)&&x.radical!==input.pool.find(h=>h.id===x.hanja_id)?.character).length+input.metadata.filter(x=>input.pool.some(h=>h.id===x.hanja_id)&&typeof x.total_strokes==="number").length,
+  DICTIONARY_LOOKUP:countDictionaryCandidates(input),
   WORD_CONTEXTS:input.wordContexts.length,
   WORD_STRUCTURES:input.wordStructures.length,
   COMMON_CHARACTER_SETS:input.commonCharacterSets.length,
