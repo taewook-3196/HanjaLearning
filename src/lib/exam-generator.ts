@@ -18,6 +18,8 @@ export type ImageItem={id:number;hanja_id:number;asset_path:string;alt_text:stri
 
 export type ExamReadinessInput={pool:HanjaPoolItem[];words:PublishedWord[];relations:Relation[];wordRelations:WordRelation[];metadata:Metadata[];wordContexts:WordContext[];wordStructures:WordStructure[];commonCharacterSets:CommonCharacterSet[];idioms:Idiom[];cultureItems:CultureItem[];usageItems:UsageItem[];specialReadings:SpecialReading[];imageItems:ImageItem[]};
 
+function validCharacter(value:string|undefined):value is string{return typeof value==="string"&&/^[\u3400-\u9fff\uf900-\ufaff]$/u.test(value.trim());}
+
 function countDictionaryCandidates(input:ExamReadinessInput):number{
  const characters=new Map(input.pool.map(h=>[h.id,h.character]));
  const radicals=new Set(input.metadata.map(m=>m.radical).filter((v):v is string=>Boolean(v)));
@@ -166,7 +168,7 @@ export function generateExamQuestions(args:{recentQuestionKeys?:Set<string>;pool
  const usageCount=(blueprint?.items.filter(x=>x.type==="CHARACTER_USAGE").reduce((n,x)=>n+x.count,0)??0)+(pre5Variable?1:0)+(grade6Variable?1:0);
  const specialReadingCount=blueprint?.items.filter(x=>x.type==="SPECIAL_READING").reduce((n,x)=>n+x.count,0)??0;
  const imageCount=blueprint?.items.filter(x=>x.type==="IMAGE_RECOGNITION").reduce((n,x)=>n+x.count,0)??0;
- function validCharacter(value:string|undefined):value is string{return typeof value==="string"&&/^[\u3400-\u9fff\uf900-\ufaff]$/u.test(value.trim());}
+ 
  const similarCharacterGroups=["田甲由申","日目白自百","土士干千","未末朱","人入八","大太犬天夫","木本禾","口囗回","王玉主","己已巳","牛午","刀力","右石","左工","問間聞","晴睛情清請","休体","鳥烏","貝見","手毛","水永氷"];
  const similarCharacters=(character:string)=>similarCharacterGroups.find(group=>group.includes(character))??"";
  const readingOf=(answer:string)=>answer.trim().split(/\s+/).at(-1)??"";
