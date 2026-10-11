@@ -9,7 +9,7 @@ export function RepresentativeStickerPicker({earnedKeys,initialKey}:{earnedKeys:
  const [selected,setSelected]=useState<string|null>(initialKey);
  const [saving,setSaving]=useState(false);
  const [error,setError]=useState("");
- const available=earnedKeys.filter(key=>Object.hasOwn(labels,key));
+ const available=[...new Set(earnedKeys)];
  async function save(key:string|null){
   if(saving)return;
   setSaving(true);setError("");
@@ -23,7 +23,7 @@ export function RepresentativeStickerPicker({earnedKeys,initialKey}:{earnedKeys:
   <h3>대표 스티커</h3><p className="subtitle">친구에게 보여줄 대표 스티커를 선택하세요.</p>
   <div className="sticker-preview-row">
    {available.map(key=><button key={key} type="button" disabled={saving} aria-pressed={selected===key} className="sticker-preview-item" onClick={()=>void save(key)}>
-    <span className="sticker-art"><GrowthStickerArt kind={key as StickerKey}/></span><strong>{labels[key]}</strong><small>{selected===key?"대표 스티커 ✓":"대표로 선택"}</small>
+    <span className="sticker-art">{Object.hasOwn(labels,key)?<GrowthStickerArt kind={key as StickerKey}/>: "🏅"}</span><strong>{labels[key]??key.replaceAll("_"," ")}</strong><small>{selected===key?"대표 스티커 ✓":"대표로 선택"}</small>
    </button>)}
   </div>
   {selected?<button type="button" className="secondary-button" disabled={saving} onClick={()=>void save(null)}>대표 스티커 해제</button>:null}
