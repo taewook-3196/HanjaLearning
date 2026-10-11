@@ -19,3 +19,11 @@
 5. 사용자 진도·계정·기존 학습 기록은 변경하지 않습니다.
 
 현재 후보만으로 문제 수·난이도가 충분하다고 단정할 수 없습니다. 이 문서는 DB 마이그레이션이 아니며 실제 출제 부족 현상은 아직 해결되지 않았습니다.
+
+## 출처 대조 1차 기록 (2026-10-11)
+
+- **土 — 부수 土, 총 3획:** 日本漢字能力検定協会 漢字ペディア의 土 항목을 인용한 사전에서 두 항목을 직접 확인: https://dictionary.goo.ne.jp/word/kanji/%E5%9C%9F/
+- **一 — 총 1획, 三 — 총 3획, 十 — 총 2획, 口 — 총 3획, 土 — 총 3획:** 한자 총획수 목록에서 각각 확인: https://ksbookshelf.com/DW/Nihonshi/NihonshiK01.htm
+- **上 — 부수 一, 나머지 2획; 下 — 총 3획:** 한컴 사전 사용 예시에서 확인: https://help.hancom.com/hoffice130/ko-KR/HncDic/insert/by_the_radical/By_the_Radical%28radical%29.htm 및 https://help.hancom.com/hoffice100/ko-KR/HncDic/insert/by_the_radical/By_the_Radical%28stroke%29.htm
+
+**검수 범위의 한계:** 위의 개별 확인은 대한검정회 공식 적용 사전과의 일치 및 나머지 모든 후보의 부수/획수 검증을 의미하지 않습니다. 특히 서로 다른 총획수 4종 이상과 실제 출제용 충분한 한자 수가 확보되기 전에는 게시하지 않습니다. 출처 없는 후보는 여전히 '출처 대조 필요' 상태입니다.
