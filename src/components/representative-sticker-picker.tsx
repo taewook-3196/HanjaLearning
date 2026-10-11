@@ -12,7 +12,16 @@ export function RepresentativeStickerPicker({stickers,initialKey}:{stickers:Grow
   if(saving)return;
   const next=selected===key?null:key;
   setSaving(true);setError("");
-  const {error:saveError}=await createClient().rpc("set_representative_sticker",{p_key:next});
+  const client=createClient();
+  // An earned sticker can appear before its award row has persisted.
+  if(next){
+   const {data:{user},error:authError}=await client.auth.getUser();
+   if(authError||!user){setError("로그인 상태를 확인하지 못했어요. 다시 로그인해 주세요.");setSaving(false);return;}
+   const {error:awardError}=await client.from("user_growth_stickers")
+    .upsert({user_id:user.id,sticker_key:next},{onConflict:"user_id,sticker_key",ignoreDuplicates:true});
+   if(awardError){setError("스티커 획득 기록을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.");setSaving(false);return;}
+  }
+  const {error:saveError}=await client.rpc("set_representative_sticker",{p_key:next});
   if(saveError)setError("대표 스티커를 저장하지 못했어요. 잠시 후 다시 시도해 주세요.");
   else setSelected(next);
   setSaving(false);
