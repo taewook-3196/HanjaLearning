@@ -2,33 +2,34 @@
 import {useState} from "react";
 import {createClient} from "@/lib/supabase/client";
 import {GrowthStickerArt} from "@/components/growth-sticker-art";
-import type {GrowthStickerKind} from "@/lib/growth-stickers";
+import type {GrowthStickerDefinition} from "@/lib/growth-stickers";
 
-const labels:Record<GrowthStickerKind,string>={first:"첫걸음",stack:"차곡차곡",learn50:"한자 탐험가",learn100:"백자 돌파",learn250:"한자 수집가",write:"쓰기 시작",write50:"또박또박",write100:"쓰기 고수",retry:"다시 도전",recover5:"칠전팔기",recover20:"오답 정복",master:"숙달 시작",week:"꾸준한 한 주",streak3:"3일 새싹",streak7:"7일 토끼",streak14:"14일 여우",streak30:"30일 호랑이"};
-
-export function RepresentativeStickerPicker({earnedKeys,initialKey}:{earnedKeys:string[];initialKey:string|null}){
+export function RepresentativeStickerPicker({stickers,initialKey}:{stickers:GrowthStickerDefinition[];initialKey:string|null}){
  const [selected,setSelected]=useState<string|null>(initialKey);
  const [saving,setSaving]=useState(false);
  const [error,setError]=useState("");
- const available=[...new Set(earnedKeys)];
- async function save(key:string|null){
+ async function save(key:string){
   if(saving)return;
+  const next=selected===key?null:key;
   setSaving(true);setError("");
-  const s=createClient();
-  const {error:saveError}=await s.rpc("set_representative_sticker",{p_key:key});
+  const {error:saveError}=await createClient().rpc("set_representative_sticker",{p_key:next});
   if(saveError)setError("대표 스티커를 저장하지 못했어요. 잠시 후 다시 시도해 주세요.");
-  else setSelected(key);
+  else setSelected(next);
   setSaving(false);
  }
- return <div className="representative-sticker-picker">
-  <h3>대표 스티커</h3><p className="subtitle">친구에게 보여줄 대표 스티커를 선택하세요.</p>
-  <div className="representative-sticker-grid">
-   {available.map(key=><button key={key} type="button" disabled={saving} aria-pressed={selected===key} className="representative-sticker-option" onClick={()=>void save(key)}>
-    <span className="sticker-art">{Object.hasOwn(labels,key)?<GrowthStickerArt kind={key as GrowthStickerKind}/>: "🏅"}</span><strong>{(labels as Record<string,string>)[key]??key.replaceAll("_"," ")}</strong><small>{selected===key?"선택됨 ✓":"선택하기"}</small>
-   </button>)}
+ return <>
+  <p className="subtitle representative-sticker-hint">획득한 스티커를 누르면 친구에게 보여줄 대표 스티커로 설정돼요. 다시 누르면 해제됩니다.</p>
+  <div className="sticker-grid">
+   {stickers.map(s=>s.earned?
+    <button key={s.kind} type="button" className="sticker-item earned representative-growth-option" aria-pressed={selected===s.kind} aria-label={`${s.name}, ${selected===s.kind?"대표 스티커, 다시 누르면 해제":"대표 스티커로 설정"}`} disabled={saving} onClick={()=>void save(s.kind)}>
+     <span className="sticker-art"><GrowthStickerArt kind={s.kind}/><b>★</b></span>
+     <strong>{s.name}</strong><small>{s.detail}</small>{selected===s.kind?<span className="representative-growth-badge">대표 ✓</span>:null}
+    </button>:
+    <div className="sticker-item" key={s.kind} aria-label={`${s.name}, 아직 획득하지 못함`}>
+     <span className="sticker-art"><GrowthStickerArt kind={s.kind} locked/><b></b></span>
+     <strong>{s.name}</strong><small>{s.detail}</small><em>아직 잠겨 있어요</em>
+    </div>)}
   </div>
-  {selected?<button type="button" className="secondary-button" disabled={saving} onClick={()=>void save(null)}>대표 스티커 해제</button>:null}
-  {!available.length?<p className="subtitle">획득한 성장 스티커가 아직 없어요.</p>:null}
-  {error?<p role="alert">{error}</p>:null}
- </div>;
+  {error?<p role="alert" className="form-message">{error}</p>:null}
+ </>;
 }
