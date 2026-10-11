@@ -2,9 +2,10 @@
 import {useState} from "react";
 import {createClient} from "@/lib/supabase/client";
 import {GrowthStickerArt} from "@/components/growth-sticker-art";
+import type {GrowthStickerKind} from "@/lib/growth-stickers";
 
-const labels:Record<string,string>={first:"첫걸음",stack:"차곡차곡",write:"쓰기 시작",retry:"다시 도전",master:"숙달 시작",week:"꾸준한 한 주"};
-type StickerKey="first"|"stack"|"write"|"retry"|"master"|"week";
+const labels:Record<GrowthStickerKind,string>={first:"첫걸음",stack:"차곡차곡",learn50:"한자 탐험가",learn100:"백자 돌파",learn250:"한자 수집가",write:"쓰기 시작",write50:"또박또박",write100:"쓰기 고수",retry:"다시 도전",recover5:"칠전팔기",recover20:"오답 정복",master:"숙달 시작",week:"꾸준한 한 주",streak3:"3일 새싹",streak7:"7일 토끼",streak14:"14일 여우",streak30:"30일 호랑이"};
+
 export function RepresentativeStickerPicker({earnedKeys,initialKey}:{earnedKeys:string[];initialKey:string|null}){
  const [selected,setSelected]=useState<string|null>(initialKey);
  const [saving,setSaving]=useState(false);
@@ -23,7 +24,7 @@ export function RepresentativeStickerPicker({earnedKeys,initialKey}:{earnedKeys:
   <h3>대표 스티커</h3><p className="subtitle">친구에게 보여줄 대표 스티커를 선택하세요.</p>
   <div className="sticker-preview-row">
    {available.map(key=><button key={key} type="button" disabled={saving} aria-pressed={selected===key} className="sticker-preview-item" onClick={()=>void save(key)}>
-    <span className="sticker-art">{Object.hasOwn(labels,key)?<GrowthStickerArt kind={key as StickerKey}/>: "🏅"}</span><strong>{labels[key]??key.replaceAll("_"," ")}</strong><small>{selected===key?"대표 스티커 ✓":"대표로 선택"}</small>
+    <span className="sticker-art">{Object.hasOwn(labels,key)?<GrowthStickerArt kind={key as GrowthStickerKind}/>: "🏅"}</span><strong>{labels[key]??key.replaceAll("_"," ")}</strong><small>{selected===key?"대표 스티커 ✓":"대표로 선택"}</small>
    </button>)}
   </div>
   {selected?<button type="button" className="secondary-button" disabled={saving} onClick={()=>void save(null)}>대표 스티커 해제</button>:null}
