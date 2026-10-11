@@ -18,7 +18,23 @@ export function watchKoreanVoices(onChange:(voices:KoreanVoiceOption[])=>void){
  const synth=window.speechSynthesis;const emit=()=>onChange(getKoreanVoiceOptions());emit();synth.addEventListener("voiceschanged",emit);const timer=window.setTimeout(emit,800);return()=>{window.clearTimeout(timer);synth.removeEventListener("voiceschanged",emit);};
 }
 export function speakKorean(text:string,pref:SpeechVoicePreference,onUnavailable?:()=>void){
- if(typeof window==="undefined"||!("speechSynthesis" in window)){onUnavailable?.();return}
- const synth=window.speechSynthesis;let spoken=false;const run=()=>{if(spoken)return;spoken=true;const u=new SpeechSynthesisUtterance(text);u.lang="ko-KR";u.rate=.85;const voice=selectKoreanVoice(pref);if(voice)u.voice=voice;synth.cancel();synth.speak(u);};
- if(synth.getVoices().length){run();return}const handler=()=>{synth.removeEventListener("voiceschanged",handler);run()};synth.addEventListener("voiceschanged",handler,{once:true});window.setTimeout(()=>{synth.removeEventListener("voiceschanged",handler);run()},800);
+ if(typeof window==="undefined"||!("speechSynthesis" in window)){onUnavailable?.();return;}
+ const synth=window.speechSynthesis;
+ if(!text.trim())return;
+ // Keep the first speak() within the original user gesture. Android browsers
+ // can lose permission when waiting for asynchronous voiceschanged events.
+ const u=new SpeechSynthesisUtterance(text);
+ u.lang="ko-KR";
+ u.rate=.85;
+ const voice=selectKoreanVoice(pref);
+ if(voice)u.voice=voice;
+ u.onerror=(event)=>{
+  if(event.error!=="canceled"&&event.error!=="interrupted")onUnavailable?.();
+ };
+ try{
+  synth.cancel();
+  synth.speak(u);
+ }catch{
+  onUnavailable?.();
+ }
 }
