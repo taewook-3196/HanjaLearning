@@ -105,6 +105,8 @@ export function examRotationShortages(input:ExamReadinessInput,blueprint:ExamBlu
  const issues=[...required].flatMap(([type,needed])=>(available[type]??0)<needed?[{type,required:needed,available:available[type]??0}]:[]);
  const sharedContextDemand=(required.get("CONTEXT_READING")??0)+(required.get("CONTEXT_TO_HANJA")??0);
  if(sharedContextDemand>0&&summary.WORD_CONTEXTS<sharedContextDemand)issues.push({type:"CONTEXT_SHARED_POOL",required:sharedContextDemand,available:summary.WORD_CONTEXTS});
+ const sharedWordDemand=(required.get("WORD_READING")??0)+(required.get("WORD_MEANING")??0)+(required.get("WORD_TO_HANJA")??0);
+ if(sharedWordDemand>0&&summary.WORDS<sharedWordDemand)issues.push({type:"WORD_SHARED_POOL",required:sharedWordDemand,available:summary.WORDS});
  return issues;
 }
 
