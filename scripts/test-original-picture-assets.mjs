@@ -36,3 +36,29 @@ for (const [filename, label] of Object.entries(all)) {
 }
 console.log("PASS: 12 local SVG candidates, expected labels, dimensions and no active/external content.");
 console.log("NOT VERIFIED: visual clarity, grade eligibility, 4-choice quality, mobile display or database publication.");
+
+const answerByFile = {
+  "original-sun.svg": "日", "original-moon.svg": "月",
+  "original-tree.svg": "木", "original-fire.svg": "火",
+  "original-water.svg": "水", "original-person.svg": "人",
+  "original-earth.svg": "土", "original-gate.svg": "門",
+  "original-mother.svg": "母", "original-mountain.svg": "山",
+  "original-mouth.svg": "口", "original-hand.svg": "手",
+};
+const grade8Characters = new Set("一七三九二五人兄八六北十南四土女子弟日月木東母水火父男西金門");
+const grade7Characters = new Set([...grade8Characters, "山", "口", "手"]);
+assert.equal(new Set(Object.values(answerByFile)).size, 12, "duplicate pictorial answers");
+for (const filename of Object.keys(grade8)) {
+  assert.ok(grade8Characters.has(answerByFile[filename]), `${filename}: not in 8급`);
+}
+for (const filename of Object.keys(grade7Extra)) {
+  assert.ok(grade7Characters.has(answerByFile[filename]), `${filename}: not in 7급`);
+}
+for (const filename of Object.keys(all)) {
+  const correct = answerByFile[filename];
+  const eligible = filename in grade8 ? grade8Characters : grade7Characters;
+  const wrong = [...eligible].filter(x => x !== correct).slice(0, 3);
+  assert.equal(new Set([correct, ...wrong]).size, 4, `${filename}: not four distinct choices`);
+}
+console.log("PASS: unique character mappings, candidate grade eligibility and sufficient distinct choices.");
+console.log("NOTE: this is a candidate-level check, not an end-to-end exam generator test.");
