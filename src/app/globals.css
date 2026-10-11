@@ -583,16 +583,10 @@ button {
 .exam-result-shell .study-card{padding-bottom:36px}
 
 
-/* Representative sticker picker: independent of the horizontal discovery carousel. */
-.representative-sticker-picker{min-width:0;margin-bottom:22px}
-.representative-sticker-picker>h3{margin:0 0 6px}
-.representative-sticker-picker>.subtitle{margin:0 0 14px}
-.representative-sticker-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
-.representative-sticker-option{display:flex;min-width:0;min-height:128px;flex-direction:column;align-items:center;justify-content:center;gap:7px;margin:0;padding:12px 5px;border:2px solid #dcecff;border-radius:18px;background:#f4f9ff;color:var(--text);text-align:center;white-space:normal;overflow-wrap:anywhere}
-.representative-sticker-option .sticker-art{flex-shrink:0}
-.representative-sticker-option strong{font-size:12px;line-height:1.35}
-.representative-sticker-option small{font-size:11px;line-height:1.35;color:var(--muted)}
-.representative-sticker-option[aria-pressed="true"]{border-color:var(--accent);background:#eaf5ff;box-shadow:inset 0 0 0 1px var(--accent)}
-.representative-sticker-option[aria-pressed="true"] small{color:var(--accent);font-weight:800}
-.representative-sticker-option:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-@media(max-width:340px){.representative-sticker-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* Representative selection lives directly in the existing growth sticker grid. */
+.representative-sticker-hint{margin:0 0 14px;font-size:12px;line-height:1.5}
+button.representative-growth-option{width:100%;font:inherit;cursor:pointer;position:relative;border-style:solid;transition:border-color .15s,background .15s}
+button.representative-growth-option[aria-pressed="true"]{border:2px solid var(--accent);background:#eaf5ff}
+button.representative-growth-option:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button.representative-growth-option:disabled{cursor:wait}
+.representative-growth-badge{display:block;padding:2px 7px;border-radius:9px;background:var(--accent);color:white;font-size:11px;font-weight:800;line-height:1.35}
