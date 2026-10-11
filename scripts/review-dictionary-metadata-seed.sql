@@ -15,11 +15,13 @@ insert into public.hanja_exam_metadata
 select hanja_id,radical,total_strokes,'DRAFT',
        'Candidate dictionary metadata; provider-specific source review required'
 from mapped
-on conflict (hanja_id) do update
-set radical=coalesce(public.hanja_exam_metadata.radical,excluded.radical),
-    total_strokes=coalesce(public.hanja_exam_metadata.total_strokes,excluded.total_strokes),
-    updated_at=now()
-where public.hanja_exam_metadata.radical is null
-   or public.hanja_exam_metadata.total_strokes is null;
+on conflict (hanja_id) do nothing;
+-- Never update an existing PUBLISHED row with unverified candidates.
+-- Verify the prospective DRAFT rows inside this transaction only:
+select h.character,m.radical,m.total_strokes,m.content_status
+from public.hanja_exam_metadata m
+join public.hanja h on h.id=m.hanja_id
+where h.character in ('一','二','三','十','口','土')
+order by h.character;
 -- The draft candidates MUST NOT become exam-visible without independent review.
 rollback;
