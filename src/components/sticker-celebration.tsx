@@ -16,10 +16,12 @@ export function StickerCelebration({kind,name,message,stickerKey,eventId}:Props)
   busy.current=true;setSaving(true);setError("");
   try{
    const s=createClient();
+   const {data:{user},error:authError}=await s.auth.getUser();
+   if(authError||!user)throw authError??new Error("Authentication required");
    const now=new Date().toISOString();
    const result=kind==="growth"
-    ?await s.from("user_growth_stickers").update({celebrated_at:now}).eq("sticker_key",stickerKey??"").is("celebrated_at",null).select("sticker_key")
-    :await s.from("user_repeatable_sticker_events").update({celebrated_at:now}).eq("id",eventId??-1).is("celebrated_at",null).select("id");
+    ?await s.from("user_growth_stickers").update({celebrated_at:now}).eq("user_id",user.id).eq("sticker_key",stickerKey??"").is("celebrated_at",null).select("sticker_key")
+    :await s.from("user_repeatable_sticker_events").update({celebrated_at:now}).eq("id",eventId??-1).eq("user_id",user.id).is("celebrated_at",null).select("id");
    if(result.error)throw result.error;
    setVisible(false);router.refresh();
   }catch(e){
