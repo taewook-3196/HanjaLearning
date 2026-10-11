@@ -62,3 +62,14 @@ for (const filename of Object.keys(all)) {
 }
 console.log("PASS: unique character mappings, candidate grade eligibility and sufficient distinct choices.");
 console.log("NOTE: this is a candidate-level check, not an end-to-end exam generator test.");
+
+const preview=readFileSync("docs/original-picture-preview.html","utf8");
+assert.match(preview, /<meta name="viewport"/, "mobile viewport is required");
+assert.match(preview, /<main class="grid">/, "review grid is required");
+assert.match(preview, /80px 시험 보기 크기로 전환/, "small-screen size toggle is required");
+for(const [filename,label] of Object.entries(all)){
+ const occurrences=preview.split(`../public/exam-images/${filename}`).length-1;
+ assert.equal(occurrences,1,`${filename}: preview should reference each candidate exactly once`);
+ assert.ok(preview.includes(`alt="${label}"`),`${filename}: preview image needs meaningful alt`);
+}
+console.log("PASS: review sheet references all 12 images once with Korean alt labels and mobile size toggle.");
