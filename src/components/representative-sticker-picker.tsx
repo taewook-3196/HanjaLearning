@@ -22,9 +22,9 @@ export function RepresentativeStickerPicker({earnedKeys,initialKey}:{earnedKeys:
  }
  return <div className="representative-sticker-picker">
   <h3>대표 스티커</h3><p className="subtitle">친구에게 보여줄 대표 스티커를 선택하세요.</p>
-  <div className="sticker-preview-row">
-   {available.map(key=><button key={key} type="button" disabled={saving} aria-pressed={selected===key} className="sticker-preview-item" onClick={()=>void save(key)}>
-    <span className="sticker-art">{Object.hasOwn(labels,key)?<GrowthStickerArt kind={key as GrowthStickerKind}/>: "🏅"}</span><strong>{(labels as Record<string,string>)[key]??key.replaceAll("_"," ")}</strong><small>{selected===key?"대표 스티커 ✓":"대표로 선택"}</small>
+  <div className="representative-sticker-grid">
+   {available.map(key=><button key={key} type="button" disabled={saving} aria-pressed={selected===key} className="representative-sticker-option" onClick={()=>void save(key)}>
+    <span className="sticker-art">{Object.hasOwn(labels,key)?<GrowthStickerArt kind={key as GrowthStickerKind}/>: "🏅"}</span><strong>{(labels as Record<string,string>)[key]??key.replaceAll("_"," ")}</strong><small>{selected===key?"선택됨 ✓":"선택하기"}</small>
    </button>)}
   </div>
   {selected?<button type="button" className="secondary-button" disabled={saving} onClick={()=>void save(null)}>대표 스티커 해제</button>:null}
