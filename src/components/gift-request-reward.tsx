@@ -17,7 +17,15 @@ export function GiftRequestReward({initialAvailable,totalEarned,nextLevel,xpRema
   try{
    const {data,error:rpcError}=await createClient().rpc("consume_gift_request_reward");
    if(rpcError)throw rpcError;
-   if(typeof data!=="number"||data<0){setAvailable(0);setConfirming(false);return;}
+   if(typeof data!=="number")throw new Error("Invalid redemption response");
+   if(data<0){
+    const {data:rows,error:countError}=await createClient().from("user_gift_request_rewards").select("id").is("used_at",null);
+    if(countError)throw countError;
+    setAvailable(rows?.length??0);
+    setConfirming(false);
+    setError("사용 가능한 선물요구권이 변경되었습니다. 남은 수량을 확인해 주세요.");
+    return;
+   }
    setAvailable(data);setConfirming(false);
   }catch(e){console.error("Gift request redemption failed",e);setError("사용 기록을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.");}
   finally{redemptionInFlight.current=false;setSaving(false);}
@@ -34,5 +42,6 @@ export function GiftRequestReward({initialAvailable,totalEarned,nextLevel,xpRema
    {error?<p role="alert" className="form-message">{error}</p>:null}
    <div className="practice-actions"><button type="button" disabled={saving} onClick={()=>void consume()}>{saving?"처리 중...":"네, 사용하기"}</button><button type="button" className="secondary-button" disabled={saving} onClick={()=>setConfirming(false)}>아니오</button></div>
   </dialog>
+  {!confirming&&error?<p role="alert" className="form-message">{error}</p>:null}
  </section>;
 }
