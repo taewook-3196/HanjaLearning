@@ -23,6 +23,7 @@ export function StickerCelebration({notices,userId}:{notices:StickerNotice[];use
   setIndex(first<0?notices.length:first);
   setVisibleCount(notices.filter(item=>!wasViewed(item)).length);
   setShownCount(0);
+  advancing.current=false;
   setReady(true);
  },[]);
  async function record(item:StickerNotice){
