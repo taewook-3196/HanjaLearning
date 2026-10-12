@@ -23,6 +23,14 @@ export function StickerCelebration({kind,name,message,stickerKey,eventId}:Props)
     ?await s.from("user_growth_stickers").update({celebrated_at:now}).eq("user_id",user.id).eq("sticker_key",stickerKey??"").is("celebrated_at",null).select("sticker_key")
     :await s.from("user_repeatable_sticker_events").update({celebrated_at:now}).eq("id",eventId??-1).eq("user_id",user.id).is("celebrated_at",null).select("id");
    if(result.error)throw result.error;
+   // A zero-row update can mean the sticker was already acknowledged in another tab.
+   // Confirm the persisted state before dismissing this celebration.
+   if(!result.data?.length){
+    const lookup=kind==="growth"
+     ?await s.from("user_growth_stickers").select("celebrated_at").eq("user_id",user.id).eq("sticker_key",stickerKey??"").maybeSingle()
+     :await s.from("user_repeatable_sticker_events").select("celebrated_at").eq("user_id",user.id).eq("id",eventId??-1).maybeSingle();
+    if(lookup.error||!lookup.data?.celebrated_at)throw lookup.error??new Error("Sticker acknowledgement not persisted");
+   }
    setVisible(false);router.refresh();
   }catch(e){
    setError("스티커 수령 기록을 저장하지 못했어요. 다시 눌러 주세요.");
