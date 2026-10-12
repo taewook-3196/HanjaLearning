@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useRef,useState} from "react";
+import {useRef,useState} from "react";
 import {useRouter} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
 import {GrowthStickerArt} from "@/components/growth-sticker-art";
@@ -37,13 +37,6 @@ export function StickerCelebration({kind,name,message,stickerKey,eventId}:Props)
    console.error("Sticker celebration acknowledgement failed",e);
   }finally{busy.current=false;setSaving(false);}
  }
- useEffect(()=>{
-  if(!visible)return;
-  const timer=window.setTimeout(()=>{void acknowledge();},3000);
-  return()=>window.clearTimeout(timer);
- // Timer is per celebration identity; never restart on save-state changes.
- // eslint-disable-next-line react-hooks/exhaustive-deps
- },[visible,kind,stickerKey,eventId]);
  if(!visible)return null;
  return <section className="sticker-celebration" role="status" aria-live="polite"><div className="sticker-celebration-card"><p className="eyebrow">{kind==="growth"?"새 성장 스티커":"새 반복 스티커"}</p><span className="sticker-celebration-art" aria-hidden="true">{kind==="growth"&&stickerKey?<GrowthStickerArt kind={stickerKey as "first"|"stack"|"write"|"retry"|"master"|"week"}/>: "★"}</span><h2>{name}</h2><p>{message}</p><button className="primary-button" type="button" disabled={saving} onClick={()=>void acknowledge()}>{saving?"저장 중...":"스티커 받기"}</button>{error?<p role="alert">{error}</p>:null}</div></section>;
 }
