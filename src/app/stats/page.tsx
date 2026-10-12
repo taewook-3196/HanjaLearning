@@ -51,7 +51,12 @@ export default async function StatsPage(){
  const todayXp=todayXpRows.reduce((sum,x)=>sum+(x.xp??0),0);
  const {level,start:levelStart,end:levelEnd}=getLevelProgress(totalXp); const levelXp=totalXp-levelStart; const levelNeed=levelEnd-levelStart; const nextGiftLevel=Math.ceil((level+1)/5)*5; const xpToNextGift=Math.max(0,xpForLevel(nextGiftLevel)-totalXp);
  const growthTitle=level>=15?"한자 달인":level>=10?"한자 탐험대장":level>=7?"꾸준한 탐험가":level>=4?"성장하는 학습가":"새싹 학습가";
- const recovered=new Set<string|number>(); const seenWrong=new Set<string|number>(); [...attempts].reverse().forEach(x=>{if(x.result==="WRONG"||x.result==="UNKNOWN")seenWrong.add(x.hanja_id);else if((x.result==="CORRECT"||x.result==="KNOWN")&&seenWrong.has(x.hanja_id))recovered.add(x.hanja_id);});
+ // Count only hanja whose latest relevant outcome is a recovery from an earlier mistake.
+ const recovered=new Set<string|number>(); const seenWrong=new Set<string|number>();
+ [...attempts].reverse().filter(x=>!isWritingAttempt(x)).forEach(x=>{
+  if(x.result==="WRONG"||x.result==="UNKNOWN"){seenWrong.add(x.hanja_id);recovered.delete(x.hanja_id);}
+  else if((x.result==="CORRECT"||x.result==="KNOWN")&&seenWrong.has(x.hanja_id))recovered.add(x.hanja_id);
+ });
  const stickerRules=growthStickerRules({learned,writtenCount,recovered:recovered.size,mastered,days,streak});
  const {data:savedStickerRows}=await s.from("user_growth_stickers").select("sticker_key,earned_at,celebrated_at").eq("user_id",user.id);
  const savedKeys=new Set((savedStickerRows??[]).map(x=>x.sticker_key));
