@@ -14,7 +14,7 @@ export function supportsStrokePractice(character:string){return !isCompatibility
 
 function FreeWritingPad({character,onComplete,compact=false}:{character:string;onComplete?:()=>void;compact?:boolean}){
  const canvas=useRef<HTMLCanvasElement>(null);const [drawn,setDrawn]=useState(false);const drawing=useRef(false);const activePointer=useRef<number|null>(null);
- function point(e:ReactPointerEvent<HTMLCanvasElement>){const el=e.currentTarget,r=el.getBoundingClientRect();return{x:(e.clientX-r.left)*(el.width/r.width),y:(e.clientY-r.top)*(el.height/r.height)};}
+ function point(e:ReactPointerEvent<HTMLCanvasElement>){const el=e.currentTarget,r=el.getBoundingClientRect();return{x:(r.width>0?(e.clientX-r.left)*el.width/r.width:0),y:(r.height>0?(e.clientY-r.top)*el.height/r.height:0)};}
  function down(e:ReactPointerEvent<HTMLCanvasElement>){const el=e.currentTarget,ctx=el.getContext("2d");if(!ctx||activePointer.current!==null)return;activePointer.current=e.pointerId;el.setPointerCapture(e.pointerId);drawing.current=true;const p=point(e);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineCap="round";ctx.lineJoin="round";ctx.lineWidth=compact?12:15;ctx.strokeStyle="#24313d";ctx.lineTo(p.x+0.01,p.y+0.01);ctx.stroke();setDrawn(true);}
  function move(e:ReactPointerEvent<HTMLCanvasElement>){if(!drawing.current||activePointer.current!==e.pointerId)return;const ctx=e.currentTarget.getContext("2d");if(!ctx)return;const p=point(e);ctx.lineTo(p.x,p.y);ctx.stroke();setDrawn(true);}
  function up(e:ReactPointerEvent<HTMLCanvasElement>){if(activePointer.current!==e.pointerId)return;drawing.current=false;activePointer.current=null;}
