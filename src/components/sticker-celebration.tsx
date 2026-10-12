@@ -88,5 +88,5 @@ export function StickerCelebration({notices,userId}:{notices:StickerNotice[];use
  // eslint-disable-next-line react-hooks/exhaustive-deps
  },[index,ready]);
  if(!ready||!notice)return null;
- return <section className="sticker-celebration" role="status" aria-live="polite"><div className="sticker-celebration-card"><p className="eyebrow">새 {notice.kind==="growth"?"성장":"반복"} 스티커 · {shownCount+1}/{visibleCount}</p><span className="sticker-celebration-art" aria-hidden="true">{notice.kind==="growth"&&notice.stickerKey?<GrowthStickerArt kind={notice.stickerKey}/>:"★"}</span><h2>{notice.name}</h2><p>{notice.message}</p><button className="primary-button" type="button" onClick={next}>{index+1===notices.length?"닫기":"다음 스티커 ›"}</button></div></section>;
+ return <section className="sticker-celebration" role="status" aria-live="polite"><div className="sticker-celebration-card"><p className="eyebrow">새 {notice.kind==="growth"?"성장":"반복"} 스티커 · {shownCount+1}/{visibleCount}</p><span className="sticker-celebration-art" aria-hidden="true">{notice.kind==="growth"&&notice.stickerKey?<GrowthStickerArt kind={notice.stickerKey}/>:"★"}</span><h2>{notice.name}</h2><p>{notice.message}</p><button className="primary-button" type="button" onClick={next}>{notices.slice(index+1).some(item=>!wasViewed(item))?"다음 스티커 ›":"닫기"}</button></div></section>;
 }
