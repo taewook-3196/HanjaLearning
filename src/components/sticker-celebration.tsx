@@ -14,6 +14,7 @@ export function StickerCelebration({notices,userId}:{notices:StickerNotice[];use
  const viewedKey=(item:StickerNotice)=>`sticker-viewed:${userId}:${item.kind}:${item.kind==="growth"?item.stickerKey:item.eventId}`;
  function wasViewed(item:StickerNotice){try{return window.sessionStorage.getItem(viewedKey(item))==="1";}catch{return false;}}
  function markViewed(item:StickerNotice){try{window.sessionStorage.setItem(viewedKey(item),"1");}catch{/* Storage is optional. */}}
+ function clearViewed(item:StickerNotice){try{window.sessionStorage.removeItem(viewedKey(item));}catch{/* Storage is optional. */}}
  useEffect(()=>{
   // Only play notices not yet shown during this tab session.
   const first=notices.findIndex(item=>!wasViewed(item));
@@ -38,7 +39,11 @@ export function StickerCelebration({notices,userId}:{notices:StickerNotice[];use
      :await s.from("user_repeatable_sticker_events").select("celebrated_at").eq("user_id",user.id).eq("id",item.eventId??-1).maybeSingle();
     if(check.error||!check.data?.celebrated_at)throw check.error??new Error("Acknowledgement not persisted");
    }
-  }catch(e){console.error("Sticker celebration acknowledgement failed",e);}
+  }catch(e){
+   // If the write failed, allow another attempt on the next visit even in this tab.
+   clearViewed(item);
+   console.error("Sticker celebration acknowledgement failed",e);
+  }
   finally{inFlight.current.delete(key);}
  }
  function next(){
