@@ -4,13 +4,15 @@ import {createClient} from "@/lib/supabase/client";
 
 export function GiftRequestReward({initialAvailable,totalEarned,nextLevel,xpRemaining}:{initialAvailable:number;totalEarned:number;nextLevel:number;xpRemaining:number}){
  const dialogRef=useRef<HTMLDialogElement>(null);
+ const redemptionInFlight=useRef(false);
  const [available,setAvailable]=useState(initialAvailable);
  const [confirming,setConfirming]=useState(false);
  const [saving,setSaving]=useState(false);
  const [error,setError]=useState("");
  useEffect(()=>{const dialog=dialogRef.current;if(!dialog)return;if(confirming&&available>0){if(!dialog.open)dialog.showModal();}else if(dialog.open)dialog.close();},[confirming,available]);
  async function consume(){
-  if(saving||available<=0)return;
+  if(redemptionInFlight.current||available<=0)return;
+  redemptionInFlight.current=true;
   setSaving(true);setError("");
   try{
    const {data,error:rpcError}=await createClient().rpc("consume_gift_request_reward");
@@ -18,7 +20,7 @@ export function GiftRequestReward({initialAvailable,totalEarned,nextLevel,xpRema
    if(typeof data!=="number"||data<0){setAvailable(0);setConfirming(false);return;}
    setAvailable(data);setConfirming(false);
   }catch(e){console.error("Gift request redemption failed",e);setError("사용 기록을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.");}
-  finally{setSaving(false);}
+  finally{redemptionInFlight.current=false;setSaving(false);}
  }
  return <section className="study-card gift-reward-card">
   <div className="section-heading"><div><p className="eyebrow">5레벨 보상</p><h2>🎁 선물 요구권 {available}장</h2></div><span>Lv.5, 10, 15…마다 1장</span></div>
