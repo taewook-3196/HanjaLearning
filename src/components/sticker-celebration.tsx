@@ -14,6 +14,12 @@ export function StickerCelebration({kind,name,message,stickerKey,eventId}:Props)
  const dismissed=useRef(false);
  const identity=kind==="growth"?`growth-${stickerKey}`:`repeatable-${eventId}`;
  useEffect(()=>{
+  const timer=window.setTimeout(()=>{void acknowledge();},2000);
+  return()=>window.clearTimeout(timer);
+ // One timer per sticker identity, not per saving state.
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ },[identity]);
+ useEffect(()=>{
   // Private browsing and restricted webviews may deny sessionStorage access.
   try{if(window.sessionStorage.getItem(`sticker-dismissed:${identity}`)==="1")setVisible(false);}
   catch(e){console.warn("Sticker session preference unavailable",e);}
