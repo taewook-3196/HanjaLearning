@@ -25,7 +25,9 @@ export default async function StatsPage(){
  ]);
  const attempts=history??[];const isWritingAttempt=(x:{activity_type:string|null;question_type:string|null})=>x.activity_type==="WRITING"||x.question_type==="STROKE_ORDER";const recognitionAttempts=attempts.filter(x=>!isWritingAttempt(x));const writingAttempts=attempts.filter(isWritingAttempt);const correct=recognitionAttempts.filter(x=>x.result==="CORRECT"||x.result==="KNOWN").length;const accuracy=recognitionAttempts.length?Math.round(correct/recognitionAttempts.length*100):0;
  const learned=(progress??[]).length;const mastered=(progress??[]).filter(x=>(x.mastery_score??0)>=75).length;const difficult=(progress??[]).filter(x=>(x.wrong_streak??0)>0).length;const written=(progress??[]).filter(x=>(x.writing_score??0)>0);const writtenCount=written.length;const avgWriting=writtenCount?Math.round(written.reduce((sum,x)=>sum+(x.writing_score??0),0)/writtenCount):0;const weeklyWritten=new Set(writingAttempts.map(x=>x.hanja_id)).size;
- const days=new Set(attempts.map(x=>dayKey(x.created_at))).size;
+ // Count study days from the complete activity window, including writing-only days.
+ const recentActivityDays=new Set((streakHistory??[]).map(x=>dayKey(x.created_at)));
+ const days=recentActivityDays.size;
  const todayAttempts=recognitionAttempts.filter(x=>dayKey(x.created_at)===todayKey);
  const todayAnswered=todayAttempts.filter(x=>["CORRECT","KNOWN","WRONG","UNKNOWN"].includes(x.result));
  const todayPerfect=todayAnswered.length>=5&&todayAnswered.every(x=>x.result==="CORRECT"||x.result==="KNOWN");
@@ -33,7 +35,7 @@ export default async function StatsPage(){
  const todayReviewPerfect=todayReviewAttempts.length>=3&&todayReviewAttempts.every(x=>x.result==="CORRECT"||x.result==="KNOWN");
  const todaySessions=(sessions??[]).filter(x=>x.completed_at&&dayKey(x.completed_at)===todayKey);
  const plannedNew=todaySessions.reduce((n,x)=>n+(x.planned_new??0),0); const plannedReview=todaySessions.reduce((n,x)=>n+(x.planned_review??0),0); const actualNew=todaySessions.reduce((n,x)=>n+(x.actual_new??0),0); const actualReview=todaySessions.reduce((n,x)=>n+(x.actual_review??0),0); const todayPlanComplete=(plannedNew+plannedReview)>0&&actualNew>=plannedNew&&actualReview>=plannedReview;
- const activityDays=new Set((streakHistory??[]).map(x=>dayKey(x.created_at)));
+ const activityDays=recentActivityDays;
  // Count calendar days in Korea, not UTC days: the latter can skip/repeat a date near midnight.
  const previousKoreanDay=(key:string)=>{const d=new Date(`${key}T12:00:00Z`);d.setUTCDate(d.getUTCDate()-1);return d.toISOString().slice(0,10);};
  let streak=0; let streakKey=activityDays.has(todayKey)?todayKey:previousKoreanDay(todayKey);
