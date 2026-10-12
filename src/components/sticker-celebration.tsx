@@ -61,8 +61,25 @@ export function StickerCelebration({notices,userId}:{notices:StickerNotice[];use
  useEffect(()=>{
   if(!ready||!notice)return;
   advancing.current=false;
-  const timer=window.setTimeout(next,2000);
-  return()=>window.clearTimeout(timer);
+  let remaining=2000;
+  let started=0;
+  let timer:ReturnType<typeof setTimeout>|undefined;
+  const pause=()=>{
+   if(timer!==undefined){
+    window.clearTimeout(timer);
+    timer=undefined;
+    remaining=Math.max(0,remaining-(Date.now()-started));
+   }
+  };
+  const resume=()=>{
+   if(document.visibilityState!=="visible"||timer!==undefined)return;
+   started=Date.now();
+   timer=window.setTimeout(()=>{timer=undefined;next();},remaining);
+  };
+  const onVisibilityChange=()=>{if(document.visibilityState==="visible")resume();else pause();};
+  document.addEventListener("visibilitychange",onVisibilityChange);
+  resume();
+  return()=>{pause();document.removeEventListener("visibilitychange",onVisibilityChange);};
  // eslint-disable-next-line react-hooks/exhaustive-deps
  },[index,ready]);
  if(!ready||!notice)return null;
