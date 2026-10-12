@@ -11,7 +11,8 @@ export function StickerCelebration({kind,name,message,stickerKey,eventId}:Props)
  const [saving,setSaving]=useState(false);
  const [error,setError]=useState("");
  const busy=useRef(false);
- function close(){setVisible(false);router.refresh();}
+ const dismissed=useRef(false);
+ function close(refresh=false){dismissed.current=true;setVisible(false);if(refresh)router.refresh();}
  async function acknowledge(){
   if(busy.current)return;
   busy.current=true;setSaving(true);setError("");
@@ -32,9 +33,9 @@ export function StickerCelebration({kind,name,message,stickerKey,eventId}:Props)
      :await s.from("user_repeatable_sticker_events").select("celebrated_at").eq("user_id",user.id).eq("id",eventId??-1).maybeSingle();
     if(lookup.error||!lookup.data?.celebrated_at)throw lookup.error??new Error("Sticker acknowledgement not persisted");
    }
-   close();
+   if(!dismissed.current)close(true);
   }catch(e){
-   setError("수령 기록 저장에 실패했어요. 나중에 다시 받을 수 있어요.");
+   if(!dismissed.current)setError("수령 기록 저장에 실패했어요. 나중에 다시 받을 수 있어요.");
    console.error("Sticker celebration acknowledgement failed",e);
   }finally{busy.current=false;setSaving(false);}
  }
