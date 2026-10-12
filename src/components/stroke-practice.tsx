@@ -57,10 +57,12 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
 
  function animate(){
   if(!writer.current||mode==="LOADING"||mode==="ERROR")return;
+  if(nextStageTimer.current!==null){clearTimeout(nextStageTimer.current);nextStageTimer.current=null;}
   writer.current.cancelQuiz();setMode("WATCH");setMessage("획순을 천천히 살펴보세요.");writer.current.animateCharacter();
  }
  function practice(targetStage:1|2|3=stage){
   if(!writer.current||mode==="LOADING"||mode==="ERROR")return;
+  if(nextStageTimer.current!==null){clearTimeout(nextStageTimer.current);nextStageTimer.current=null;}
   writer.current.cancelQuiz();setStage(targetStage);setMode("TRACE");
   if(targetStage===1){writer.current.showCharacter();writer.current.showOutline();setMessage("1단계 · 글자를 보면서 따라 써 보세요.");}
   else if(targetStage===2){writer.current.hideCharacter();writer.current.showOutline();setMessage("2단계 · 흐린 윤곽을 힌트로 써 보세요.");}
