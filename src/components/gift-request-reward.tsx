@@ -29,8 +29,8 @@ export function GiftRequestReward({initialAvailable,totalEarned,nextLevel,xpRema
    <h3 id="gift-request-title">선물요구권 1장을 사용하시겠습니까?</h3>
    <p>부모님께 원하는 선물을 요청할 수 있지만, 부모님에게는 요청을 거절할 권리가 있습니다.</p>
    <p>네를 선택하면 1장이 차감됩니다.</p>
+   {error?<p role="alert" className="form-message">{error}</p>:null}
    <div className="practice-actions"><button type="button" disabled={saving} onClick={()=>void consume()}>{saving?"처리 중...":"네, 사용하기"}</button><button type="button" className="secondary-button" disabled={saving} onClick={()=>setConfirming(false)}>아니오</button></div>
   </dialog>
-  {error?<p role="alert" className="form-message">{error}</p>:null}
  </section>;
 }
