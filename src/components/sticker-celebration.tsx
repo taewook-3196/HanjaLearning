@@ -14,12 +14,16 @@ export function StickerCelebration({kind,name,message,stickerKey,eventId}:Props)
  const dismissed=useRef(false);
  const identity=kind==="growth"?`growth-${stickerKey}`:`repeatable-${eventId}`;
  useEffect(()=>{
-  // Dismissed celebrations stay hidden during this visit, including after a refresh.
-  if(window.sessionStorage.getItem(`sticker-dismissed:${identity}`)==="1")setVisible(false);
+  // Private browsing and restricted webviews may deny sessionStorage access.
+  try{if(window.sessionStorage.getItem(`sticker-dismissed:${identity}`)==="1")setVisible(false);}
+  catch(e){console.warn("Sticker session preference unavailable",e);}
  },[identity]);
  function close(refresh=false){
   dismissed.current=true;
-  if(!refresh)window.sessionStorage.setItem(`sticker-dismissed:${identity}`,"1");
+  if(!refresh){
+   try{window.sessionStorage.setItem(`sticker-dismissed:${identity}`,"1");}
+   catch(e){console.warn("Sticker session preference unavailable",e);}
+  }
   setVisible(false);
   if(refresh)router.refresh();
  }
