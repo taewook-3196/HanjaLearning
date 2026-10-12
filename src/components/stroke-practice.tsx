@@ -19,7 +19,7 @@ function FreeWritingPad({character,onComplete,compact=false}:{character:string;o
  function move(e:ReactPointerEvent<HTMLCanvasElement>){if(!drawing.current)return;const ctx=e.currentTarget.getContext("2d");if(!ctx)return;const p=point(e);ctx.lineTo(p.x,p.y);ctx.stroke();setDrawn(true);}
  function up(){drawing.current=false;}
  function clear(){const el=canvas.current;if(el)el.getContext("2d")?.clearRect(0,0,el.width,el.height);setDrawn(false);}
- return <div className="free-writing-wrap"><div className="free-writing-pad"><span aria-hidden="true">{character}</span><canvas ref={canvas} width={512} height={512} aria-label={character+" 자유 쓰기판"} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}/></div><div className="practice-actions"><button type="button" className="secondary-button" onClick={clear}>다시 쓰기</button><button type="button" disabled={!drawn} onClick={onComplete}>쓰기 완료</button></div></div>;
+ return <div className="free-writing-wrap"><div className="free-writing-pad"><span aria-hidden="true">{character}</span><canvas ref={canvas} width={512} height={512} aria-label={character+" 자유 쓰기판"} style={{touchAction:"none"}} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onLostPointerCapture={up}/></div><div className="practice-actions"><button type="button" className="secondary-button" onClick={clear}>다시 쓰기</button><button type="button" disabled={!drawn} onClick={onComplete}>쓰기 완료</button></div></div>;
 }
 
 export default function StrokePractice({character,onPracticeComplete,onAvailabilityChange,compact=false,details,controlsEnabled=true}:Props){
@@ -28,9 +28,11 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
  const [mode,setMode]=useState<"LOADING"|"WATCH"|"TRACE"|"DONE"|"ERROR">("LOADING");
  const [stage,setStage]=useState<1|2|3>(1);
  const [message,setMessage]=useState("획순을 준비하고 있어요.");
+ const nextStageTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
 
  useEffect(()=>{
   let active=true;
+  if(nextStageTimer.current!==null){clearTimeout(nextStageTimer.current);nextStageTimer.current=null;}
   if(!supportsStrokePractice(character)){onAvailabilityChange?.(false);return;}
   if(!target.current)return;
   target.current.innerHTML="";
@@ -44,7 +46,7 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
    },
    onLoadCharDataSuccess:()=>{if(active){onAvailabilityChange?.(true);setStage(1);setMode("WATCH");setMessage("1단계 · 글자를 보면서 따라 써 보세요.");}},
   });
-  return()=>{active=false;writer.current=null;if(target.current)target.current.innerHTML="";};
+  return()=>{active=false;if(nextStageTimer.current!==null){clearTimeout(nextStageTimer.current);nextStageTimer.current=null;}writer.current=null;if(target.current)target.current.innerHTML="";};
  },[character,onAvailabilityChange]);
 
  if(!supportsStrokePractice(character)){
@@ -69,7 +71,7 @@ export default function StrokePractice({character,onPracticeComplete,onAvailabil
    showHintAfterMisses:targetStage===3?3:2,
    highlightOnComplete:true,
    onComplete:()=>{
-    if(targetStage<3){const next=(targetStage+1) as 2|3;setMode("DONE");setMessage(targetStage===1?"좋아요. 이제 힌트만 보고 써 보세요.":"좋아요. 마지막은 가이드 없이 기억해서 써 보세요.");setTimeout(()=>practice(next),450);}
+    if(targetStage<3){const next=(targetStage+1) as 2|3;setMode("DONE");setMessage(targetStage===1?"좋아요. 이제 힌트만 보고 써 보세요.":"좋아요. 마지막은 가이드 없이 기억해서 써 보세요.");nextStageTimer.current=setTimeout(()=>{nextStageTimer.current=null;practice(next);},450);}
     else {setMode("DONE");setMessage("3단계 쓰기 완료! 기억해서 잘 썼어요.");onPracticeComplete?.();}
    }
   });
