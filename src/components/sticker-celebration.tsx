@@ -5,12 +5,12 @@ import {GrowthStickerArt} from "@/components/growth-sticker-art";
 import type {GrowthStickerKind} from "@/lib/growth-stickers";
 
 export type StickerNotice={kind:"growth"|"repeatable";name:string;message:string;stickerKey?:GrowthStickerKind;eventId?:number};
-export function StickerCelebration({notices}:{notices:StickerNotice[]}){
+export function StickerCelebration({notices,userId}:{notices:StickerNotice[];userId:string}){
  const [index,setIndex]=useState(0);
  const [ready,setReady]=useState(false);
  const advancing=useRef(false);
  const notice=notices[index];
- const viewedKey=(item:StickerNotice)=>`sticker-viewed:${item.kind}:${item.kind==="growth"?item.stickerKey:item.eventId}`;
+ const viewedKey=(item:StickerNotice)=>`sticker-viewed:${userId}:${item.kind}:${item.kind==="growth"?item.stickerKey:item.eventId}`;
  function wasViewed(item:StickerNotice){try{return window.sessionStorage.getItem(viewedKey(item))==="1";}catch{return false;}}
  function markViewed(item:StickerNotice){try{window.sessionStorage.setItem(viewedKey(item),"1");}catch{/* Storage is optional. */}}
  useEffect(()=>{
@@ -23,7 +23,7 @@ export function StickerCelebration({notices}:{notices:StickerNotice[]}){
   try{
    const s=createClient();
    const {data:{user},error:authError}=await s.auth.getUser();
-   if(authError||!user)throw authError??new Error("Authentication required");
+   if(authError||!user||user.id!==userId)throw authError??new Error("Sticker acknowledgement user mismatch");
    const result=item.kind==="growth"
     ?await s.from("user_growth_stickers").update({celebrated_at:new Date().toISOString()}).eq("user_id",user.id).eq("sticker_key",item.stickerKey??"").is("celebrated_at",null).select("sticker_key")
     :await s.from("user_repeatable_sticker_events").update({celebrated_at:new Date().toISOString()}).eq("user_id",user.id).eq("id",item.eventId??-1).is("celebrated_at",null).select("id");
