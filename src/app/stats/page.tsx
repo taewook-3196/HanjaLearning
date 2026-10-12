@@ -23,10 +23,10 @@ export default async function StatsPage(){
   s.from("study_sessions").select("planned_new,planned_review,planned_wrong,actual_new,actual_review,completed_at").eq("user_id",user.id).gte("started_at",sinceIso),
   s.from("review_history").select("created_at").eq("user_id",user.id).gte("created_at",streakSinceIso)
  ]);
- const attempts=history??[];const recognitionAttempts=attempts.filter(x=>x.activity_type!=="WRITING");const writingAttempts=attempts.filter(x=>x.activity_type==="WRITING"||x.question_type==="STROKE_ORDER");const correct=recognitionAttempts.filter(x=>x.result==="CORRECT"||x.result==="KNOWN").length;const accuracy=recognitionAttempts.length?Math.round(correct/recognitionAttempts.length*100):0;
+ const attempts=history??[];const isWritingAttempt=(x:{activity_type:string|null;question_type:string|null})=>x.activity_type==="WRITING"||x.question_type==="STROKE_ORDER";const recognitionAttempts=attempts.filter(x=>!isWritingAttempt(x));const writingAttempts=attempts.filter(isWritingAttempt);const correct=recognitionAttempts.filter(x=>x.result==="CORRECT"||x.result==="KNOWN").length;const accuracy=recognitionAttempts.length?Math.round(correct/recognitionAttempts.length*100):0;
  const learned=(progress??[]).length;const mastered=(progress??[]).filter(x=>(x.mastery_score??0)>=75).length;const difficult=(progress??[]).filter(x=>(x.wrong_streak??0)>0).length;const written=(progress??[]).filter(x=>(x.writing_score??0)>0);const writtenCount=written.length;const avgWriting=writtenCount?Math.round(written.reduce((sum,x)=>sum+(x.writing_score??0),0)/writtenCount):0;const weeklyWritten=new Set(writingAttempts.map(x=>x.hanja_id)).size;
  const days=new Set(attempts.map(x=>dayKey(x.created_at))).size;
- const todayAttempts=attempts.filter(x=>dayKey(x.created_at)===todayKey&&x.activity_type!=="WRITING");
+ const todayAttempts=recognitionAttempts.filter(x=>dayKey(x.created_at)===todayKey);
  const todayAnswered=todayAttempts.filter(x=>["CORRECT","KNOWN","WRONG","UNKNOWN"].includes(x.result));
  const todayPerfect=todayAnswered.length>=5&&todayAnswered.every(x=>x.result==="CORRECT"||x.result==="KNOWN");
  const todayReviewAttempts=todayAttempts.filter(x=>x.activity_type==="REVIEW");
