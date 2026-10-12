@@ -13,12 +13,12 @@ export function supportsStrokePractice(character:string){return !isCompatibility
 
 
 function FreeWritingPad({character,onComplete,compact=false}:{character:string;onComplete?:()=>void;compact?:boolean}){
- const canvas=useRef<HTMLCanvasElement>(null);const [drawn,setDrawn]=useState(false);const drawing=useRef(false);
+ const canvas=useRef<HTMLCanvasElement>(null);const [drawn,setDrawn]=useState(false);const drawing=useRef(false);const activePointer=useRef<number|null>(null);
  function point(e:ReactPointerEvent<HTMLCanvasElement>){const el=e.currentTarget,r=el.getBoundingClientRect();return{x:(e.clientX-r.left)*(el.width/r.width),y:(e.clientY-r.top)*(el.height/r.height)};}
- function down(e:ReactPointerEvent<HTMLCanvasElement>){const el=e.currentTarget,ctx=el.getContext("2d");if(!ctx)return;el.setPointerCapture(e.pointerId);drawing.current=true;const p=point(e);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineCap="round";ctx.lineJoin="round";ctx.lineWidth=compact?12:15;ctx.strokeStyle="#24313d";ctx.lineTo(p.x+0.01,p.y+0.01);ctx.stroke();setDrawn(true);}
- function move(e:ReactPointerEvent<HTMLCanvasElement>){if(!drawing.current)return;const ctx=e.currentTarget.getContext("2d");if(!ctx)return;const p=point(e);ctx.lineTo(p.x,p.y);ctx.stroke();setDrawn(true);}
- function up(){drawing.current=false;}
- function clear(){const el=canvas.current;if(el)el.getContext("2d")?.clearRect(0,0,el.width,el.height);setDrawn(false);}
+ function down(e:ReactPointerEvent<HTMLCanvasElement>){const el=e.currentTarget,ctx=el.getContext("2d");if(!ctx||activePointer.current!==null)return;activePointer.current=e.pointerId;el.setPointerCapture(e.pointerId);drawing.current=true;const p=point(e);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineCap="round";ctx.lineJoin="round";ctx.lineWidth=compact?12:15;ctx.strokeStyle="#24313d";ctx.lineTo(p.x+0.01,p.y+0.01);ctx.stroke();setDrawn(true);}
+ function move(e:ReactPointerEvent<HTMLCanvasElement>){if(!drawing.current||activePointer.current!==e.pointerId)return;const ctx=e.currentTarget.getContext("2d");if(!ctx)return;const p=point(e);ctx.lineTo(p.x,p.y);ctx.stroke();setDrawn(true);}
+ function up(e:ReactPointerEvent<HTMLCanvasElement>){if(activePointer.current!==e.pointerId)return;drawing.current=false;activePointer.current=null;}
+ function clear(){drawing.current=false;activePointer.current=null;const el=canvas.current;if(el)el.getContext("2d")?.clearRect(0,0,el.width,el.height);setDrawn(false);}
  return <div className="free-writing-wrap"><div className="free-writing-pad"><span aria-hidden="true">{character}</span><canvas ref={canvas} width={512} height={512} aria-label={character+" 자유 쓰기판"} style={{touchAction:"none"}} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onLostPointerCapture={up}/></div><div className="practice-actions"><button type="button" className="secondary-button" onClick={clear}>다시 쓰기</button><button type="button" disabled={!drawn} onClick={onComplete}>쓰기 완료</button></div></div>;
 }
 
