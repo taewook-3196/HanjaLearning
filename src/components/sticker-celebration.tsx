@@ -63,7 +63,7 @@ export function StickerCelebration({notices,userId}:{notices:StickerNotice[];use
   advancing.current=false;
   let remaining=2000;
   let started=0;
-  let timer:ReturnType<typeof setTimeout>|undefined;
+  let timer:number|undefined;
   const pause=()=>{
    if(timer!==undefined){
     window.clearTimeout(timer);
