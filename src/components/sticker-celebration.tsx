@@ -10,8 +10,13 @@ export function StickerCelebration({notices}:{notices:StickerNotice[]}){
  const [ready,setReady]=useState(false);
  const advancing=useRef(false);
  const notice=notices[index];
+ const viewedKey=(item:StickerNotice)=>`sticker-viewed:${item.kind}:${item.kind==="growth"?item.stickerKey:item.eventId}`;
+ function wasViewed(item:StickerNotice){try{return window.sessionStorage.getItem(viewedKey(item))==="1";}catch{return false;}}
+ function markViewed(item:StickerNotice){try{window.sessionStorage.setItem(viewedKey(item),"1");}catch{/* Storage is optional. */}}
  useEffect(()=>{
-  // Avoid flashing a previously dismissed award during hydration.
+  // Only play notices not yet shown during this tab session.
+  const first=notices.findIndex(item=>!wasViewed(item));
+  setIndex(first<0?notices.length:first);
   setReady(true);
  },[]);
  async function record(item:StickerNotice){
@@ -35,8 +40,13 @@ export function StickerCelebration({notices}:{notices:StickerNotice[]}){
   if(!notice||advancing.current)return;
   advancing.current=true;
   // The animation is never blocked by network latency. Failed writes remain pending.
+  markViewed(notice);
   void record(notice);
-  setIndex(value=>value+1);
+  setIndex(value=>{
+   let nextIndex=value+1;
+   while(nextIndex<notices.length&&wasViewed(notices[nextIndex]))nextIndex++;
+   return nextIndex;
+  });
  }
  useEffect(()=>{
   if(!ready||!notice)return;
