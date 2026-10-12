@@ -66,7 +66,8 @@ export default async function StatsPage(){
  }
  const {data:stickerRows}=await s.from("user_growth_stickers").select("sticker_key,earned_at,celebrated_at").eq("user_id",user.id);
  const persistedKeys=new Set((stickerRows??[]).map(x=>x.sticker_key));
- const stickers=stickerRules.map(x=>({...x,earned:persistedKeys.has(x.kind)||x.earned}));
+ // A sticker is earned only after its award is persisted; a failed upsert must not appear successful.
+ const stickers=stickerRules.map(x=>({...x,earned:persistedKeys.has(x.kind)}));
  const earnedStickers=stickers.filter(x=>x.earned).length; const nextSticker=nextGrowthSticker(stickers);
  const uncelebrated=(stickerRows??[]).filter(x=>!x.celebrated_at).sort((a,b)=>String(a.earned_at).localeCompare(String(b.earned_at)));
  const celebrationRow=uncelebrated[0];
