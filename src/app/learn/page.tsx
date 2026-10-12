@@ -27,11 +27,11 @@ export default function LearnPage(){
  useEffect(()=>{(async()=>{const s=createClient();const {data:{user}}=await s.auth.getUser();if(!user){router.replace("/login");return;}const {data:account}=await s.from("account_status").select("status").eq("user_id",user.id).maybeSingle();if(account?.status!=="ACTIVE"){router.replace("/pending");return;}const [{data:p},{data:st}]=await Promise.all([s.from("profiles").select("target_grade").eq("user_id",user.id).single(),s.from("user_settings").select("exam_provider_id,sound_enabled,speech_voice,target_exam_date,learning_order").eq("user_id",user.id).single()]);setSoundEnabled(st?.sound_enabled??true);setSpeechVoice(st?.speech_voice??"AUTO");if(!p?.target_grade){router.replace("/onboarding");return;}let q=s.from("exam_grades").select("id").eq("code",p.target_grade);if(st?.exam_provider_id)q=q.eq("provider_id",st.exam_provider_id);const {data:grades,error:gradesError}=await q;if(gradesError){setMessage("학습자료를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.");setLoading(false);return;}if(!grades?.length){setMessage("목표 급수의 학습자료를 찾지 못했어요.");setLoading(false);return;}const gradeIds=grades.map(g=>g.id);const scopeResults=await Promise.all(gradeIds.map(gradeId=>s.rpc("list_grade_hanja_ids",{target_grade_id:gradeId})));if(scopeResults.some(result=>result.error)){setMessage("학습자료를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.");setLoading(false);return;}const maps=scopeResults.flatMap(result=>result.data??[]).sort((a,b)=>(a.sequence_no??0)-(b.sequence_no??0));let allIds=[...new Set(maps.map(x=>x.hanja_id))];
 const order=st?.learning_order??"STROKE";
 if(order==="STROKE"||order==="READING"){
- const [{data:orderReadings},{data:meta}]=await Promise.all([
+ const [{data:orderReadings,error:orderReadingsError},{data:meta,error:metaError}]=await Promise.all([
   s.from("hanja_readings").select("hanja_id,reading").in("hanja_id",allIds).eq("is_primary",true),
   s.from("hanja_exam_metadata").select("hanja_id,total_strokes").in("hanja_id",allIds)
  ]);
- if(orderReadings===null||meta===null){setMessage("학습 순서 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.");setLoading(false);return;}
+ if(orderReadingsError||metaError||orderReadings===null||meta===null){setMessage("학습 순서 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.");setLoading(false);return;}
  const readingById=new Map((orderReadings??[]).map(v=>[v.hanja_id,v.reading??""]));
  const strokesById=new Map((meta??[]).map(v=>[v.hanja_id,v.total_strokes??999]));
  allIds=allIds.slice().sort((a,b)=>order==="READING"?(readingById.get(a)??"").localeCompare(readingById.get(b)??"","ko")||(a-b):(strokesById.get(a)??999)-(strokesById.get(b)??999)||(readingById.get(a)??"").localeCompare(readingById.get(b)??"","ko")||(a-b));
