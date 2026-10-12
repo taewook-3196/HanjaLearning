@@ -14,7 +14,7 @@ export function StickerCelebration({kind,name,message,stickerKey,eventId}:Props)
  const dismissed=useRef(false);
  const identity=kind==="growth"?`growth-${stickerKey}`:`repeatable-${eventId}`;
  useEffect(()=>{
-  const timer=window.setTimeout(()=>{void acknowledge();},2000);
+  const timer=window.setTimeout(()=>{if(!dismissed.current)void acknowledge();},2000);
   return()=>window.clearTimeout(timer);
  // One timer per sticker identity, not per saving state.
  // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -60,5 +60,5 @@ export function StickerCelebration({kind,name,message,stickerKey,eventId}:Props)
   }finally{busy.current=false;setSaving(false);}
  }
  if(!visible)return null;
- return <section className="sticker-celebration" role="status" aria-live="polite"><div className="sticker-celebration-card"><p className="eyebrow">{kind==="growth"?"새 성장 스티커":"새 반복 스티커"}</p><span className="sticker-celebration-art" aria-hidden="true">{kind==="growth"&&stickerKey?<GrowthStickerArt kind={stickerKey as "first"|"stack"|"write"|"retry"|"master"|"week"}/>: "★"}</span><h2>{name}</h2><p>{message}</p><button className="primary-button" type="button" disabled={saving} onClick={()=>void acknowledge()}>{saving?"저장 중...":"스티커 받기"}</button>{error?<p role="alert">{error}</p>:null}<button className="secondary-button" type="button" onClick={close}>나중에 받기 · 닫기</button></div></section>;
+ return <section className="sticker-celebration" role="status" aria-live="polite"><div className="sticker-celebration-card"><p className="eyebrow">{kind==="growth"?"새 성장 스티커":"새 반복 스티커"}</p><span className="sticker-celebration-art" aria-hidden="true">{kind==="growth"&&stickerKey?<GrowthStickerArt kind={stickerKey as "first"|"stack"|"write"|"retry"|"master"|"week"}/>: "★"}</span><h2>{name}</h2><p>{message}</p><button className="primary-button" type="button" disabled={saving} onClick={()=>void acknowledge()}>{saving?"저장 중...":"스티커 받기"}</button>{error?<p role="alert">{error}</p>:null}<button className="secondary-button" type="button" onClick={()=>close()}>나중에 받기 · 닫기</button></div></section>;
 }
