@@ -9,6 +9,7 @@ export function StickerCelebration({notices,userId}:{notices:StickerNotice[];use
  const [index,setIndex]=useState(0);
  const [ready,setReady]=useState(false);
  const advancing=useRef(false);
+ const inFlight=useRef(new Set<string>());
  const notice=notices[index];
  const viewedKey=(item:StickerNotice)=>`sticker-viewed:${userId}:${item.kind}:${item.kind==="growth"?item.stickerKey:item.eventId}`;
  function wasViewed(item:StickerNotice){try{return window.sessionStorage.getItem(viewedKey(item))==="1";}catch{return false;}}
@@ -20,6 +21,9 @@ export function StickerCelebration({notices,userId}:{notices:StickerNotice[];use
   setReady(true);
  },[]);
  async function record(item:StickerNotice){
+  const key=viewedKey(item);
+  if(inFlight.current.has(key))return;
+  inFlight.current.add(key);
   try{
    const s=createClient();
    const {data:{user},error:authError}=await s.auth.getUser();
@@ -35,6 +39,7 @@ export function StickerCelebration({notices,userId}:{notices:StickerNotice[];use
     if(check.error||!check.data?.celebrated_at)throw check.error??new Error("Acknowledgement not persisted");
    }
   }catch(e){console.error("Sticker celebration acknowledgement failed",e);}
+  finally{inFlight.current.delete(key);}
  }
  function next(){
   if(!notice||advancing.current)return;
