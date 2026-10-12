@@ -33,9 +33,11 @@ export default async function StatsPage(){
  const todayReviewPerfect=todayReviewAttempts.length>=3&&todayReviewAttempts.every(x=>x.result==="CORRECT"||x.result==="KNOWN");
  const todaySessions=(sessions??[]).filter(x=>x.completed_at&&dayKey(x.completed_at)===todayKey);
  const plannedNew=todaySessions.reduce((n,x)=>n+(x.planned_new??0),0); const plannedReview=todaySessions.reduce((n,x)=>n+(x.planned_review??0),0); const actualNew=todaySessions.reduce((n,x)=>n+(x.actual_new??0),0); const actualReview=todaySessions.reduce((n,x)=>n+(x.actual_review??0),0); const todayPlanComplete=(plannedNew+plannedReview)>0&&actualNew>=plannedNew&&actualReview>=plannedReview;
- const activityDays=[...new Set((streakHistory??[]).map(x=>dayKey(x.created_at)))].sort().reverse();
- let streak=0; const streakCursor=new Date(now); if(!activityDays.includes(todayKey))streakCursor.setUTCDate(streakCursor.getUTCDate()-1);
- for(let i=0;i<120;i++){const key=dayKey(streakCursor);if(!activityDays.includes(key))break;streak++;streakCursor.setUTCDate(streakCursor.getUTCDate()-1);}
+ const activityDays=new Set((streakHistory??[]).map(x=>dayKey(x.created_at)));
+ // Count calendar days in Korea, not UTC days: the latter can skip/repeat a date near midnight.
+ const previousKoreanDay=(key:string)=>{const d=new Date(`${key}T12:00:00Z`);d.setUTCDate(d.getUTCDate()-1);return d.toISOString().slice(0,10);};
+ let streak=0; let streakKey=activityDays.has(todayKey)?todayKey:previousKoreanDay(todayKey);
+ for(let i=0;i<120&&activityDays.has(streakKey);i++){streak++;streakKey=previousKoreanDay(streakKey);}
  const {data:repeatableRows}=await s.from("user_repeatable_sticker_events").select("id,sticker_key,earned_on,earned_at,celebrated_at").eq("user_id",user.id).order("earned_at",{ascending:true});
  const repeatCounts=(repeatableRows??[]).reduce<Record<string,number>>((acc,x)=>{acc[x.sticker_key]=(acc[x.sticker_key]??0)+1;return acc;},{});
  const {data:xpRows}=await s.from("user_xp_events").select("xp,event_date,reason,created_at").eq("user_id",user.id).order("created_at",{ascending:false});
