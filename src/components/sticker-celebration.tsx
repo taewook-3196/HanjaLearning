@@ -8,6 +8,8 @@ export type StickerNotice={kind:"growth"|"repeatable";name:string;message:string
 export function StickerCelebration({notices,userId}:{notices:StickerNotice[];userId:string}){
  const [index,setIndex]=useState(0);
  const [ready,setReady]=useState(false);
+ const [visibleCount,setVisibleCount]=useState(notices.length);
+ const [shownCount,setShownCount]=useState(0);
  const advancing=useRef(false);
  const inFlight=useRef(new Set<string>());
  const notice=notices[index];
@@ -19,6 +21,8 @@ export function StickerCelebration({notices,userId}:{notices:StickerNotice[];use
   // Only play notices not yet shown during this tab session.
   const first=notices.findIndex(item=>!wasViewed(item));
   setIndex(first<0?notices.length:first);
+  setVisibleCount(notices.filter(item=>!wasViewed(item)).length);
+  setShownCount(0);
   setReady(true);
  },[]);
  async function record(item:StickerNotice){
@@ -51,6 +55,7 @@ export function StickerCelebration({notices,userId}:{notices:StickerNotice[];use
   advancing.current=true;
   // The animation is never blocked by network latency. Failed writes remain pending.
   markViewed(notice);
+  setShownCount(count=>count+1);
   void record(notice);
   setIndex(value=>{
    let nextIndex=value+1;
@@ -83,5 +88,5 @@ export function StickerCelebration({notices,userId}:{notices:StickerNotice[];use
  // eslint-disable-next-line react-hooks/exhaustive-deps
  },[index,ready]);
  if(!ready||!notice)return null;
- return <section className="sticker-celebration" role="status" aria-live="polite"><div className="sticker-celebration-card"><p className="eyebrow">새 {notice.kind==="growth"?"성장":"반복"} 스티커 · {index+1}/{notices.length}</p><span className="sticker-celebration-art" aria-hidden="true">{notice.kind==="growth"&&notice.stickerKey?<GrowthStickerArt kind={notice.stickerKey}/>:"★"}</span><h2>{notice.name}</h2><p>{notice.message}</p><button className="primary-button" type="button" onClick={next}>{index+1===notices.length?"닫기":"다음 스티커 ›"}</button></div></section>;
+ return <section className="sticker-celebration" role="status" aria-live="polite"><div className="sticker-celebration-card"><p className="eyebrow">새 {notice.kind==="growth"?"성장":"반복"} 스티커 · {shownCount+1}/{visibleCount}</p><span className="sticker-celebration-art" aria-hidden="true">{notice.kind==="growth"&&notice.stickerKey?<GrowthStickerArt kind={notice.stickerKey}/>:"★"}</span><h2>{notice.name}</h2><p>{notice.message}</p><button className="primary-button" type="button" onClick={next}>{index+1===notices.length?"닫기":"다음 스티커 ›"}</button></div></section>;
 }
