@@ -13,9 +13,11 @@ export default async function StatsPage(){
  const {supabase:s,user}=await requireActiveUser();
  const {data:myProfile}=await s.from("profiles").select("nickname,target_grade,avatar_type,avatar_key,avatar_path,representative_sticker_key").eq("user_id",user.id).maybeSingle();
  const profilePhoto=myProfile?.avatar_type==="PHOTO"&&myProfile.avatar_path?await profileAvatarUrl(s,myProfile.avatar_path):null;
- const now=new Date(); const since=new Date(now); since.setUTCDate(since.getUTCDate()-7); const sinceIso=since.toISOString();
+ const now=new Date();
  const dayKey=(value:Date|string)=>new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(value));
  const todayKey=dayKey(now);
+ // Include today and the six preceding Korea calendar days, not a rolling 168-hour window.
+ const since=new Date(`${todayKey}T00:00:00+09:00`); since.setUTCDate(since.getUTCDate()-6); const sinceIso=since.toISOString();
  const streakSince=new Date(now); streakSince.setUTCDate(streakSince.getUTCDate()-120); const streakSinceIso=streakSince.toISOString();
  const [{data:history},{data:progress},{data:sessions},{data:streakHistory}]=await Promise.all([
   s.from("review_history").select("hanja_id,activity_type,question_type,result,created_at").eq("user_id",user.id).gte("created_at",sinceIso).order("created_at",{ascending:false}),
