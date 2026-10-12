@@ -62,9 +62,11 @@ export default async function StatsPage(){
  const savedKeys=new Set((savedStickerRows??[]).map(x=>x.sticker_key));
  const newlyEarned=stickerRules.filter(x=>x.earned&&!savedKeys.has(x.kind));
  if(newlyEarned.length){
-  await s.from("user_growth_stickers").upsert(newlyEarned.map(x=>({user_id:user.id,sticker_key:x.kind})),{onConflict:"user_id,sticker_key",ignoreDuplicates:true});
+  const {error:awardError}=await s.from("user_growth_stickers").upsert(newlyEarned.map(x=>({user_id:user.id,sticker_key:x.kind})),{onConflict:"user_id,sticker_key",ignoreDuplicates:true});
+  if(awardError)console.error("Growth sticker award failed",awardError);
  }
- const {data:stickerRows}=await s.from("user_growth_stickers").select("sticker_key,earned_at,celebrated_at").eq("user_id",user.id);
+ const {data:stickerRows,error:stickerReadError}=await s.from("user_growth_stickers").select("sticker_key,earned_at,celebrated_at").eq("user_id",user.id);
+ if(stickerReadError)console.error("Growth sticker read failed",stickerReadError);
  const persistedKeys=new Set((stickerRows??[]).map(x=>x.sticker_key));
  // A sticker is earned only after its award is persisted; a failed upsert must not appear successful.
  const stickers=stickerRules.map(x=>({...x,earned:persistedKeys.has(x.kind)}));
