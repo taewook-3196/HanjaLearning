@@ -1,5 +1,5 @@
 "use client";
-import {useRef,useState} from "react";
+import {useEffect,useRef,useState} from "react";
 import {useRouter} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
 import {GrowthStickerArt} from "@/components/growth-sticker-art";
@@ -12,7 +12,17 @@ export function StickerCelebration({kind,name,message,stickerKey,eventId}:Props)
  const [error,setError]=useState("");
  const busy=useRef(false);
  const dismissed=useRef(false);
- function close(refresh=false){dismissed.current=true;setVisible(false);if(refresh)router.refresh();}
+ const identity=kind==="growth"?`growth-${stickerKey}`:`repeatable-${eventId}`;
+ useEffect(()=>{
+  // Dismissed celebrations stay hidden during this visit, including after a refresh.
+  if(window.sessionStorage.getItem(`sticker-dismissed:${identity}`)==="1")setVisible(false);
+ },[identity]);
+ function close(refresh=false){
+  dismissed.current=true;
+  if(!refresh)window.sessionStorage.setItem(`sticker-dismissed:${identity}`,"1");
+  setVisible(false);
+  if(refresh)router.refresh();
+ }
  async function acknowledge(){
   if(busy.current)return;
   busy.current=true;setSaving(true);setError("");
