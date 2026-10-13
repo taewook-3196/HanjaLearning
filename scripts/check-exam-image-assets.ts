@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { DAEHAN_FIELD_BLUEPRINTS } from "../src/lib/exam-blueprints.ts";
 
 // This manifest describes source assets only. Production DB must be checked separately.
+// Run through PR CI on public GitHub; no production database writes are required.
 const imageAssets = [
   { hanja: "木", path: "/exam-images/tree.svg" },
   { hanja: "水", path: "/exam-images/water.svg" },
