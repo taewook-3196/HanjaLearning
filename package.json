@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test:exam": "node --experimental-strip-types scripts/test-exam-blueprints.ts && node --experimental-strip-types scripts/test-exam-generator.ts && node --experimental-strip-types scripts/test-exam-culture.ts && node --experimental-strip-types scripts/test-mastery-spacing.ts && node --experimental-strip-types scripts/test-grade-switch-preservation.ts && node --experimental-strip-types scripts/test-relation-distractors.ts && node --experimental-strip-types scripts/test-pictorial-generation.ts"
+    "test:exam": "node --experimental-strip-types scripts/test-exam-blueprints.ts && node --experimental-strip-types scripts/test-exam-generator.ts && node --experimental-strip-types scripts/test-exam-culture.ts && node --experimental-strip-types scripts/test-mastery-spacing.ts && node --experimental-strip-types scripts/test-grade-switch-preservation.ts && node --experimental-strip-types scripts/test-relation-distractors.ts && node --experimental-strip-types scripts/test-pictorial-generation.ts && npm run check:exam-images",
+    "check:exam-images": "node --experimental-strip-types scripts/check-exam-image-assets.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
