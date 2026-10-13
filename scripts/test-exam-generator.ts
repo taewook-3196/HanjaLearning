@@ -1,5 +1,5 @@
 import {DAEHAN_FIELD_BLUEPRINTS} from "../src/lib/exam-blueprints.ts";
-import {generateExamQuestions,validateExamQuestions,examReadinessSummary,examRotationShortages,type HanjaPoolItem,type PublishedWord} from "../src/lib/exam-generator.ts";
+import {generateExamQuestions,validateExamQuestions,examReadinessSummary,fieldExamReadinessIssues,examRotationShortages,type HanjaPoolItem,type PublishedWord} from "../src/lib/exam-generator.ts";
 
 const pool:HanjaPoolItem[]=Array.from({length:80},(_,i)=>({id:i+1,character:String.fromCodePoint(0x4e00+i),answer:`뜻${i+1} 음${i+1}`,examples:[]}));
 const words:PublishedWord[]=Array.from({length:80},(_,i)=>({id:i+1,word:i<4?`詞${String.fromCodePoint(0x4e00+i)}`:i>=10&&i<14?`${String.fromCodePoint(0x4e00+i-10)}詞`:`詞${String.fromCodePoint(0x4e00+i)}`,reading:`읽기${i+1}`,meaning:`뜻풀이${i+1}`}));
@@ -27,6 +27,16 @@ for(const [gradeCode,blueprint] of Object.entries(DAEHAN_FIELD_BLUEPRINTS)){
  if(!issue||issue.required!==required||issue.available!==required-1)throw new Error(`${gradeCode}: combined context bank shortage not detected`);
 }
 console.log("All nine grade shared-context rotation checks passed.");
+// Readiness must match extra fixed types chosen by the variable generator.
+const pre5VariableInput={...base,idioms:idioms.slice(0,1),cultureItems:cultureItems.slice(0,1)};
+const pre5Issues=fieldExamReadinessIssues(pre5VariableInput,DAEHAN_FIELD_BLUEPRINTS.PRE5);
+if(!pre5Issues.some(x=>x.type==="IDIOM"&&x.required===2))throw new Error("PRE5 variable idiom shortage not detected");
+if(!pre5Issues.some(x=>x.type==="CULTURE_ETIQUETTE"&&x.required===2))throw new Error("PRE5 variable culture shortage not detected");
+const pre3VariableInput={...base,cultureItems:cultureItems.slice(0,1)};
+const pre3Issues=fieldExamReadinessIssues(pre3VariableInput,DAEHAN_FIELD_BLUEPRINTS.PRE3);
+if(!pre3Issues.some(x=>x.type==="CULTURE_ETIQUETTE"&&x.required===2))throw new Error("PRE3 variable culture shortage not detected");
+console.log("Variable-type readiness requirements match generator.");
+
 
 // Every supported grade must report a three-exam rotation shortage when a required bank is empty.
 for(const [gradeCode,blueprint] of Object.entries(DAEHAN_FIELD_BLUEPRINTS)){
@@ -41,6 +51,13 @@ for(const [gradeCode,blueprint] of Object.entries(DAEHAN_FIELD_BLUEPRINTS)){
  }
 }
 console.log("All nine grade rotation-shortage checks passed.");
+
+// Image readiness must reject out-of-grade images and invalid asset metadata.
+const invalidImages=[{id:9001,hanja_id:99999,asset_path:"/exam-images/missing.svg",alt_text:"missing"},{id:9002,hanja_id:1,asset_path:"/outside/tree.svg",alt_text:"invalid"}];
+if(examReadinessSummary({...base,imageItems:invalidImages}).ORIGINAL_IMAGES!==0)throw new Error("Image readiness counted unrenderable or out-of-grade items");
+if(examReadinessSummary(base).ORIGINAL_IMAGES!==imageItems.length)throw new Error("Valid image readiness regression");
+console.log("Image eligibility readiness checks passed.");
+
 
 const gradeCodes=Object.keys(DAEHAN_FIELD_BLUEPRINTS);
 for(const gradeCode of gradeCodes){
