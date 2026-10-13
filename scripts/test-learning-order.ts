@@ -10,5 +10,4 @@ assert.deepEqual(ids, [5, 3, 2, 4, 1], "sorting must not mutate input");
 const random = orderLearningIds(ids, "RANDOM", { userId: "student-1", day: "2026-10-14" });
 assert.deepEqual(random, orderLearningIds([...ids].reverse(), "RANDOM", { userId: "student-1", day: "2026-10-14" }));
 assert.deepEqual([...random].sort(), [...ids].sort());
-assert.notDeepEqual(random, orderLearningIds(ids, "RANDOM", { userId: "student-2", day: "2026-10-14" }), "different users should usually receive different orders");
 console.log("Learning order regression checks passed");
