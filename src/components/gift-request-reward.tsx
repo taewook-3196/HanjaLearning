@@ -27,7 +27,18 @@ export function GiftRequestReward({initialAvailable,totalEarned,nextLevel,xpRema
     return;
    }
    setAvailable(data);setConfirming(false);
-  }catch(e){console.error("Gift request redemption failed",e);setError("사용 기록을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.");}
+  }catch(e){
+   console.error("Gift request redemption failed",e);
+   // A lost RPC response does not mean the transaction failed. Reconcile before allowing a retry.
+   const {data:rows,error:balanceError}=await createClient().from("user_gift_request_rewards").select("id").is("used_at",null);
+   if(balanceError){setError("사용 결과를 확인하지 못했어요. 다시 누르지 말고 화면을 새로고침해 남은 수량을 확인해 주세요.");setConfirming(false);}
+   else{
+    const remaining=rows?.length??0;
+    setAvailable(remaining);
+    setConfirming(false);
+    setError(remaining<available?"선물요구권 사용 기록이 반영되었어요. 남은 수량을 확인해 주세요.":"사용이 완료되지 않았어요. 남은 수량을 확인한 뒤 다시 시도해 주세요.");
+   }
+  }
   finally{redemptionInFlight.current=false;setSaving(false);}
  }
  return <section className="study-card gift-reward-card">
