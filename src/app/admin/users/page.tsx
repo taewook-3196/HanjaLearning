@@ -11,25 +11,25 @@ function daysSince(value:string|null,now:number){if(!value)return null;return Ma
 export default function AdminUsersPage(){
  const router=useRouter();const [now]=useState(()=>Date.now());const [rows,setRows]=useState<Account[]>([]);const [search,setSearch]=useState("");const [statusFilter,setStatusFilter]=useState("ALL");const [sortOrder,setSortOrder]=useState("NEWEST");const [visibleCount,setVisibleCount]=useState(30);const [loading,setLoading]=useState(true);const [refreshing,setRefreshing]=useState(false);const [message,setMessage]=useState("");const [resetCode,setResetCode]=useState("");const [resetIssuedAt,setResetIssuedAt]=useState<Record<string,number>>({});const accountPending=useRef<Set<string>>(new Set());const [accountBusy,setAccountBusy]=useState<Record<string,boolean>>({});const resetPending=useRef<Set<string>>(new Set());const [resetBusy,setResetBusy]=useState<Record<string,boolean>>({});const [approvalMode,setApprovalMode]=useState<"AUTO"|"MANUAL">("AUTO");const modePending=useRef(false);const [modeBusy,setModeBusy]=useState(false);const [adminId,setAdminId]=useState("");
  async function load(){
-  setResetCode("");setRefreshing(true);try{const s=createClient();const {data:{user},error:authError}=await s.auth.getUser();if(authError||!user){router.replace("/login");return;}setAdminId(user.id);
-  const {data:isAdmin,error:adminError}=await s.rpc("is_app_admin");if(adminError||!isAdmin){router.replace("/");return;}
+  setResetCode("");setRefreshing(true);try{const s=createClient();const {data:{user},error:authError}=await s.auth.getUser();if(authError||!user){router.replace("/login");return false;}setAdminId(user.id);
+  const {data:isAdmin,error:adminError}=await s.rpc("is_app_admin");if(adminError||!isAdmin){router.replace("/");return false;}
   const {data:mode,error:modeError}=await s.rpc("get_signup_approval_mode");if(!modeError)setApprovalMode(mode==="MANUAL"?"MANUAL":"AUTO");
   const {data,error}=await s.rpc("admin_list_accounts");
-  if(error){setMessage("회원 목록을 불러오지 못했어요. 다시 시도해 주세요.");return;}setRows(data??[]);
-  }catch{setMessage("회원 목록을 불러오는 중 오류가 발생했어요. 다시 시도해 주세요.");}finally{setLoading(false);setRefreshing(false);}
+  if(error){setMessage("회원 목록을 불러오지 못했어요. 다시 시도해 주세요.");return false;}setRows(data??[]);setMessage("");return true;
+  }catch{setMessage("회원 목록을 불러오는 중 오류가 발생했어요. 다시 시도해 주세요.");return false;}finally{setLoading(false);setRefreshing(false);}
  }
  useEffect(()=>{queueMicrotask(()=>{void load();});},[]);
  async function change(userId:string,status:"ACTIVE"|"REJECTED"|"SUSPENDED"){
   setResetCode("");if(accountPending.current.has(userId))return;if(userId===adminId){setMessage("현재 로그인한 운영자 계정의 상태는 변경할 수 없어요.");return;}
   accountPending.current.add(userId);setAccountBusy(prev=>({...prev,[userId]:true}));try{const s=createClient();const {error}=await s.from("account_status").update({status,updated_at:new Date().toISOString()}).eq("user_id",userId);
-  if(error){setMessage("상태를 변경하지 못했어요.");return;}await load();setMessage("회원 상태를 변경했습니다.");}catch{setMessage("회원 상태 변경 중 오류가 발생했어요.");}finally{accountPending.current.delete(userId);setAccountBusy(prev=>({...prev,[userId]:false}));}
+  if(error){setMessage("상태를 변경하지 못했어요.");return;}const reloaded=await load();if(reloaded)setMessage("회원 상태를 변경했습니다.");else setMessage("회원 상태는 변경됐지만 목록을 새로고치지 못했어요. 다시 불러와 주세요.");}catch{setMessage("회원 상태 변경 중 오류가 발생했어요.");}finally{accountPending.current.delete(userId);setAccountBusy(prev=>({...prev,[userId]:false}));}
  }
  async function remove(account:Account){
   setResetCode("");if(accountPending.current.has(account.user_id)||account.user_id===adminId||account.is_admin)return;
   if(!window.confirm(`${account.nickname||account.login_id} 회원의 계정을 완전히 삭제할까요?\n학습 기록과 친구 관계도 함께 삭제되며 되돌릴 수 없습니다.`))return;
   accountPending.current.add(account.user_id);setAccountBusy(prev=>({...prev,[account.user_id]:true}));try{const s=createClient();const {error}=await s.rpc("admin_delete_user",{target_user_id:account.user_id});
   if(error){setMessage("계정을 삭제하지 못했어요. 운영자 계정은 삭제할 수 없습니다.");return;}
-  await load();setMessage("회원 계정을 삭제했습니다.");}catch{setMessage("계정 삭제 중 오류가 발생했어요.");}finally{accountPending.current.delete(account.user_id);setAccountBusy(prev=>({...prev,[account.user_id]:false}));}
+  const reloaded=await load();if(reloaded)setMessage("회원 계정을 삭제했습니다.");else setMessage("계정은 삭제됐지만 목록을 새로고치지 못했어요. 다시 불러와 주세요.");}catch{setMessage("계정 삭제 중 오류가 발생했어요.");}finally{accountPending.current.delete(account.user_id);setAccountBusy(prev=>({...prev,[account.user_id]:false}));}
  }
  async function createReset(account:Account){
   if(resetPending.current.has(account.user_id)||accountPending.current.has(account.user_id))return;
