@@ -1,0 +1,58 @@
+"use client";
+import {useEffect,useRef,useState} from "react";
+import {createClient} from "@/lib/supabase/client";
+
+export function GiftRequestReward({initialAvailable,totalEarned,nextLevel,xpRemaining}:{initialAvailable:number;totalEarned:number;nextLevel:number;xpRemaining:number}){
+ const dialogRef=useRef<HTMLDialogElement>(null);
+ const redemptionInFlight=useRef(false);
+ const [available,setAvailable]=useState(initialAvailable);
+ const [confirming,setConfirming]=useState(false);
+ const [saving,setSaving]=useState(false);
+ const [error,setError]=useState("");
+ useEffect(()=>{const dialog=dialogRef.current;if(!dialog)return;if(confirming&&available>0){if(!dialog.open)dialog.showModal();}else if(dialog.open)dialog.close();},[confirming,available]);
+ async function consume(){
+  if(redemptionInFlight.current||available<=0)return;
+  redemptionInFlight.current=true;
+  setSaving(true);setError("");
+  try{
+   const {data,error:rpcError}=await createClient().rpc("consume_gift_request_reward");
+   if(rpcError)throw rpcError;
+   if(typeof data!=="number")throw new Error("Invalid redemption response");
+   if(data<0){
+    const {data:rows,error:countError}=await createClient().from("user_gift_request_rewards").select("id").is("used_at",null);
+    if(countError)throw countError;
+    setAvailable(rows?.length??0);
+    setConfirming(false);
+    setError("사용 가능한 선물요구권이 변경되었습니다. 남은 수량을 확인해 주세요.");
+    return;
+   }
+   setAvailable(data);setConfirming(false);
+  }catch(e){
+   console.error("Gift request redemption failed",e);
+   // A lost RPC response does not mean the transaction failed. Reconcile before allowing a retry.
+   const {data:rows,error:balanceError}=await createClient().from("user_gift_request_rewards").select("id").is("used_at",null);
+   if(balanceError){setError("사용 결과를 확인하지 못했어요. 다시 누르지 말고 화면을 새로고침해 남은 수량을 확인해 주세요.");setConfirming(false);}
+   else{
+    const remaining=rows?.length??0;
+    setAvailable(remaining);
+    setConfirming(false);
+    setError(remaining<available?"선물요구권 사용 기록이 반영되었어요. 남은 수량을 확인해 주세요.":"사용이 완료되지 않았어요. 남은 수량을 확인한 뒤 다시 시도해 주세요.");
+   }
+  }
+  finally{redemptionInFlight.current=false;setSaving(false);}
+ }
+ return <section className="study-card gift-reward-card">
+  <div className="section-heading"><div><p className="eyebrow">5레벨 보상</p><h2>🎁 선물 요구권 {available}장</h2></div><span>Lv.5, 10, 15…마다 1장</span></div>
+  <div className="gift-reward-summary"><span>받은 요구권 <strong>{totalEarned}장</strong></span><span>다음 보상 <strong>Lv.{nextLevel}</strong></span><span>남은 XP <strong>{xpRemaining}</strong></span></div>
+  <p className="subtitle">5레벨씩 성장할 때마다 부모님께 원하는 선물을 요청할 수 있는 요구권을 받아요.</p>
+  <button type="button" className="secondary-button" disabled={available===0||saving} onClick={()=>{if(available>0){setError("");setConfirming(true);}}}>{available===0?"사용 가능한 요구권이 없어요":"선물요구권 사용하기"}</button>
+  <dialog ref={dialogRef} aria-labelledby="gift-request-title" onCancel={e=>{if(saving)e.preventDefault();else setConfirming(false);}} className="gift-request-confirm" style={{padding:"24px",border:"1px solid #a8b2be",borderRadius:"12px",maxWidth:"min(90vw,420px)",width:"100%"}}>
+   <h3 id="gift-request-title">선물요구권 1장을 사용하시겠습니까?</h3>
+   <p>부모님께 원하는 선물을 요청할 수 있지만, 부모님에게는 요청을 거절할 권리가 있습니다.</p>
+   <p>네를 선택하면 1장이 차감됩니다.</p>
+   {error?<p role="alert" className="form-message">{error}</p>:null}
+   <div className="practice-actions"><button type="button" disabled={saving} onClick={()=>void consume()}>{saving?"처리 중...":"네, 사용하기"}</button><button type="button" className="secondary-button" disabled={saving} onClick={()=>setConfirming(false)}>아니오</button></div>
+  </dialog>
+  {!confirming&&error?<p role="alert" className="form-message">{error}</p>:null}
+ </section>;
+}
