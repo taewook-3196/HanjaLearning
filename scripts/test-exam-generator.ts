@@ -28,7 +28,7 @@ for(const [gradeCode,blueprint] of Object.entries(DAEHAN_FIELD_BLUEPRINTS)){
 }
 console.log("All nine grade shared-context rotation checks passed.");
 // Readiness must match extra fixed types chosen by the variable generator.
-const pre5VariableInput={...base,idioms:idioms.slice(0,2),cultureItems:cultureItems.slice(0,1)};
+const pre5VariableInput={...base,idioms:idioms.slice(0,1),cultureItems:cultureItems.slice(0,1)};
 const pre5Issues=fieldExamReadinessIssues(pre5VariableInput,DAEHAN_FIELD_BLUEPRINTS.PRE5);
 if(!pre5Issues.some(x=>x.type==="IDIOM"&&x.required===2))throw new Error("PRE5 variable idiom shortage not detected");
 if(!pre5Issues.some(x=>x.type==="CULTURE_ETIQUETTE"&&x.required===2))throw new Error("PRE5 variable culture shortage not detected");
