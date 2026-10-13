@@ -20,11 +20,13 @@ export function StickerCelebration({notices,userId}:{notices:StickerNotice[];use
  useEffect(()=>{
   // Only play notices not yet shown during this tab session.
   const first=notices.findIndex(item=>!wasViewed(item));
-  setIndex(first<0?notices.length:first);
-  setVisibleCount(notices.filter(item=>!wasViewed(item)).length);
-  setShownCount(0);
-  advancing.current=false;
-  setReady(true);
+  queueMicrotask(()=>{
+   setIndex(first<0?notices.length:first);
+   setVisibleCount(notices.filter(item=>!wasViewed(item)).length);
+   setShownCount(0);
+   advancing.current=false;
+   setReady(true);
+  });
  },[]);
  async function record(item:StickerNotice){
   const key=viewedKey(item);
