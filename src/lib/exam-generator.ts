@@ -66,8 +66,8 @@ export function fieldExamReadinessIssues(input:ExamReadinessInput,blueprint:Exam
  }
  const variableCount=blueprint.items.filter(x=>x.type==="VARIABLE_VERIFIED").reduce((n,x)=>n+x.count,0);
  if(blueprint.gradeCode==="6"&&variableCount)add("CHARACTER_USAGE",1);
- if(blueprint.gradeCode==="PRE5"&&variableCount){add("CHARACTER_USAGE",1);add("IDIOM",1);}
- if(blueprint.gradeCode==="PRE3"&&variableCount)add("CHARACTER_PRINCIPLE",1);
+ if(blueprint.gradeCode==="PRE5"&&variableCount){add("CHARACTER_USAGE",1);add("IDIOM",2);add("CULTURE_ETIQUETTE",1);}
+ if(blueprint.gradeCode==="PRE3"&&variableCount){add("CHARACTER_PRINCIPLE",1);add("CULTURE_ETIQUETTE",1);}
  const available:Record<string,number>={
   HANJA_TO_READING_MEANING:summary.HANJA_READING,
   READING_MEANING_TO_HANJA:summary.HANJA_READING,
