@@ -14,8 +14,8 @@ for (const item of imageAssets) {
   const filename = join(process.cwd(), "public", item.path.slice(1));
   assert.ok(existsSync(filename), `Missing image asset for ${item.hanja}: ${filename}`);
   const svg = readFileSync(filename, "utf8");
-  assert.match(svg, /<svg\\b/, `Invalid SVG for ${item.hanja}`);
-  assert.match(svg, /<\\/svg>/, `Unclosed SVG for ${item.hanja}`);
+  assert.match(svg, /<svg\b/, `Invalid SVG for ${item.hanja}`);
+  assert.match(svg, /<\/svg>/, `Unclosed SVG for ${item.hanja}`);
 }
 for (const grade of ["7", "8"]) {
   const blueprint = DAEHAN_FIELD_BLUEPRINTS[grade];
