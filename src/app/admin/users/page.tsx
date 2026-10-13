@@ -15,7 +15,7 @@ export default function AdminUsersPage(){
   const {data:isAdmin,error:adminError}=await s.rpc("is_app_admin");if(adminError||!isAdmin){router.replace("/");return false;}
   const {data:mode,error:modeError}=await s.rpc("get_signup_approval_mode");if(!modeError&&(mode==="MANUAL"||mode==="AUTO")){setApprovalMode(mode);setModeLoaded(true);}else{setModeLoaded(false);setMessage("가입 승인 방식을 확인하지 못했어요. 새로고침 후 다시 시도해 주세요.");}
   const {data,error}=await s.rpc("admin_list_accounts");
-  if(error){setMessage("회원 목록을 불러오지 못했어요. 다시 시도해 주세요.");return false;}setRows(data??[]);setMessage("");return true;
+  if(error){setMessage("회원 목록을 불러오지 못했어요. 다시 시도해 주세요.");return false;}setRows(data??[]);if(!modeError&&(mode==="MANUAL"||mode==="AUTO"))setMessage("");return true;
   }catch{setMessage("회원 목록을 불러오는 중 오류가 발생했어요. 다시 시도해 주세요.");return false;}finally{setLoading(false);setRefreshing(false);}
  }
  useEffect(()=>{queueMicrotask(()=>{void load();});},[]);
