@@ -21,19 +21,19 @@ export default function AdminUsersPage(){
  }
  useEffect(()=>{queueMicrotask(()=>{void load();});},[]);
  async function change(userId:string,status:"ACTIVE"|"REJECTED"|"SUSPENDED"){
-  setResetCode("");if(accountPending.current.has(userId))return;if(userId===adminId){setMessage("현재 로그인한 운영자 계정의 상태는 변경할 수 없어요.");return;}
+  setResetCode("");if(accountPending.current.has(userId)||resetPending.current.has(userId))return;if(userId===adminId||rows.some(a=>a.user_id===userId&&a.is_admin)){setMessage("운영자 계정의 상태는 변경할 수 없어요.");return;}
   accountPending.current.add(userId);setAccountBusy(prev=>({...prev,[userId]:true}));try{const s=createClient();const {error}=await s.from("account_status").update({status,updated_at:new Date().toISOString()}).eq("user_id",userId);
   if(error){setMessage("상태를 변경하지 못했어요.");return;}const reloaded=await load();if(reloaded)setMessage("회원 상태를 변경했습니다.");else setMessage("회원 상태는 변경됐지만 목록을 새로고치지 못했어요. 다시 불러와 주세요.");}catch{setMessage("회원 상태 변경 중 오류가 발생했어요.");}finally{accountPending.current.delete(userId);setAccountBusy(prev=>({...prev,[userId]:false}));}
  }
  async function remove(account:Account){
-  setResetCode("");if(accountPending.current.has(account.user_id)||account.user_id===adminId||account.is_admin)return;
+  setResetCode("");if(accountPending.current.has(account.user_id)||resetPending.current.has(account.user_id)||account.user_id===adminId||account.is_admin)return;
   if(!window.confirm(`${account.nickname||account.login_id} 회원의 계정을 완전히 삭제할까요?\n학습 기록과 친구 관계도 함께 삭제되며 되돌릴 수 없습니다.`))return;
   accountPending.current.add(account.user_id);setAccountBusy(prev=>({...prev,[account.user_id]:true}));try{const s=createClient();const {error}=await s.rpc("admin_delete_user",{target_user_id:account.user_id});
   if(error){setMessage("계정을 삭제하지 못했어요. 운영자 계정은 삭제할 수 없습니다.");return;}
   const reloaded=await load();if(reloaded)setMessage("회원 계정을 삭제했습니다.");else setMessage("계정은 삭제됐지만 목록을 새로고치지 못했어요. 다시 불러와 주세요.");}catch{setMessage("계정 삭제 중 오류가 발생했어요.");}finally{accountPending.current.delete(account.user_id);setAccountBusy(prev=>({...prev,[account.user_id]:false}));}
  }
  async function createReset(account:Account){
-  if(resetPending.current.has(account.user_id)||accountPending.current.has(account.user_id))return;
+  if(resetPending.current.has(account.user_id)||accountPending.current.has(account.user_id))return;if(account.user_id===adminId||account.is_admin){setMessage("운영자 계정의 복구 코드는 발급할 수 없어요.");return;}
   setResetCode("");const lastIssued=resetIssuedAt[account.user_id];if(lastIssued&&Date.now()-lastIssued<60000){setMessage(`복구 코드는 ${Math.ceil((60000-(Date.now()-lastIssued))/1000)}초 후 다시 발급할 수 있어요.`);return;}resetPending.current.add(account.user_id);setResetBusy(prev=>({...prev,[account.user_id]:true}));try{const alphabet="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";const bytes=crypto.getRandomValues(new Uint8Array(10));const code=Array.from(bytes,b=>alphabet[b%alphabet.length]).join("");const digestBytes=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(code));const digest=Array.from(new Uint8Array(digestBytes),b=>b.toString(16).padStart(2,"0")).join("");const s=createClient();const {error}=await s.rpc("admin_create_password_reset",{target_user_id:account.user_id,token_digest:digest});if(error){setMessage(error.message.includes("once every 60 seconds")?"복구 코드는 동일 회원에게 60초 간격으로 발급할 수 있어요. 잠시 후 다시 시도해 주세요.":"복구 코드를 만들지 못했어요.");return;}setResetIssuedAt(prev=>({...prev,[account.user_id]:Date.now()}));setMessage("");setResetCode(`${account.nickname||account.login_id} 복구 코드: ${code} (15분간 1회 사용)`);}catch{setMessage("복구 코드 발급 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.");}finally{resetPending.current.delete(account.user_id);setResetBusy(prev=>({...prev,[account.user_id]:false}));}
  }
  async function setMode(mode:"AUTO"|"MANUAL"){if(modePending.current||!modeLoaded||mode===approvalMode)return;setResetCode("");modePending.current=true;setModeBusy(true);try{const s=createClient();const {error}=await s.rpc("set_signup_approval_mode",{new_mode:mode});if(error){setMessage("가입 승인 방식을 변경하지 못했어요.");return;}setApprovalMode(mode);setMessage(mode==="AUTO"?"신규 회원은 가입 즉시 자동 승인됩니다.":"신규 회원은 운영자 승인 후 이용할 수 있습니다.");}catch{setMessage("가입 승인 방식 변경 중 오류가 발생했어요.");}finally{modePending.current=false;setModeBusy(false);}}
