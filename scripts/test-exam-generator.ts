@@ -52,6 +52,13 @@ for(const [gradeCode,blueprint] of Object.entries(DAEHAN_FIELD_BLUEPRINTS)){
 }
 console.log("All nine grade rotation-shortage checks passed.");
 
+// Image readiness must reject out-of-grade images and invalid asset metadata.
+const invalidImages=[{id:9001,hanja_id:99999,asset_path:"/exam-images/missing.svg",alt_text:"missing"},{id:9002,hanja_id:1,asset_path:"/outside/tree.svg",alt_text:"invalid"}];
+if(examReadinessSummary({...base,imageItems:invalidImages}).ORIGINAL_IMAGES!==0)throw new Error("Image readiness counted unrenderable or out-of-grade items");
+if(examReadinessSummary(base).ORIGINAL_IMAGES!==imageItems.length)throw new Error("Valid image readiness regression");
+console.log("Image eligibility readiness checks passed.");
+
+
 const gradeCodes=Object.keys(DAEHAN_FIELD_BLUEPRINTS);
 for(const gradeCode of gradeCodes){
  const blueprint=DAEHAN_FIELD_BLUEPRINTS[gradeCode];
