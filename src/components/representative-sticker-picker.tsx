@@ -4,35 +4,31 @@ import {createClient} from "@/lib/supabase/client";
 import {GrowthStickerArt} from "@/components/growth-sticker-art";
 import type {GrowthStickerDefinition} from "@/lib/growth-stickers";
 
-export function RepresentativeStickerPicker({stickers,initialKey}:{stickers:GrowthStickerDefinition[];initialKey:string|null}){
- const [selected,setSelected]=useState<string|null>(initialKey);
+export function RepresentativeStickerPicker({stickers,initialKeys}:{stickers:GrowthStickerDefinition[];initialKeys:string[]}){
+ const [selected,setSelected]=useState<string[]>(initialKeys.slice(0,3));
  const [saving,setSaving]=useState(false);
  const [error,setError]=useState("");
  async function save(key:string){
   if(saving)return;
-  const next=selected===key?null:key;
+  const next=selected.includes(key)?selected.filter(x=>x!==key):[...selected,key];
+  if(next.length>3){setError("대표 스티커는 최대 3개까지 선택할 수 있어요.");return;}
   setSaving(true);setError("");
   const client=createClient();
-  // An earned sticker can appear before its award row has persisted.
-  if(next){
-   const {data:{user},error:authError}=await client.auth.getUser();
-   if(authError||!user){setError("로그인 상태를 확인하지 못했어요. 다시 로그인해 주세요.");setSaving(false);return;}
-   const {error:awardError}=await client.from("user_growth_stickers")
-    .upsert({user_id:user.id,sticker_key:next},{onConflict:"user_id,sticker_key",ignoreDuplicates:true});
-   if(awardError){setError("스티커 획득 기록을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.");setSaving(false);return;}
-  }
-  const {error:saveError}=await client.rpc("set_representative_sticker",{p_key:next});
-  if(saveError)setError("대표 스티커를 저장하지 못했어요. 잠시 후 다시 시도해 주세요.");
+  const {data:{user},error:authError}=await client.auth.getUser();
+  if(authError||!user){setError("로그인 상태를 확인하지 못했어요.");setSaving(false);return;}
+  const {error:saveError}=await client.rpc("set_featured_stickers",{p_keys:next});
+  if(saveError)setError("스티커 선택을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.");
   else setSelected(next);
   setSaving(false);
  }
+
  return <>
-  <p className="subtitle representative-sticker-hint">획득한 스티커를 누르면 친구에게 보여줄 대표 스티커로 설정돼요. 다시 누르면 해제됩니다.</p>
+  <p className="subtitle representative-sticker-hint">획득한 스티커를 최대 3개 선택할 수 있어요. 다시 누르면 해제됩니다. 첫 번째 스티커는 친구 목록에도 표시돼요.</p>
   <div className="sticker-grid">
    {stickers.map(s=>s.earned?
-    <button key={s.kind} type="button" className="sticker-item earned representative-growth-option" aria-pressed={selected===s.kind} aria-label={`${s.name}, ${selected===s.kind?"대표 스티커, 다시 누르면 해제":"대표 스티커로 설정"}`} disabled={saving} onClick={()=>void save(s.kind)}>
+    <button key={s.kind} type="button" className="sticker-item earned representative-growth-option" aria-pressed={selected.includes(s.kind)} aria-label={`${s.name}, ${selected.includes(s.kind)?"선택됨, 다시 누르면 해제":"대표 스티커로 선택"}`} disabled={saving} onClick={()=>void save(s.kind)}>
      <span className="sticker-art"><GrowthStickerArt kind={s.kind}/><b>★</b></span>
-     <strong>{s.name}</strong><small>{s.detail}</small>{selected===s.kind?<span className="representative-growth-badge">대표 ✓</span>:null}
+     <strong>{s.name}</strong><small>{s.detail}</small>{selected.includes(s.kind)?<span className="representative-growth-badge">선택 ✓</span>:null}
     </button>:
     <div className="sticker-item" key={s.kind} aria-label={`${s.name}, 아직 획득하지 못함`}>
      <span className="sticker-art"><GrowthStickerArt kind={s.kind} locked/><b></b></span>
