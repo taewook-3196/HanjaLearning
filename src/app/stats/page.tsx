@@ -12,7 +12,8 @@ import { RepresentativeStickerPicker } from "@/components/representative-sticker
 import { GiftRequestReward } from "@/components/gift-request-reward";
 export default async function StatsPage(){
  const {supabase:s,user}=await requireActiveUser();
- const {data:myProfile}=await s.from("profiles").select("nickname,target_grade,avatar_type,avatar_key,avatar_path,representative_sticker_key,featured_sticker_keys").eq("user_id",user.id).maybeSingle();
+ const {data:myProfile,error:profileError}=await s.from("profiles").select("nickname,target_grade,avatar_type,avatar_key,avatar_path,representative_sticker_key,featured_sticker_keys").eq("user_id",user.id).maybeSingle();
+ if(profileError)throw new Error("프로필 정보를 불러오지 못했습니다.");
  const profilePhoto=myProfile?.avatar_type==="PHOTO"&&myProfile.avatar_path?await profileAvatarUrl(s,myProfile.avatar_path):null;
  const now=new Date();
  const dayKey=(value:Date|string)=>new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(value));
@@ -50,13 +51,14 @@ export default async function StatsPage(){
    if((data??[]).length<pageSize)return rows;
   }
  };
- const [historyResult,{data:progress},{data:sessions},streakHistory,recoveryHistory]=await Promise.all([
+ const [historyResult,{data:progress,error:progressError},{data:sessions,error:sessionsError},streakHistory,recoveryHistory]=await Promise.all([
   loadWeeklyHistory(),
   s.from("user_hanja_progress").select("mastery_score,writing_score,study_count,wrong_streak").eq("user_id",user.id).gt("study_count",0),
   s.from("study_sessions").select("planned_new,planned_review,planned_wrong,actual_new,actual_review,started_at,completed_at").eq("user_id",user.id).gte("started_at",sinceIso),
   loadStreakHistory(),
   loadRecoveryHistory()
  ]);
+ if(progressError||sessionsError)throw new Error("학습 통계를 불러오지 못했습니다.");
  const attempts=historyResult??[];const isWritingAttempt=(x:{activity_type:string|null;question_type:string|null})=>x.activity_type==="WRITING"||x.question_type==="STROKE_ORDER";const isAnswered=(result:string|null)=>result==="CORRECT"||result==="KNOWN"||result==="WRONG"||result==="UNKNOWN";const recognitionAttempts=attempts.filter(x=>!isWritingAttempt(x)&&isAnswered(x.result));const writingAttempts=attempts.filter(isWritingAttempt);const correct=recognitionAttempts.filter(x=>x.result==="CORRECT"||x.result==="KNOWN").length;const accuracy=recognitionAttempts.length?Math.round(correct/recognitionAttempts.length*100):0;
  const learned=(progress??[]).length;const mastered=(progress??[]).filter(x=>(x.mastery_score??0)>=75).length;const difficult=(progress??[]).filter(x=>(x.wrong_streak??0)>0).length;const written=(progress??[]).filter(x=>(x.writing_score??0)>0);const writtenCount=written.length;const avgWriting=writtenCount?Math.round(written.reduce((sum,x)=>sum+(x.writing_score??0),0)/writtenCount):0;const weeklyWritten=new Set(writingAttempts.map(x=>x.hanja_id)).size;
  // Use exactly the last seven Korean calendar dates for the weekly sticker.
@@ -92,7 +94,8 @@ export default async function StatsPage(){
  const repeatCounts=(repeatableRows??[]).reduce<Record<string,number>>((acc,x)=>{acc[x.sticker_key]=(acc[x.sticker_key]??0)+1;return acc;},{});
  const xpRows=await loadAllRewardRows("user_xp_events") as {xp:number;event_date:string;reason:string;created_at:string}[]|null;
  const totalXp=(xpRows??[]).reduce((sum,x)=>sum+(x.xp??0),0);
- const {data:giftRewardRows}=await s.from("user_gift_request_rewards").select("milestone_level,used_at").eq("user_id",user.id).order("milestone_level",{ascending:true});
+ const {data:giftRewardRows,error:giftRewardError}=await s.from("user_gift_request_rewards").select("milestone_level,used_at").eq("user_id",user.id).order("milestone_level",{ascending:true});
+ if(giftRewardError)throw new Error("보상 정보를 불러오지 못했습니다.");
  const giftRewards=giftRewardRows??[]; const availableGiftRewards=giftRewards.filter(x=>!x.used_at).length;
  const todayXpRows=(xpRows??[]).filter(x=>x.event_date===todayKey);
  const todayXp=todayXpRows.reduce((sum,x)=>sum+(x.xp??0),0);
@@ -108,7 +111,8 @@ export default async function StatsPage(){
  const nightStudies=(sessions??[]).filter(x=>{if(!x.completed_at)return false;const hour=Number(new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Seoul",hour:"2-digit",hourCycle:"h23"}).format(new Date(x.completed_at)));return hour>=21;}).length;
  const todayMinutes=Math.floor(todaySessions.reduce((sum,x)=>{if(!x.started_at||!x.completed_at)return sum;const duration=(new Date(x.completed_at).getTime()-new Date(x.started_at).getTime())/60000;return sum+(duration>0&&duration<=180?duration:0);},0));
  const stickerRules=growthStickerRules({learned,writtenCount,recovered:recovered.size,mastered,days,streak,accuracy,answered:recognitionAttempts.length,reviewed,level,nightStudies,todayMinutes,weeklyGoal:days>=5});
- const {data:savedStickerRows}=await s.from("user_growth_stickers").select("sticker_key,earned_at,celebrated_at").eq("user_id",user.id);
+ const {data:savedStickerRows,error:savedStickerError}=await s.from("user_growth_stickers").select("sticker_key,earned_at,celebrated_at").eq("user_id",user.id);
+ if(savedStickerError)throw new Error("스티커 정보를 불러오지 못했습니다.");
  const savedKeys=new Set((savedStickerRows??[]).map(x=>x.sticker_key));
  const newlyEarned=stickerRules.filter(x=>x.earned&&!savedKeys.has(x.kind));
  if(newlyEarned.length){
@@ -116,7 +120,7 @@ export default async function StatsPage(){
   if(awardError)console.error("Growth sticker award failed",awardError);
  }
  const {data:stickerRows,error:stickerReadError}=await s.from("user_growth_stickers").select("sticker_key,earned_at,celebrated_at").eq("user_id",user.id);
- if(stickerReadError)console.error("Growth sticker read failed",stickerReadError);
+ if(stickerReadError)throw new Error("스티커 정보를 불러오지 못했습니다.");
  const persistedKeys=new Set((stickerRows??[]).map(x=>x.sticker_key));
  // A sticker is earned only after its award is persisted; a failed upsert must not appear successful.
  const stickers=stickerRules.map(x=>({...x,earned:persistedKeys.has(x.kind)}));
