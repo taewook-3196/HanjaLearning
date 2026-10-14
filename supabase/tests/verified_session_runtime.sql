@@ -55,5 +55,7 @@ DO $$ BEGIN
  BEGIN PERFORM public.complete_verified_study_session('10000000-0000-4000-8000-000000000001'); RAISE EXCEPTION 'cross-user completion accepted';
  EXCEPTION WHEN raise_exception THEN IF SQLERRM='cross-user completion accepted' THEN RAISE; END IF; END;
 END $$;
-SELECT CASE WHEN EXISTS(SELECT 1 FROM public.study_sessions WHERE id='10000000-0000-4000-8000-000000000001') THEN 1/0 ELSE 1 END AS isolated_session;
-SELECT CASE WHEN EXISTS(SELECT 1 FROM public.study_session_items WHERE session_id='10000000-0000-4000-8000-000000000001') THEN 1/0 ELSE 1 END AS isolated_items;
+DO $isolation$ BEGIN
+ IF EXISTS(SELECT 1 FROM public.study_sessions WHERE id='10000000-0000-4000-8000-000000000001') THEN RAISE EXCEPTION 'cross-user session visible'; END IF;
+ IF EXISTS(SELECT 1 FROM public.study_session_items WHERE session_id='10000000-0000-4000-8000-000000000001') THEN RAISE EXCEPTION 'cross-user items visible'; END IF;
+END $isolation$;
