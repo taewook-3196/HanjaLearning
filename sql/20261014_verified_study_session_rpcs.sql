@@ -30,7 +30,7 @@ BEGIN
  IF EXISTS(SELECT 1 FROM unnest(p_review_ids) AS x(id) WHERE NOT EXISTS(SELECT 1 FROM public.user_hanja_progress p WHERE p.user_id=uid AND p.hanja_id=x.id AND p.study_count>0)) THEN RAISE EXCEPTION 'unseen hanja cannot be review'; END IF;
  PERFORM pg_advisory_xact_lock(hashtext(uid::text));
  IF EXISTS(SELECT 1 FROM public.study_sessions WHERE id=p_session_id) THEN
-  IF NOT EXISTS(SELECT 1 FROM public.study_sessions WHERE id=p_session_id AND user_id=uid AND session_type=p_session_type AND planned_new=n AND planned_review=r) OR
+  IF NOT EXISTS(SELECT 1 FROM public.study_sessions WHERE id=p_session_id AND user_id=uid AND session_type=p_session_type AND planned_new=0 AND planned_review=0) OR
     (SELECT count(*) FROM public.study_session_items WHERE session_id=p_session_id AND user_id=uid AND ((item_kind='NEW' AND hanja_id=ANY(p_new_ids)) OR (item_kind='REVIEW' AND hanja_id=ANY(p_review_ids))))<>n+r
   THEN RAISE EXCEPTION 'session id reused'; END IF;
   RETURN;
@@ -39,7 +39,9 @@ BEGIN
  -- A restarted lesson may abandon an unfinished session. Expire it without awarding XP.
  DELETE FROM public.study_session_items WHERE session_id IN (SELECT id FROM public.study_sessions WHERE user_id=uid AND completed_at IS NULL);
  DELETE FROM public.study_sessions WHERE user_id=uid AND completed_at IS NULL;
- INSERT INTO public.study_sessions(id,user_id,session_type,planned_new,planned_review) VALUES(p_session_id,uid,p_session_type,n,r);
+ -- Client-provided card selection is not proof of the server-assigned daily plan.
+ -- Keep planned counts zero until a server-side daily-plan validator is implemented.
+ INSERT INTO public.study_sessions(id,user_id,session_type,planned_new,planned_review) VALUES(p_session_id,uid,p_session_type,0,0);
  INSERT INTO public.study_session_items(session_id,user_id,hanja_id,item_kind) SELECT p_session_id,uid,id,'NEW' FROM unnest(p_new_ids) id;
  INSERT INTO public.study_session_items(session_id,user_id,hanja_id,item_kind) SELECT p_session_id,uid,id,'REVIEW' FROM unnest(p_review_ids) id;
 END $fn$;
@@ -73,8 +75,8 @@ BEGIN
  SELECT count(r.request_id),count(r.request_id) FILTER(WHERE r.result_kind='KNOWN'),count(r.request_id) FILTER(WHERE r.result_kind='UNKNOWN') INTO answered,correct,wrong
  FROM public.study_session_items i LEFT JOIN public.learning_request_receipts r ON r.user_id=i.user_id AND r.request_id=i.request_id AND r.event_kind='FLASHCARD' AND r.hanja_id=i.hanja_id
  WHERE i.session_id=p_session_id AND i.user_id=uid;
- IF answered<>session_row.planned_new+session_row.planned_review THEN RAISE EXCEPTION 'session incomplete'; END IF;
- UPDATE public.study_sessions SET completed_at=now(),actual_new=session_row.planned_new,actual_review=session_row.planned_review,correct_count=correct,wrong_count=wrong,duration_seconds=least(43200,greatest(0,extract(epoch FROM now()-session_row.started_at)::integer)) WHERE id=p_session_id;
+ IF answered<>(SELECT count(*) FROM public.study_session_items WHERE session_id=p_session_id AND user_id=uid) OR answered=0 THEN RAISE EXCEPTION 'session incomplete'; END IF;
+ UPDATE public.study_sessions SET completed_at=now(),actual_new=(SELECT count(*) FROM public.study_session_items WHERE session_id=p_session_id AND user_id=uid AND item_kind='NEW'),actual_review=(SELECT count(*) FROM public.study_session_items WHERE session_id=p_session_id AND user_id=uid AND item_kind='REVIEW'),correct_count=correct,wrong_count=wrong,duration_seconds=least(43200,greatest(0,extract(epoch FROM now()-session_row.started_at)::integer)) WHERE id=p_session_id;
 END $fn$;
 
 REVOKE ALL ON FUNCTION public.start_verified_study_session(uuid,text,bigint[],bigint[]) FROM PUBLIC,anon;
