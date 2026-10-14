@@ -29,6 +29,29 @@ DO $$ BEGIN
   RAISE EXCEPTION 'direct session insert unexpectedly succeeded';
  EXCEPTION WHEN insufficient_privilege THEN NULL; END;
 END $$;
+-- Reject malformed or dishonest lesson selections without changing progress.
+DO $negative$ BEGIN
+ BEGIN
+  PERFORM public.start_verified_study_session('10000000-0000-4000-8000-000000000002','TODAY',ARRAY[1,1]::bigint[],ARRAY[]::bigint[]);
+  RAISE EXCEPTION 'duplicate cards accepted';
+ EXCEPTION WHEN raise_exception THEN IF SQLERRM='duplicate cards accepted' THEN RAISE; END IF; END;
+ BEGIN
+  PERFORM public.start_verified_study_session('10000000-0000-4000-8000-000000000002','TODAY',ARRAY[999]::bigint[],ARRAY[]::bigint[]);
+  RAISE EXCEPTION 'unknown card accepted';
+ EXCEPTION WHEN raise_exception THEN IF SQLERRM='unknown card accepted' THEN RAISE; END IF; END;
+ BEGIN
+  PERFORM public.start_verified_study_session('10000000-0000-4000-8000-000000000002','TODAY',ARRAY[2]::bigint[],ARRAY[]::bigint[]);
+  RAISE EXCEPTION 'studied card accepted as new';
+ EXCEPTION WHEN raise_exception THEN IF SQLERRM='studied card accepted as new' THEN RAISE; END IF; END;
+ BEGIN
+  PERFORM public.start_verified_study_session('10000000-0000-4000-8000-000000000002','TODAY',ARRAY[]::bigint[],ARRAY[3]::bigint[]);
+  RAISE EXCEPTION 'unseen card accepted as review';
+ EXCEPTION WHEN raise_exception THEN IF SQLERRM='unseen card accepted as review' THEN RAISE; END IF; END;
+ BEGIN
+  PERFORM public.start_verified_study_session('10000000-0000-4000-8000-000000000002','INVALID',ARRAY[3]::bigint[],ARRAY[]::bigint[]);
+  RAISE EXCEPTION 'invalid lesson type accepted';
+ EXCEPTION WHEN raise_exception THEN IF SQLERRM='invalid lesson type accepted' THEN RAISE; END IF; END;
+END $negative$;
 SELECT public.start_verified_study_session('10000000-0000-4000-8000-000000000001','TODAY',ARRAY[1]::bigint[],ARRAY[2]::bigint[]);
 SELECT public.start_verified_study_session('10000000-0000-4000-8000-000000000001','TODAY',ARRAY[1]::bigint[],ARRAY[2]::bigint[]);
 DO $$ BEGIN
