@@ -29,7 +29,7 @@ export default async function Home() {
   if (!profile?.target_provider || !profile?.target_grade) redirect("/onboarding");
   const avatarUrl=profile.avatar_type==="PHOTO"&&profile.avatar_path?await profileAvatarUrl(supabase,profile.avatar_path):null;
   const profileAvatar=avatarUrl?<img className="profile-photo" src={avatarUrl} width={48} height={48} alt="" />:<ProfileAvatarArt avatarKey={profile.avatar_key} size={48} />;
-  const stickerKeys=(profile.featured_sticker_keys?.length?profile.featured_sticker_keys:profile.representative_sticker_key?[profile.representative_sticker_key]:[]).slice(0,3) as GrowthStickerKind[];
+  const stickerKeys=(profile.featured_sticker_keys??(profile.representative_sticker_key?[profile.representative_sticker_key]:[])).slice(0,3) as GrowthStickerKind[];
   const featuredStickers=<div className="home-featured-stickers" aria-label="대표 스티커">{stickerKeys.map(key=><span key={key} className="home-featured-sticker"><GrowthStickerArt kind={key} showCaption/></span>)}</div>;
 
   let gradeQuery = supabase.from("exam_grades").select("id,name,cumulative_hanja_count").eq("code", profile.target_grade);
