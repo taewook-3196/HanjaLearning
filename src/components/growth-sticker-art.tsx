@@ -11,6 +11,6 @@ export function GrowthStickerArt({kind,locked=false}:{kind:Kind;locked?:boolean}
   display:"inline-block",width:"100%",height:"100%",aspectRatio:"1 / 1",
   backgroundImage:"url('/hanja_sticker_24_new.webp')",backgroundRepeat:"no-repeat",
   backgroundSize:"600% 400%",backgroundPosition:`${col*20}% ${row*100/3}%`,
-  borderRadius:"18%"
+  borderRadius:"50%"
  }}/>;
 }
