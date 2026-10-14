@@ -27,7 +27,6 @@ BEGIN
  -- The caller cannot label previously studied cards as new to inflate daily plan rewards.
  IF EXISTS(SELECT 1 FROM public.user_hanja_progress WHERE user_id=uid AND hanja_id=ANY(p_new_ids) AND study_count>0) THEN RAISE EXCEPTION 'previously studied hanja cannot be new'; END IF;
  -- Check progress at session creation, not at completion: first-time flashcards create progress rows.
- IF EXISTS(SELECT 1 FROM public.study_sessions WHERE user_id=uid AND completed_at IS NULL AND started_at>now()-interval '12 hours' AND id<>p_session_id) THEN RAISE EXCEPTION 'another session is active'; END IF;
  IF EXISTS(SELECT 1 FROM unnest(p_review_ids) AS x(id) WHERE NOT EXISTS(SELECT 1 FROM public.user_hanja_progress p WHERE p.user_id=uid AND p.hanja_id=x.id AND p.study_count>0)) THEN RAISE EXCEPTION 'unseen hanja cannot be review'; END IF;
  PERFORM pg_advisory_xact_lock(hashtext(uid::text));
  IF EXISTS(SELECT 1 FROM public.study_sessions WHERE id=p_session_id) THEN
@@ -37,7 +36,9 @@ BEGIN
   RETURN;
  END IF;
  -- A user may not create overlapping active sessions.
- IF EXISTS(SELECT 1 FROM public.study_sessions WHERE user_id=uid AND completed_at IS NULL AND started_at>now()-interval '12 hours') THEN RAISE EXCEPTION 'another session is active'; END IF;
+ -- A restarted lesson may abandon an unfinished session. Expire it without awarding XP.
+ DELETE FROM public.study_session_items WHERE session_id IN (SELECT id FROM public.study_sessions WHERE user_id=uid AND completed_at IS NULL);
+ DELETE FROM public.study_sessions WHERE user_id=uid AND completed_at IS NULL;
  INSERT INTO public.study_sessions(id,user_id,session_type,planned_new,planned_review) VALUES(p_session_id,uid,p_session_type,n,r);
  INSERT INTO public.study_session_items(session_id,user_id,hanja_id,item_kind) SELECT p_session_id,uid,id,'NEW' FROM unnest(p_new_ids) id;
  INSERT INTO public.study_session_items(session_id,user_id,hanja_id,item_kind) SELECT p_session_id,uid,id,'REVIEW' FROM unnest(p_review_ids) id;
