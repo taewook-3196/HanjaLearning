@@ -61,14 +61,23 @@ export default async function StatsPage(){
    if((data??[]).length<pageSize)return rows;
   }
  };
- const [historyResult,progress,{data:sessions,error:sessionsError},streakHistory,recoveryHistory]=await Promise.all([
+ const loadRecentSessions=async()=>{
+  const rows:{planned_new:number|null;planned_review:number|null;planned_wrong:number|null;actual_new:number|null;actual_review:number|null;started_at:string|null;completed_at:string|null}[]=[];
+  const pageSize=500;
+  for(let offset=0;;offset+=pageSize){
+   const {data,error}=await s.from("study_sessions").select("planned_new,planned_review,planned_wrong,actual_new,actual_review,started_at,completed_at").eq("user_id",user.id).gte("started_at",sinceIso).order("started_at",{ascending:false}).order("id",{ascending:false}).range(offset,offset+pageSize-1);
+   if(error){console.error("Stats sessions read failed",error);throw new Error("학습 세션 정보를 불러오지 못했습니다.");}
+   rows.push(...(data??[]));
+   if((data??[]).length<pageSize)return rows;
+  }
+ };
+ const [historyResult,progress,sessions,streakHistory,recoveryHistory]=await Promise.all([
   loadWeeklyHistory(),
   loadProgress(),
-  s.from("study_sessions").select("planned_new,planned_review,planned_wrong,actual_new,actual_review,started_at,completed_at").eq("user_id",user.id).gte("started_at",sinceIso),
+  loadRecentSessions(),
   loadStreakHistory(),
   loadRecoveryHistory()
  ]);
- if(sessionsError)throw new Error("학습 통계를 불러오지 못했습니다.");
  const attempts=historyResult??[];const isWritingAttempt=(x:{activity_type:string|null;question_type:string|null})=>x.activity_type==="WRITING"||x.question_type==="STROKE_ORDER";const isAnswered=(result:string|null)=>result==="CORRECT"||result==="KNOWN"||result==="WRONG"||result==="UNKNOWN";const recognitionAttempts=attempts.filter(x=>!isWritingAttempt(x)&&isAnswered(x.result));const writingAttempts=attempts.filter(isWritingAttempt);const correct=recognitionAttempts.filter(x=>x.result==="CORRECT"||x.result==="KNOWN").length;const accuracy=recognitionAttempts.length?Math.round(correct/recognitionAttempts.length*100):0;
  const learned=(progress??[]).length;const mastered=(progress??[]).filter(x=>(x.mastery_score??0)>=75).length;const difficult=(progress??[]).filter(x=>(x.wrong_streak??0)>0).length;const written=(progress??[]).filter(x=>(x.writing_score??0)>0);const writtenCount=written.length;const avgWriting=writtenCount?Math.round(written.reduce((sum,x)=>sum+(x.writing_score??0),0)/writtenCount):0;const weeklyWritten=new Set(writingAttempts.map(x=>x.hanja_id)).size;
  // Use exactly the last seven Korean calendar dates for the weekly sticker.
