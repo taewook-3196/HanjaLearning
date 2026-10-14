@@ -15,6 +15,6 @@ WITH proposed(hanja_id,asset_path,alt_text) AS (
  AND NOT EXISTS (SELECT 1 FROM hanja_image_items hi WHERE hi.asset_path=p.asset_path)
 ), next_id AS (SELECT coalesce(max(id),0) AS last_id FROM hanja_image_items)
 INSERT INTO hanja_image_items(id,hanja_id,asset_path,alt_text,asset_license,content_status,source_note)
-SELECT next_id.last_id+eligible.rn,eligible.hanja_id,eligible.asset_path,eligible.alt_text,'ORIGINAL','DRAFT','Original SVG created for 아빠한자 8급 picture question bank; awaiting editorial review'
+SELECT next_id.last_id+eligible.rn,eligible.hanja_id,eligible.asset_path,eligible.alt_text,'APP_ORIGINAL','DRAFT','Original SVG created for 아빠한자 8급 picture question bank; awaiting editorial review'
 FROM eligible CROSS JOIN next_id
 ON CONFLICT (asset_path) DO NOTHING;
