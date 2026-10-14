@@ -22,7 +22,7 @@ BEGIN
  IF p_session_id IS NULL OR p_session_type NOT IN ('TODAY','REPEAT','EXTRA','WRONG') OR p_new_ids IS NULL OR p_review_ids IS NULL THEN RAISE EXCEPTION 'invalid session'; END IF;
  n:=cardinality(p_new_ids);r:=cardinality(p_review_ids);
  IF n+r NOT BETWEEN 1 AND 40 OR n<0 OR r<0 THEN RAISE EXCEPTION 'invalid session size'; END IF;
- IF (SELECT count(DISTINCT id) FROM unnest(p_new_ids||p_review_ids) id WHERE id IS NOT NULL)<>n+r THEN RAISE EXCEPTION 'duplicate or null hanja'; END IF;
+ IF (SELECT count(DISTINCT x.hanja_id) FROM unnest(p_new_ids||p_review_ids) AS x(hanja_id) WHERE x.hanja_id IS NOT NULL)<>n+r THEN RAISE EXCEPTION 'duplicate or null hanja'; END IF;
  IF (SELECT count(*) FROM public.hanja WHERE id=ANY(p_new_ids||p_review_ids))<>n+r THEN RAISE EXCEPTION 'unknown hanja'; END IF;
  PERFORM pg_advisory_xact_lock(hashtext(uid::text));
  -- The caller cannot label previously studied cards as new to inflate daily plan rewards.
