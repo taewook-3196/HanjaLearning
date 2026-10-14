@@ -1,6 +1,21 @@
 import type { GrowthStickerKind as Kind } from "@/lib/growth-stickers";
+const stickerArtworkPosition:Record<Kind,number>={
+ first:0,streak7:1,week:2,streak30:3,learn100:4,retry:5,recover5:6,recover20:7,
+ master:8,write:9,learn50:10,learn250:11,stack:12,write50:13,streak14:14,streak3:15,
+ write100:16
+};
 export function GrowthStickerArt({kind,locked=false}:{kind:Kind;locked?:boolean}){
  const common={stroke:"#334155",strokeWidth:4,strokeLinecap:"round" as const,strokeLinejoin:"round" as const};
+ const index=stickerArtworkPosition[kind];
+ const col=index%8,row=Math.floor(index/8);
+ return <span className={locked?"growth-sticker-illustration locked":"growth-sticker-illustration"} role="img" aria-label={kind} style={{
+  display:"inline-block",width:"100%",height:"100%",aspectRatio:"1 / 1",
+  backgroundImage:"url('/stickers/sticker-sheet.webp')",backgroundRepeat:"no-repeat",
+  backgroundSize:"800% 300%",backgroundPosition:`${col*100/7}% ${row*50}%`,
+  borderRadius:"18%"
+ }}/>;
+}
+function LegacyGrowthStickerArt({kind,locked=false}:{kind:Kind;locked?:boolean}){
  return <svg viewBox="0 0 96 96" aria-hidden="true" className={locked?"locked":undefined}>
   <circle cx="48" cy="48" r="43" fill={locked?"#EEF1F5":"#FFF9E8"}/>
   {kind==="first"?<><path d="M48 71V44" {...common}/><path d="M48 49C29 48 25 34 27 24c14 0 25 7 27 20" fill="#83C96F" {...common}/><path d="M49 48c18-1 24-13 22-23-13 0-23 6-26 18" fill="#67B77A" {...common}/><path d="M31 73h34" {...common}/></>:
