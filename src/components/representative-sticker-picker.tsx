@@ -23,7 +23,7 @@ export function RepresentativeStickerPicker({stickers,initialKeys}:{stickers:Gro
  }
 
  return <>
-  <p className="subtitle representative-sticker-hint">획득한 스티커를 최대 3개 선택할 수 있어요. 다시 누르면 해제됩니다. 첫 번째 스티커는 친구 목록에도 표시돼요.</p>
+  <p className="subtitle representative-sticker-hint">획득한 스티커를 최대 3개 선택할 수 있어요. 다시 누르면 해제됩니다. 선택한 스티커는 홈과 친구 목록에 표시돼요.</p>
   <div className="sticker-grid">
    {stickers.map(s=>s.earned?
     <button key={s.kind} type="button" className="sticker-item earned representative-growth-option" aria-pressed={selected.includes(s.kind)} aria-label={`${s.name}, ${selected.includes(s.kind)?"선택됨, 다시 누르면 해제":"대표 스티커로 선택"}`} disabled={saving} onClick={()=>void save(s.kind)}>
