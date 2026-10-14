@@ -20,12 +20,22 @@ export default async function StatsPage(){
  // Include today and the six preceding Korea calendar days, not a rolling 168-hour window.
  const since=new Date(`${todayKey}T00:00:00+09:00`); since.setUTCDate(since.getUTCDate()-6); const sinceIso=since.toISOString();
  const streakSince=new Date(now); streakSince.setUTCDate(streakSince.getUTCDate()-120); const streakSinceIso=streakSince.toISOString();
- const [{data:history},{data:progress},{data:sessions},{data:streakHistory},{data:recoveryHistory}]=await Promise.all([
+ const loadRecoveryHistory=async()=>{
+  const rows:{hanja_id:string|number;activity_type:string|null;question_type:string|null;result:string|null;created_at:string}[]=[];
+  const pageSize=500;
+  for(let offset=0;;offset+=pageSize){
+   const {data,error}=await s.from("review_history").select("hanja_id,activity_type,question_type,result,created_at").eq("user_id",user.id).in("result",["WRONG","UNKNOWN","CORRECT","KNOWN"]).order("created_at",{ascending:true}).range(offset,offset+pageSize-1);
+   if(error){console.error("Sticker recovery history read failed",error);return null;}
+   rows.push(...(data??[]));
+   if((data??[]).length<pageSize)return rows;
+  }
+ };
+ const [{data:history},{data:progress},{data:sessions},{data:streakHistory},recoveryHistory]=await Promise.all([
   s.from("review_history").select("hanja_id,activity_type,question_type,result,created_at").eq("user_id",user.id).gte("created_at",sinceIso).order("created_at",{ascending:false}),
   s.from("user_hanja_progress").select("mastery_score,writing_score,study_count,wrong_streak").eq("user_id",user.id).gt("study_count",0),
   s.from("study_sessions").select("planned_new,planned_review,planned_wrong,actual_new,actual_review,started_at,completed_at").eq("user_id",user.id).gte("started_at",sinceIso),
   s.from("review_history").select("created_at").eq("user_id",user.id).gte("created_at",streakSinceIso),
-  s.from("review_history").select("hanja_id,activity_type,question_type,result,created_at").eq("user_id",user.id).in("result",["WRONG","UNKNOWN","CORRECT","KNOWN"]).order("created_at",{ascending:true})
+  loadRecoveryHistory()
  ]);
  const attempts=history??[];const isWritingAttempt=(x:{activity_type:string|null;question_type:string|null})=>x.activity_type==="WRITING"||x.question_type==="STROKE_ORDER";const isAnswered=(result:string|null)=>result==="CORRECT"||result==="KNOWN"||result==="WRONG"||result==="UNKNOWN";const recognitionAttempts=attempts.filter(x=>!isWritingAttempt(x)&&isAnswered(x.result));const writingAttempts=attempts.filter(isWritingAttempt);const correct=recognitionAttempts.filter(x=>x.result==="CORRECT"||x.result==="KNOWN").length;const accuracy=recognitionAttempts.length?Math.round(correct/recognitionAttempts.length*100):0;
  const learned=(progress??[]).length;const mastered=(progress??[]).filter(x=>(x.mastery_score??0)>=75).length;const difficult=(progress??[]).filter(x=>(x.wrong_streak??0)>0).length;const written=(progress??[]).filter(x=>(x.writing_score??0)>0);const writtenCount=written.length;const avgWriting=writtenCount?Math.round(written.reduce((sum,x)=>sum+(x.writing_score??0),0)/writtenCount):0;const weeklyWritten=new Set(writingAttempts.map(x=>x.hanja_id)).size;
