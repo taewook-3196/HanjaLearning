@@ -40,6 +40,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Verified session security contracts
+        run: node scripts/test-verified-session-contract.mjs
+
       - name: Exam blueprint tests
         run: npm run test:exam
 
