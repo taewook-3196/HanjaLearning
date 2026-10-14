@@ -25,7 +25,7 @@ export default async function StatsPage(){
   const pageSize=500;
   for(let offset=0;;offset+=pageSize){
    const {data,error}=await s.from("review_history").select("hanja_id,activity_type,question_type,result,created_at").eq("user_id",user.id).in("result",["WRONG","UNKNOWN","CORRECT","KNOWN"]).order("created_at",{ascending:true}).range(offset,offset+pageSize-1);
-   if(error){console.error("Sticker recovery history read failed",error);return null;}
+   if(error){console.error("Sticker recovery history read failed",error);throw new Error("학습 통계를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");}
    rows.push(...(data??[]));
    if((data??[]).length<pageSize)return rows;
   }
@@ -35,7 +35,7 @@ export default async function StatsPage(){
   const pageSize=500;
   for(let offset=0;;offset+=pageSize){
    const {data,error}=await s.from("review_history").select("created_at").eq("user_id",user.id).gte("created_at",streakSinceIso).order("created_at",{ascending:false}).range(offset,offset+pageSize-1);
-   if(error){console.error("Sticker streak history read failed",error);return null;}
+   if(error){console.error("Sticker streak history read failed",error);throw new Error("학습 통계를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");}
    rows.push(...(data??[]));
    if((data??[]).length<pageSize)return rows;
   }
@@ -45,7 +45,7 @@ export default async function StatsPage(){
   const pageSize=500;
   for(let offset=0;;offset+=pageSize){
    const {data,error}=await s.from("review_history").select("hanja_id,activity_type,question_type,result,created_at").eq("user_id",user.id).gte("created_at",sinceIso).order("created_at",{ascending:false}).range(offset,offset+pageSize-1);
-   if(error){console.error("Weekly sticker history read failed",error);return null;}
+   if(error){console.error("Weekly sticker history read failed",error);throw new Error("학습 통계를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");}
    rows.push(...(data??[]));
    if((data??[]).length<pageSize)return rows;
   }
@@ -83,7 +83,7 @@ export default async function StatsPage(){
     ?s.from("user_repeatable_sticker_events").select("id,sticker_key,earned_on,earned_at,celebrated_at").eq("user_id",user.id).order("earned_at",{ascending:true}).range(offset,offset+pageSize-1)
     :s.from("user_xp_events").select("xp,event_date,reason,created_at").eq("user_id",user.id).order("created_at",{ascending:false}).range(offset,offset+pageSize-1);
    const {data,error}=await query;
-   if(error){console.error("Reward history read failed",table,error);return null;}
+   if(error){console.error("Reward history read failed",error);throw new Error("학습 통계를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");}
    rows.push(...(data??[]));
    if((data??[]).length<pageSize)return rows;
   }
