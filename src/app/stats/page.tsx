@@ -75,9 +75,22 @@ export default async function StatsPage(){
  const previousKoreanDay=(key:string)=>{const d=new Date(`${key}T12:00:00Z`);d.setUTCDate(d.getUTCDate()-1);return d.toISOString().slice(0,10);};
  let streak=0; let streakKey=activityDays.has(todayKey)?todayKey:previousKoreanDay(todayKey);
  for(let i=0;i<120&&activityDays.has(streakKey);i++){streak++;streakKey=previousKoreanDay(streakKey);}
- const {data:repeatableRows}=await s.from("user_repeatable_sticker_events").select("id,sticker_key,earned_on,earned_at,celebrated_at").eq("user_id",user.id).order("earned_at",{ascending:true});
+ const loadAllRewardRows=async(table:"user_repeatable_sticker_events"|"user_xp_events")=>{
+  const rows:Record<string,unknown>[]=[];
+  const pageSize=500;
+  for(let offset=0;;offset+=pageSize){
+   const query=table==="user_repeatable_sticker_events"
+    ?s.from("user_repeatable_sticker_events").select("id,sticker_key,earned_on,earned_at,celebrated_at").eq("user_id",user.id).order("earned_at",{ascending:true}).range(offset,offset+pageSize-1)
+    :s.from("user_xp_events").select("xp,event_date,reason,created_at").eq("user_id",user.id).order("created_at",{ascending:false}).range(offset,offset+pageSize-1);
+   const {data,error}=await query;
+   if(error){console.error("Reward history read failed",table,error);return null;}
+   rows.push(...(data??[]));
+   if((data??[]).length<pageSize)return rows;
+  }
+ };
+ const repeatableRows=await loadAllRewardRows("user_repeatable_sticker_events") as {id:number;sticker_key:string;earned_on:string;earned_at:string;celebrated_at:string|null}[]|null;
  const repeatCounts=(repeatableRows??[]).reduce<Record<string,number>>((acc,x)=>{acc[x.sticker_key]=(acc[x.sticker_key]??0)+1;return acc;},{});
- const {data:xpRows}=await s.from("user_xp_events").select("xp,event_date,reason,created_at").eq("user_id",user.id).order("created_at",{ascending:false});
+ const xpRows=await loadAllRewardRows("user_xp_events") as {xp:number;event_date:string;reason:string;created_at:string}[]|null;
  const totalXp=(xpRows??[]).reduce((sum,x)=>sum+(x.xp??0),0);
  const {data:giftRewardRows}=await s.from("user_gift_request_rewards").select("milestone_level,used_at").eq("user_id",user.id).order("milestone_level",{ascending:true});
  const giftRewards=giftRewardRows??[]; const availableGiftRewards=giftRewards.filter(x=>!x.used_at).length;
