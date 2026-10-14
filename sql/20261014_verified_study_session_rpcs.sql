@@ -26,6 +26,8 @@ BEGIN
  IF (SELECT count(*) FROM public.hanja WHERE id=ANY(p_new_ids||p_review_ids))<>n+r THEN RAISE EXCEPTION 'unknown hanja'; END IF;
  -- The caller cannot label previously studied cards as new to inflate daily plan rewards.
  IF EXISTS(SELECT 1 FROM public.user_hanja_progress WHERE user_id=uid AND hanja_id=ANY(p_new_ids) AND study_count>0) THEN RAISE EXCEPTION 'previously studied hanja cannot be new'; END IF;
+ -- Check progress at session creation, not at completion: first-time flashcards create progress rows.
+ IF EXISTS(SELECT 1 FROM public.study_sessions WHERE user_id=uid AND completed_at IS NULL AND started_at>now()-interval '12 hours' AND id<>p_session_id) THEN RAISE EXCEPTION 'another session is active'; END IF;
  IF EXISTS(SELECT 1 FROM unnest(p_review_ids) AS x(id) WHERE NOT EXISTS(SELECT 1 FROM public.user_hanja_progress p WHERE p.user_id=uid AND p.hanja_id=x.id AND p.study_count>0)) THEN RAISE EXCEPTION 'unseen hanja cannot be review'; END IF;
  PERFORM pg_advisory_xact_lock(hashtext(uid::text));
  IF EXISTS(SELECT 1 FROM public.study_sessions WHERE id=p_session_id) THEN
