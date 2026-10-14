@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS public.study_session_items (
  PRIMARY KEY(session_id,hanja_id)
 );
 ALTER TABLE public.study_session_items ENABLE ROW LEVEL SECURITY;
-REVOKE ALL ON public.study_session_items FROM anon,authenticated;
+REVOKE ALL ON public.study_session_items FROM PUBLIC,anon,authenticated;
 DROP POLICY IF EXISTS study_session_items_select_own ON public.study_session_items;
 CREATE POLICY study_session_items_select_own ON public.study_session_items FOR SELECT TO authenticated USING(user_id=(SELECT auth.uid()));
 GRANT SELECT ON public.study_session_items TO authenticated;
@@ -75,7 +75,7 @@ BEGIN
  SELECT count(r.request_id),count(r.request_id) FILTER(WHERE r.result_kind='KNOWN'),count(r.request_id) FILTER(WHERE r.result_kind='UNKNOWN') INTO answered,correct,wrong
  FROM public.study_session_items i LEFT JOIN public.learning_request_receipts r ON r.user_id=i.user_id AND r.request_id=i.request_id AND r.event_kind='FLASHCARD' AND r.hanja_id=i.hanja_id
  WHERE i.session_id=p_session_id AND i.user_id=uid;
- IF answered<>(SELECT count(*) FROM public.study_session_items WHERE session_id=p_session_id AND user_id=uid) OR answered=0 THEN RAISE EXCEPTION 'session incomplete'; END IF;
+ IF answered<>(SELECT count(*) FROM public.study_session_items WHERE session_id=p_session_id AND user_id=uid) OR answered=0 OR correct+wrong<>answered THEN RAISE EXCEPTION 'session incomplete'; END IF;
  UPDATE public.study_sessions SET completed_at=now(),actual_new=(SELECT count(*) FROM public.study_session_items WHERE session_id=p_session_id AND user_id=uid AND item_kind='NEW'),actual_review=(SELECT count(*) FROM public.study_session_items WHERE session_id=p_session_id AND user_id=uid AND item_kind='REVIEW'),correct_count=correct,wrong_count=wrong,duration_seconds=least(43200,greatest(0,extract(epoch FROM now()-session_row.started_at)::integer)) WHERE id=p_session_id;
 END $fn$;
 
