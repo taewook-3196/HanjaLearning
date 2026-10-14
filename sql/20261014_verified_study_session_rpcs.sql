@@ -24,6 +24,9 @@ BEGIN
  IF n+r NOT BETWEEN 1 AND 40 OR n<0 OR r<0 THEN RAISE EXCEPTION 'invalid session size'; END IF;
  IF (SELECT count(DISTINCT id) FROM unnest(p_new_ids||p_review_ids) id WHERE id IS NOT NULL)<>n+r THEN RAISE EXCEPTION 'duplicate or null hanja'; END IF;
  IF (SELECT count(*) FROM public.hanja WHERE id=ANY(p_new_ids||p_review_ids))<>n+r THEN RAISE EXCEPTION 'unknown hanja'; END IF;
+ -- The caller cannot label previously studied cards as new to inflate daily plan rewards.
+ IF EXISTS(SELECT 1 FROM public.user_hanja_progress WHERE user_id=uid AND hanja_id=ANY(p_new_ids) AND study_count>0) THEN RAISE EXCEPTION 'previously studied hanja cannot be new'; END IF;
+ IF EXISTS(SELECT 1 FROM unnest(p_review_ids) AS x(id) WHERE NOT EXISTS(SELECT 1 FROM public.user_hanja_progress p WHERE p.user_id=uid AND p.hanja_id=x.id AND p.study_count>0)) THEN RAISE EXCEPTION 'unseen hanja cannot be review'; END IF;
  PERFORM pg_advisory_xact_lock(hashtext(uid::text));
  IF EXISTS(SELECT 1 FROM public.study_sessions WHERE id=p_session_id) THEN
   IF NOT EXISTS(SELECT 1 FROM public.study_sessions WHERE id=p_session_id AND user_id=uid AND session_type=p_session_type AND planned_new=n AND planned_review=r) OR
