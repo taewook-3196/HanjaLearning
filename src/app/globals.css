@@ -601,10 +601,10 @@ button.representative-growth-option:disabled{cursor:wait}
 
 
 /* Up to three featured stickers between the nickname and app icon. */
-.home-header .home-featured-stickers{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:4px;flex:1 1 auto;min-width:0}
-.home-header .home-featured-sticker{display:grid;place-items:center;width:clamp(25px,8vw,43px);height:clamp(25px,8vw,43px);flex:0 1 auto;border-radius:50%;background:#fff8e9}
-.home-header .home-featured-sticker svg{display:block;width:100%;height:100%}
-@media(max-width:390px){.home-header{gap:5px}.home-header .profile-heading{gap:6px}.home-header .home-featured-stickers{gap:2px}.home-header .home-app-icon{width:42px;height:42px}}
+.home-header .home-featured-stickers{display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:center;gap:5px;flex:1 1 auto;min-width:0;max-width:100%;overflow:hidden}
+.home-header .home-featured-sticker{display:grid;place-items:center;width:clamp(34px,11vw,52px);height:auto;aspect-ratio:1;flex:0 1 52px;min-width:0;min-height:0;overflow:hidden;border-radius:50%;background:#fff8e9}
+.home-header .home-featured-sticker .growth-sticker-illustration,.home-header .home-featured-sticker svg{display:block;width:100%;height:100%}
+@media(max-width:390px){.home-header{gap:5px}.home-header .profile-heading{gap:6px}.home-header .home-featured-stickers{gap:3px}.home-header .home-featured-sticker{flex-basis:46px}.home-header .home-app-icon{width:42px;height:42px}}
 
 /* Friends see the same three featured sticker badges as the profile owner. */
 .friend-featured-stickers{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;flex-shrink:0}
