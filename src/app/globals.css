@@ -615,9 +615,14 @@ button.representative-growth-option:disabled{cursor:wait}
 /* Keep the full illustrated tile and provide a consistent legible achievement label. */
 /* Reserve a separate caption row instead of covering the bottom of the sticker artwork. */
 .growth-sticker-with-caption{position:relative;display:flex;width:100%;height:100%;min-width:0;min-height:0;flex-direction:column;overflow:hidden;border-radius:8%}
-.growth-sticker-with-caption>.growth-sticker-illustration{display:block!important;width:100%!important;height:auto!important;min-height:0;flex:1 1 auto;aspect-ratio:auto!important}
+.growth-sticker-with-caption>.growth-sticker-illustration{display:block!important;width:100%!important;height:auto!important;min-height:0;flex:0 0 auto;aspect-ratio:1 / 1!important}
 .growth-sticker-caption{position:relative;display:block;flex:0 0 auto;width:100%;padding:1px 1px 2px;background:rgba(255,255,255,.96);color:#24324a!important;text-align:center;font-size:clamp(7px,1.9vw,10px)!important;font-weight:800!important;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:clip;letter-spacing:-.06em}
 
 /* Keep all three featured tiles at their intended size; do not shrink the last tile inside a tight header. */
 .home-header .home-featured-sticker{flex:0 0 clamp(34px,11vw,52px)}
 @media(max-width:390px){.home-header .home-featured-sticker{flex-basis:clamp(34px,11vw,46px)}}
+
+/* Featured artwork needs its full square above the caption, not a compressed sprite. */
+.home-header .home-featured-sticker{aspect-ratio:auto;height:auto;align-self:center;overflow:visible}
+.home-header .home-featured-sticker .growth-sticker-with-caption{height:auto;overflow:visible}
+.home-header .home-featured-stickers{overflow:visible;align-items:center}
