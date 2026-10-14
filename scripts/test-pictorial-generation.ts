@@ -26,3 +26,38 @@ for(let run=0;run<100;run++){
  assert.ok(q.choices.some(x=>["月","目","白","自"].includes(x)),"similar character should appear");
 }
 console.log("PASS: 100 generated pictorial questions with image, correct answer, unique choices and confusable distractors");
+
+
+const grade8Images=[
+ {id:8,hanja_id:6,asset_path:"/exam-images/sun.svg",alt_text:"해"},
+ {id:9,hanja_id:2,asset_path:"/exam-images/moon.svg",alt_text:"달"},
+ {id:10,hanja_id:11,asset_path:"/exam-images/person.svg",alt_text:"사람"},
+ {id:11,hanja_id:16,asset_path:"/exam-images/gate.svg",alt_text:"문"},
+ {id:12,hanja_id:12,asset_path:"/exam-images/earth.svg",alt_text:"흙"},
+ {id:13,hanja_id:1,asset_path:"/exam-images/child.svg",alt_text:"아이"},
+ {id:14,hanja_id:10,asset_path:"/exam-images/fire.svg",alt_text:"불"},
+ {id:15,hanja_id:9,asset_path:"/exam-images/tree.svg",alt_text:"나무"},
+ {id:16,hanja_id:8,asset_path:"/exam-images/water.svg",alt_text:"물"},
+];
+const threePictureBlueprint:ExamBlueprint={gradeCode:"8",questionCount:3,items:[{type:"IMAGE_RECOGNITION",count:3}],status:"VERIFIED_108_112"};
+for(let run=0;run<50;run++){
+ const seen=new Set<string>();
+ for(let exam=0;exam<3;exam++){
+  const questions=generateExamQuestions({
+   pool,words:[],relations:[],wordRelations:[],metadata:[],wordContexts:[],wordStructures:[],
+   commonCharacterSets:[],idioms:[],cultureItems:[],usageItems:[],specialReadings:[],
+   imageItems:grade8Images,characterById,questionCount:3,blueprint:threePictureBlueprint,
+   recentQuestionKeys:seen
+  });
+  assert.equal(questions.length,3,`run ${run}, exam ${exam}: expected 3 image questions`);
+  for(const question of questions){
+   assert.ok(!seen.has(question.id),`run ${run}, exam ${exam}: repeated picture ${question.id}`);
+   assert.equal(question.choices.length,4);
+   assert.equal(new Set(question.choices).size,4);
+   assert.ok(question.choices.includes(question.correct));
+   seen.add(question.id);
+  }
+ }
+ assert.equal(seen.size,9);
+}
+console.log("PASS: 50 simulations of three exams with 9 unique picture questions and valid choices");
