@@ -16,11 +16,6 @@ export function RepresentativeStickerPicker({stickers,initialKeys}:{stickers:Gro
   const client=createClient();
   const {data:{user},error:authError}=await client.auth.getUser();
   if(authError||!user){setError("로그인 상태를 확인하지 못했어요.");setSaving(false);return;}
-  if(next.includes(key)){
-   const {error:awardError}=await client.from("user_growth_stickers")
-    .upsert({user_id:user.id,sticker_key:key},{onConflict:"user_id,sticker_key",ignoreDuplicates:true});
-   if(awardError){setError("스티커 획득 기록을 저장하지 못했어요.");setSaving(false);return;}
-  }
   const {error:saveError}=await client.rpc("set_featured_stickers",{p_keys:next});
   if(saveError)setError("스티커 선택을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.");
   else setSelected(next);
