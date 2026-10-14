@@ -90,11 +90,15 @@ export default async function StatsPage(){
    if((data??[]).length<pageSize)return rows;
   }
  };
- const repeatableRows=await loadAllRewardRows("user_repeatable_sticker_events") as {id:number;sticker_key:string;earned_on:string;earned_at:string;celebrated_at:string|null}[]|null;
+ const [repeatableRows,xpRows,{data:giftRewardRows,error:giftRewardError}]=await Promise.all([
+  loadAllRewardRows("user_repeatable_sticker_events") as Promise<{id:number;sticker_key:string;earned_on:string;earned_at:string;celebrated_at:string|null}[]|null>,
+  loadAllRewardRows("user_xp_events") as Promise<{xp:number;event_date:string;reason:string;created_at:string}[]|null>,
+  s.from("user_gift_request_rewards").select("milestone_level,used_at").eq("user_id",user.id).order("milestone_level",{ascending:true})
+ ]);
  const repeatCounts=(repeatableRows??[]).reduce<Record<string,number>>((acc,x)=>{acc[x.sticker_key]=(acc[x.sticker_key]??0)+1;return acc;},{});
- const xpRows=await loadAllRewardRows("user_xp_events") as {xp:number;event_date:string;reason:string;created_at:string}[]|null;
+
  const totalXp=(xpRows??[]).reduce((sum,x)=>sum+(x.xp??0),0);
- const {data:giftRewardRows,error:giftRewardError}=await s.from("user_gift_request_rewards").select("milestone_level,used_at").eq("user_id",user.id).order("milestone_level",{ascending:true});
+
  if(giftRewardError)throw new Error("보상 정보를 불러오지 못했습니다.");
  const giftRewards=giftRewardRows??[]; const availableGiftRewards=giftRewards.filter(x=>!x.used_at).length;
  const todayXpRows=(xpRows??[]).filter(x=>x.event_date===todayKey);
