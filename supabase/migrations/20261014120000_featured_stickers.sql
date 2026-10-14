@@ -1,6 +1,10 @@
 -- Store up to three featured stickers while preserving the legacy primary sticker.
 alter table public.profiles
   add column if not exists featured_sticker_keys text[] not null default '{}'::text[];
+alter table public.profiles
+  add constraint featured_sticker_keys_max_three
+  check (cardinality(featured_sticker_keys) <= 3);
+
 update public.profiles
 set featured_sticker_keys = array[representative_sticker_key]
 where representative_sticker_key is not null
