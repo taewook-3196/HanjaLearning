@@ -19,7 +19,7 @@ RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS
 DECLARE uid uuid:=auth.uid(); n integer; r integer;
 BEGIN
  IF uid IS NULL THEN RAISE EXCEPTION 'authentication required'; END IF;
- IF p_session_id IS NULL OR p_session_type NOT IN ('TODAY','REPEAT','EXTRA','WRONG') OR p_new_ids IS NULL OR p_review_ids IS NULL THEN RAISE EXCEPTION 'invalid session'; END IF;
+ IF p_session_id IS NULL OR p_session_type IS NULL OR p_session_type NOT IN ('TODAY','REPEAT','EXTRA','WRONG') OR p_new_ids IS NULL OR p_review_ids IS NULL THEN RAISE EXCEPTION 'invalid session'; END IF;
  n:=cardinality(p_new_ids);r:=cardinality(p_review_ids);
  IF n+r NOT BETWEEN 1 AND 40 OR n<0 OR r<0 THEN RAISE EXCEPTION 'invalid session size'; END IF;
  IF (SELECT count(DISTINCT x.hanja_id) FROM unnest(p_new_ids||p_review_ids) AS x(hanja_id) WHERE x.hanja_id IS NOT NULL)<>n+r THEN RAISE EXCEPTION 'duplicate or null hanja'; END IF;
@@ -50,7 +50,7 @@ CREATE OR REPLACE FUNCTION public.record_verified_session_flashcard(p_session_id
 RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $fn$
 DECLARE uid uuid:=auth.uid(); item public.study_session_items%rowtype;
 BEGIN
- IF uid IS NULL OR p_request_id IS NULL OR p_known IS NULL THEN RAISE EXCEPTION 'invalid request'; END IF;
+ IF uid IS NULL OR p_session_id IS NULL OR p_request_id IS NULL OR p_hanja_id IS NULL OR p_known IS NULL THEN RAISE EXCEPTION 'invalid request'; END IF;
  PERFORM pg_advisory_xact_lock(hashtext(uid::text));
  IF NOT EXISTS(SELECT 1 FROM public.study_sessions WHERE id=p_session_id AND user_id=uid AND completed_at IS NULL AND started_at>now()-interval '12 hours') THEN RAISE EXCEPTION 'session unavailable'; END IF;
  SELECT * INTO item FROM public.study_session_items WHERE session_id=p_session_id AND user_id=uid AND hanja_id=p_hanja_id FOR UPDATE;
