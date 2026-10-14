@@ -45,3 +45,41 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  learning-state-sql:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare minimal progress schema
+        run: |
+          psql -v ON_ERROR_STOP=1 -c "create table public.user_hanja_progress (study_count integer not null, mastery_score integer not null, review_stage integer not null, learning_state text not null default 'NEW');"
+          psql -v ON_ERROR_STOP=1 -c "insert into public.user_hanja_progress values (1,30,3,'LEARNING'),(1,80,5,'LEARNING'),(0,0,0,'NEW');"
+      - name: Apply learning-state migration and verify backfill
+        run: |
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261014080000_sync_learning_state_from_progress.sql
+          psql -v ON_ERROR_STOP=1 -c "do \$\$ begin if (select count(*) from public.user_hanja_progress where learning_state='FAMILIAR')<>1 or (select count(*) from public.user_hanja_progress where learning_state='MASTERED')<>1 or (select count(*) from public.user_hanja_progress where learning_state='NEW')<>1 then raise exception 'backfill failed'; end if; end \$\$;"
+      - name: Verify trigger promotion and demotion
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/learning_state_trigger_integration.sql
+      - name: Verify threshold boundaries
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/learning_state_thresholds_readonly.sql
