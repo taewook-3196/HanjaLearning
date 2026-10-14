@@ -20,11 +20,12 @@ export default async function StatsPage(){
  // Include today and the six preceding Korea calendar days, not a rolling 168-hour window.
  const since=new Date(`${todayKey}T00:00:00+09:00`); since.setUTCDate(since.getUTCDate()-6); const sinceIso=since.toISOString();
  const streakSince=new Date(now); streakSince.setUTCDate(streakSince.getUTCDate()-120); const streakSinceIso=streakSince.toISOString();
- const [{data:history},{data:progress},{data:sessions},{data:streakHistory}]=await Promise.all([
+ const [{data:history},{data:progress},{data:sessions},{data:streakHistory},{data:recoveryHistory}]=await Promise.all([
   s.from("review_history").select("hanja_id,activity_type,question_type,result,created_at").eq("user_id",user.id).gte("created_at",sinceIso).order("created_at",{ascending:false}),
   s.from("user_hanja_progress").select("mastery_score,writing_score,study_count,wrong_streak").eq("user_id",user.id).gt("study_count",0),
   s.from("study_sessions").select("planned_new,planned_review,planned_wrong,actual_new,actual_review,started_at,completed_at").eq("user_id",user.id).gte("started_at",sinceIso),
-  s.from("review_history").select("created_at").eq("user_id",user.id).gte("created_at",streakSinceIso)
+  s.from("review_history").select("created_at").eq("user_id",user.id).gte("created_at",streakSinceIso),
+  s.from("review_history").select("hanja_id,activity_type,question_type,result,created_at").eq("user_id",user.id).in("result",["WRONG","UNKNOWN","CORRECT","KNOWN"]).order("created_at",{ascending:true})
  ]);
  const attempts=history??[];const isWritingAttempt=(x:{activity_type:string|null;question_type:string|null})=>x.activity_type==="WRITING"||x.question_type==="STROKE_ORDER";const isAnswered=(result:string|null)=>result==="CORRECT"||result==="KNOWN"||result==="WRONG"||result==="UNKNOWN";const recognitionAttempts=attempts.filter(x=>!isWritingAttempt(x)&&isAnswered(x.result));const writingAttempts=attempts.filter(isWritingAttempt);const correct=recognitionAttempts.filter(x=>x.result==="CORRECT"||x.result==="KNOWN").length;const accuracy=recognitionAttempts.length?Math.round(correct/recognitionAttempts.length*100):0;
  const learned=(progress??[]).length;const mastered=(progress??[]).filter(x=>(x.mastery_score??0)>=75).length;const difficult=(progress??[]).filter(x=>(x.wrong_streak??0)>0).length;const written=(progress??[]).filter(x=>(x.writing_score??0)>0);const writtenCount=written.length;const avgWriting=writtenCount?Math.round(written.reduce((sum,x)=>sum+(x.writing_score??0),0)/writtenCount):0;const weeklyWritten=new Set(writingAttempts.map(x=>x.hanja_id)).size;
@@ -56,7 +57,7 @@ export default async function StatsPage(){
  const growthTitle=level>=15?"한자 달인":level>=10?"한자 탐험대장":level>=7?"꾸준한 탐험가":level>=4?"성장하는 학습가":"새싹 학습가";
  // Count only hanja whose latest relevant outcome is a recovery from an earlier mistake.
  const recovered=new Set<string|number>(); const seenWrong=new Set<string|number>();
- [...attempts].reverse().filter(x=>!isWritingAttempt(x)).forEach(x=>{
+ (recoveryHistory??[]).filter(x=>!isWritingAttempt(x)).forEach(x=>{
   if(x.result==="WRONG"||x.result==="UNKNOWN"){seenWrong.add(x.hanja_id);recovered.delete(x.hanja_id);}
   else if((x.result==="CORRECT"||x.result==="KNOWN")&&seenWrong.has(x.hanja_id))recovered.add(x.hanja_id);
  });
