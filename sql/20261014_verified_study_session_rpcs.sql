@@ -25,16 +25,16 @@ BEGIN
  IF (SELECT count(DISTINCT x.hanja_id) FROM unnest(p_new_ids||p_review_ids) AS x(hanja_id) WHERE x.hanja_id IS NOT NULL)<>n+r THEN RAISE EXCEPTION 'duplicate or null hanja'; END IF;
  IF (SELECT count(*) FROM public.hanja WHERE id=ANY(p_new_ids||p_review_ids))<>n+r THEN RAISE EXCEPTION 'unknown hanja'; END IF;
  PERFORM pg_advisory_xact_lock(hashtext(uid::text));
- -- The caller cannot label previously studied cards as new to inflate daily plan rewards.
- IF EXISTS(SELECT 1 FROM public.user_hanja_progress WHERE user_id=uid AND hanja_id=ANY(p_new_ids) AND study_count>0) THEN RAISE EXCEPTION 'previously studied hanja cannot be new'; END IF;
- -- Check progress at session creation, not at completion: first-time flashcards create progress rows.
- IF EXISTS(SELECT 1 FROM unnest(p_review_ids) AS x(id) WHERE NOT EXISTS(SELECT 1 FROM public.user_hanja_progress p WHERE p.user_id=uid AND p.hanja_id=x.id AND p.study_count>0)) THEN RAISE EXCEPTION 'unseen hanja cannot be review'; END IF;
  IF EXISTS(SELECT 1 FROM public.study_sessions WHERE id=p_session_id) THEN
   IF NOT EXISTS(SELECT 1 FROM public.study_sessions WHERE id=p_session_id AND user_id=uid AND session_type=p_session_type AND planned_new=0 AND planned_review=0) OR
     (SELECT count(*) FROM public.study_session_items WHERE session_id=p_session_id AND user_id=uid AND ((item_kind='NEW' AND hanja_id=ANY(p_new_ids)) OR (item_kind='REVIEW' AND hanja_id=ANY(p_review_ids))))<>n+r
   THEN RAISE EXCEPTION 'session id reused'; END IF;
   RETURN;
  END IF;
+ -- The caller cannot label previously studied cards as new to inflate daily plan rewards.
+ IF EXISTS(SELECT 1 FROM public.user_hanja_progress WHERE user_id=uid AND hanja_id=ANY(p_new_ids) AND study_count>0) THEN RAISE EXCEPTION 'previously studied hanja cannot be new'; END IF;
+ -- Check progress at session creation, not at completion: first-time flashcards create progress rows.
+ IF EXISTS(SELECT 1 FROM unnest(p_review_ids) AS x(id) WHERE NOT EXISTS(SELECT 1 FROM public.user_hanja_progress p WHERE p.user_id=uid AND p.hanja_id=x.id AND p.study_count>0)) THEN RAISE EXCEPTION 'unseen hanja cannot be review'; END IF;
  -- A user may not create overlapping active sessions.
  -- A restarted lesson may abandon an unfinished session. Expire it without awarding XP.
  DELETE FROM public.study_session_items WHERE session_id IN (SELECT id FROM public.study_sessions WHERE user_id=uid AND completed_at IS NULL);
