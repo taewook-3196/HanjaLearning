@@ -23,7 +23,7 @@ export default async function StatsPage(){
  const [{data:history},{data:progress},{data:sessions},{data:streakHistory}]=await Promise.all([
   s.from("review_history").select("hanja_id,activity_type,question_type,result,created_at").eq("user_id",user.id).gte("created_at",sinceIso).order("created_at",{ascending:false}),
   s.from("user_hanja_progress").select("mastery_score,writing_score,study_count,wrong_streak").eq("user_id",user.id).gt("study_count",0),
-  s.from("study_sessions").select("planned_new,planned_review,planned_wrong,actual_new,actual_review,completed_at").eq("user_id",user.id).gte("started_at",sinceIso),
+  s.from("study_sessions").select("planned_new,planned_review,planned_wrong,actual_new,actual_review,started_at,completed_at").eq("user_id",user.id).gte("started_at",sinceIso),
   s.from("review_history").select("created_at").eq("user_id",user.id).gte("created_at",streakSinceIso)
  ]);
  const attempts=history??[];const isWritingAttempt=(x:{activity_type:string|null;question_type:string|null})=>x.activity_type==="WRITING"||x.question_type==="STROKE_ORDER";const isAnswered=(result:string|null)=>result==="CORRECT"||result==="KNOWN"||result==="WRONG"||result==="UNKNOWN";const recognitionAttempts=attempts.filter(x=>!isWritingAttempt(x)&&isAnswered(x.result));const writingAttempts=attempts.filter(isWritingAttempt);const correct=recognitionAttempts.filter(x=>x.result==="CORRECT"||x.result==="KNOWN").length;const accuracy=recognitionAttempts.length?Math.round(correct/recognitionAttempts.length*100):0;
@@ -60,7 +60,10 @@ export default async function StatsPage(){
   if(x.result==="WRONG"||x.result==="UNKNOWN"){seenWrong.add(x.hanja_id);recovered.delete(x.hanja_id);}
   else if((x.result==="CORRECT"||x.result==="KNOWN")&&seenWrong.has(x.hanja_id))recovered.add(x.hanja_id);
  });
- const stickerRules=growthStickerRules({learned,writtenCount,recovered:recovered.size,mastered,days,streak});
+ const reviewed=recognitionAttempts.filter(x=>x.activity_type==="REVIEW").length;
+ const nightStudies=attempts.filter(x=>{const hour=Number(new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Seoul",hour:"2-digit",hourCycle:"h23"}).format(new Date(x.created_at)));return hour>=21;}).length;
+ const todayMinutes=Math.floor(todaySessions.reduce((sum,x)=>{if(!x.started_at||!x.completed_at)return sum;const duration=(new Date(x.completed_at).getTime()-new Date(x.started_at).getTime())/60000;return sum+(duration>0&&duration<=180?duration:0);},0));
+ const stickerRules=growthStickerRules({learned,writtenCount,recovered:recovered.size,mastered,days,streak,accuracy,answered:recognitionAttempts.length,reviewed,level,nightStudies,todayMinutes,weeklyGoal:days>=5});
  const {data:savedStickerRows}=await s.from("user_growth_stickers").select("sticker_key,earned_at,celebrated_at").eq("user_id",user.id);
  const savedKeys=new Set((savedStickerRows??[]).map(x=>x.sticker_key));
  const newlyEarned=stickerRules.filter(x=>x.earned&&!savedKeys.has(x.kind));
