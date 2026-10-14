@@ -3,7 +3,7 @@ alter table public.profiles
   add column if not exists featured_sticker_keys text[] not null default '{}'::text[];
 alter table public.profiles
   add constraint featured_sticker_keys_max_three
-  check (cardinality(featured_sticker_keys) <= 3);
+  check (cardinality(featured_sticker_keys) <= 3 and array_position(featured_sticker_keys,null) is null);
 
 update public.profiles
 set featured_sticker_keys = array[representative_sticker_key]
