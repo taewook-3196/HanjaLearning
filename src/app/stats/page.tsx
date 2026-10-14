@@ -61,7 +61,7 @@ export default async function StatsPage(){
   else if((x.result==="CORRECT"||x.result==="KNOWN")&&seenWrong.has(x.hanja_id))recovered.add(x.hanja_id);
  });
  const reviewed=recognitionAttempts.filter(x=>x.activity_type==="REVIEW").length;
- const nightStudies=attempts.filter(x=>{const hour=Number(new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Seoul",hour:"2-digit",hourCycle:"h23"}).format(new Date(x.created_at)));return hour>=21;}).length;
+ const nightStudies=(sessions??[]).filter(x=>{if(!x.completed_at)return false;const hour=Number(new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Seoul",hour:"2-digit",hourCycle:"h23"}).format(new Date(x.completed_at)));return hour>=21;}).length;
  const todayMinutes=Math.floor(todaySessions.reduce((sum,x)=>{if(!x.started_at||!x.completed_at)return sum;const duration=(new Date(x.completed_at).getTime()-new Date(x.started_at).getTime())/60000;return sum+(duration>0&&duration<=180?duration:0);},0));
  const stickerRules=growthStickerRules({learned,writtenCount,recovered:recovered.size,mastered,days,streak,accuracy,answered:recognitionAttempts.length,reviewed,level,nightStudies,todayMinutes,weeklyGoal:days>=5});
  const {data:savedStickerRows}=await s.from("user_growth_stickers").select("sticker_key,earned_at,celebrated_at").eq("user_id",user.id);
