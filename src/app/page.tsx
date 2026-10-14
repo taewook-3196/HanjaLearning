@@ -6,13 +6,15 @@ import { requireActiveUser } from "@/lib/auth/require-active-user";
 import { buildStudyPlan } from "@/lib/study-plan";
 import { profileAvatarUrl } from "@/lib/profile-photo";
 import { ProfileAvatarArt } from "@/components/profile-avatar-art";
+import { GrowthStickerArt } from "@/components/growth-sticker-art";
+import type { GrowthStickerKind } from "@/lib/growth-stickers";
 import { levelProgress as getLevelProgress } from "@/lib/xp-level";
 
 export default async function Home() {
   const { supabase, user } = await requireActiveUser();
 
   const [{ data: profile }, { data: settings }, { data: friendUnread }, { count: friendRequests }] = await Promise.all([
-    supabase.from("profiles").select("nickname,target_provider,target_grade,avatar_type,avatar_key,avatar_path").eq("user_id", user.id).maybeSingle(),
+    supabase.from("profiles").select("nickname,target_provider,target_grade,avatar_type,avatar_key,avatar_path,representative_sticker_key,featured_sticker_keys").eq("user_id", user.id).maybeSingle(),
     supabase.from("user_settings").select("exam_provider_id,target_exam_date").eq("user_id", user.id).maybeSingle(),
     supabase.rpc("friend_unread_message_count"),
     supabase.from("friendships").select("*",{count:"exact",head:true}).eq("addressee_id",user.id).eq("status","PENDING"),
@@ -27,6 +29,8 @@ export default async function Home() {
   if (!profile?.target_provider || !profile?.target_grade) redirect("/onboarding");
   const avatarUrl=profile.avatar_type==="PHOTO"&&profile.avatar_path?await profileAvatarUrl(supabase,profile.avatar_path):null;
   const profileAvatar=avatarUrl?<img className="profile-photo" src={avatarUrl} width={48} height={48} alt="" />:<ProfileAvatarArt avatarKey={profile.avatar_key} size={48} />;
+  const stickerKeys=(profile.featured_sticker_keys?.length?profile.featured_sticker_keys:profile.representative_sticker_key?[profile.representative_sticker_key]:[]).slice(0,3) as GrowthStickerKind[];
+  const featuredStickers=<div className="home-featured-stickers" aria-label="대표 스티커">{stickerKeys.map(key=><span key={key} className="home-featured-sticker"><GrowthStickerArt kind={key}/></span>)}</div>;
 
   let gradeQuery = supabase.from("exam_grades").select("id,name,cumulative_hanja_count").eq("code", profile.target_grade);
   if (settings?.exam_provider_id) gradeQuery = gradeQuery.eq("provider_id", settings.exam_provider_id);
@@ -61,7 +65,7 @@ export default async function Home() {
     }
   }
   if (targetCount === 0) {
-    return <main className="app-shell"><header className="home-header"><div className="profile-heading"><span className="profile-avatar">{profileAvatar}</span><div><strong>{profile.nickname}</strong></div></div><img className="home-app-icon" src="/app-icon.webp" width={52} height={52} alt="아빠한자" /></header><section className="study-card"><div><p className="eyebrow">목표급수 확인</p><h2>{officialGradeDisplayName(profile.target_grade)}은(는) 아직 학습할 수 없어요.</h2><p className="subtitle">지금 학습 가능한 급수로 목표를 바꿔 주세요. 기존 학습 기록은 그대로 남습니다.</p></div><Link className="primary-link" href="/settings">학습 가능한 급수 선택하기</Link></section></main>;
+    return <main className="app-shell"><header className="home-header"><div className="profile-heading"><span className="profile-avatar">{profileAvatar}</span><div><strong>{profile.nickname}</strong></div></div>{featuredStickers}<img className="home-app-icon" src="/app-icon.webp" width={52} height={52} alt="아빠한자" /></header><section className="study-card"><div><p className="eyebrow">목표급수 확인</p><h2>{officialGradeDisplayName(profile.target_grade)}은(는) 아직 학습할 수 없어요.</h2><p className="subtitle">지금 학습 가능한 급수로 목표를 바꿔 주세요. 기존 학습 기록은 그대로 남습니다.</p></div><Link className="primary-link" href="/settings">학습 가능한 급수 선택하기</Link></section></main>;
   }
   const plan=buildStudyPlan({unseen:Math.max(0,targetCount-learnedCount),dueReviews:reviewCount,weakNotDue:Math.max(0,learnedCount-masteredCount-reviewCount),examDate:settings?.target_exam_date});
   const todayReviewCount=plan.reviewCount;
