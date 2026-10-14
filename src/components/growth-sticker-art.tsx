@@ -10,7 +10,7 @@ export function GrowthStickerArt({kind,locked=false}:{kind:Kind;locked?:boolean}
  const col=index%8,row=Math.floor(index/8);
  return <span className={locked?"growth-sticker-illustration locked":"growth-sticker-illustration"} role="img" aria-label={kind} style={{
   display:"inline-block",width:"100%",height:"100%",aspectRatio:"1 / 1",
-  backgroundImage:"url('/stickers/sticker-sheet.webp')",backgroundRepeat:"no-repeat",
+  backgroundImage:"url('/sticker-sheet.webp')",backgroundRepeat:"no-repeat",
   backgroundSize:"800% 300%",backgroundPosition:`${col*100/7}% ${row*50}%`,
   borderRadius:"18%"
  }}/>;
