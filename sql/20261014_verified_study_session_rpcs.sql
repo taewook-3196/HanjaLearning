@@ -51,6 +51,7 @@ BEGIN
  SELECT * INTO item FROM public.study_session_items WHERE session_id=p_session_id AND user_id=uid AND hanja_id=p_hanja_id FOR UPDATE;
  IF NOT FOUND THEN RAISE EXCEPTION 'hanja not in session'; END IF;
  IF item.request_id IS NOT NULL AND item.request_id<>p_request_id THEN RAISE EXCEPTION 'card already answered'; END IF;
+ IF EXISTS(SELECT 1 FROM public.learning_request_receipts WHERE user_id=uid AND request_id=p_request_id AND (event_kind<>'FLASHCARD' OR hanja_id<>p_hanja_id OR result_kind IS DISTINCT FROM CASE WHEN p_known THEN 'KNOWN' ELSE 'UNKNOWN' END)) THEN RAISE EXCEPTION 'request id reused with different parameters'; END IF;
  PERFORM public.record_learning_event_once(p_request_id,p_hanja_id,'FLASHCARD',CASE WHEN p_known THEN 'KNOWN' ELSE 'UNKNOWN' END,'SELF_REPORT');
  UPDATE public.study_session_items SET request_id=p_request_id WHERE session_id=p_session_id AND hanja_id=p_hanja_id AND request_id IS NULL;
 END $fn$;
