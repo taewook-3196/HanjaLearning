@@ -140,3 +140,13 @@ for(let run=0;run<40;run++){
  if(qs.some(q=>q.id==="radical:99999"||q.id==="strokes:99999"))throw new Error("Out-of-grade dictionary question generated");
 }
 console.log("Dictionary variant counting, rotation, and special-reading shortage checks passed.");
+
+const pictureBlueprint={gradeCode:"8",questionCount:1,status:"VERIFIED_108_112" as const,items:[{type:"IMAGE_RECOGNITION" as const,count:1}]};
+const pictureQuestions=generateExamQuestions({...base,questionCount:1,blueprint:pictureBlueprint});
+if(pictureQuestions.length!==1||!pictureQuestions[0].image)throw new Error("Picture test setup failed");
+const picture=pictureQuestions[0];
+const missingImage=validateExamQuestions([{...picture,image:undefined}],1,pictureBlueprint);
+if(!missingImage.some(x=>x.includes("missing an image")))throw new Error("Picture without image was not rejected");
+const leakingAlt=validateExamQuestions([{...picture,image:{...picture.image!,alt:`정답은 ${picture.correct}`}}],1,pictureBlueprint);
+if(!leakingAlt.some(x=>x.includes("alt text reveals")))throw new Error("Picture answer leakage through alt text was not rejected");
+console.log("Picture image presence and alt-answer leakage validation passed.");
