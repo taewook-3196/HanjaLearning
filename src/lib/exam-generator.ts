@@ -124,11 +124,15 @@ export function examRotationShortages(input:ExamReadinessInput,blueprint:ExamBlu
  const issues=[...required].flatMap(([type,needed])=>(available[type]??0)<needed?[{type,required:needed,available:available[type]??0}]:[]);
  const sharedContextDemand=(required.get("CONTEXT_READING")??0)+(required.get("CONTEXT_TO_HANJA")??0);
  if(sharedContextDemand>0){
-  const eligibleWords=new Set(input.words.filter(w=>w.word&&w.reading&&w.meaning).map(w=>w.id));
-  const sharedEligible=input.wordContexts.filter(ctx=>eligibleWords.has(ctx.word_id)&&input.words.some(w=>w.id===ctx.word_id&&ctx.blank_text===w.reading&&ctx.sentence.includes(ctx.blank_text))&&(
-   new Set(input.words.filter(w=>w.word&&w.reading&&w.meaning&&w.id!==ctx.word_id&&w.reading!==input.words.find(x=>x.id===ctx.word_id)?.reading).map(w=>w.reading)).size>=3||
-   new Set(input.words.filter(w=>w.word&&w.reading&&w.meaning&&w.id!==ctx.word_id&&w.word!==input.words.find(x=>x.id===ctx.word_id)?.word&&!ctx.sentence.includes(w.reading)).map(w=>w.word)).size>=3
-  )).length;
+  const eligibleReading=new Set(input.wordContexts.filter(ctx=>{
+   const w=input.words.find(x=>x.id===ctx.word_id&&x.word&&x.reading&&x.meaning);
+   return Boolean(w&&ctx.blank_text===w.reading&&ctx.sentence.includes(ctx.blank_text)&&new Set(input.words.filter(x=>x.word&&x.reading&&x.meaning&&x.id!==w.id&&x.reading!==w.reading).map(x=>x.reading)).size>=3);
+  }).map(ctx=>ctx.id));
+  const eligibleHanja=new Set(input.wordContexts.filter(ctx=>{
+   const w=input.words.find(x=>x.id===ctx.word_id&&x.word&&x.reading&&x.meaning);
+   return Boolean(w&&ctx.blank_text===w.reading&&ctx.sentence.includes(ctx.blank_text)&&new Set(input.words.filter(x=>x.word&&x.reading&&x.meaning&&x.id!==w.id&&x.word!==w.word&&!ctx.sentence.includes(x.reading)).map(x=>x.word)).size>=3);
+  }).map(ctx=>ctx.id));
+  const sharedEligible=new Set([...eligibleReading,...eligibleHanja]).size;
   if(sharedEligible<sharedContextDemand)issues.push({type:"CONTEXT_SHARED_POOL",required:sharedContextDemand,available:sharedEligible});
  }
  const sharedWordDemand=(required.get("WORD_READING")??0)+(required.get("WORD_MEANING")??0)+(required.get("WORD_TO_HANJA")??0);
