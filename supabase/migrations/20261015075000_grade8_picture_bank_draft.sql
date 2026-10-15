@@ -6,8 +6,8 @@ WITH proposed(hanja_id,asset_path,alt_text) AS (
  (19,'/exam-images/moon.svg','초승달이 떠 있는 그림'),
  (21,'/exam-images/person.svg','두 팔과 두 다리로 서 있는 사람 그림'),
  (10,'/exam-images/gate.svg','두 짝으로 열린 문 그림'),
- (27,'/exam-images/earth.svg','흙에서 새싹이 자라는 그림'),
- (24,'/exam-images/child.svg','어린아이가 서 있는 그림')
+ (27,'/exam-images/earth.svg','흙의 단면과 흙덩이가 보이는 그림'),
+ (24,'/exam-images/child.svg','어린아이의 얼굴과 몸이 보이는 그림')
 ), eligible AS (
  SELECT p.*
  FROM proposed p
