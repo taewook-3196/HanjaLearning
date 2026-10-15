@@ -6,7 +6,7 @@ const expected = {
   sun: "22", moon: "19", person: "21", gate: "10", earth: "27", child: "24",
 };
 for (const [name, id] of Object.entries(expected)) {
-  assert.ok(sql.includes(`(${id},'/exam-images/${name}.svg'`), `Missing or incorrect ${name} seed mapping`);
+  assert.ok(new RegExp(`\\(\\s*${id}\\s*,\\s*'/exam-images/${name}\\.svg'`).test(sql), `Missing or incorrect ${name} seed mapping`);
   const svg = readFileSync(`public/exam-images/${name}.svg`, "utf8");
   assert.match(svg, /<svg\b/);
   assert.doesNotMatch(svg, /aria-label="[^"]*[日月人門土子][^"]*"/, `Answer leaked in ${name} SVG label`);
