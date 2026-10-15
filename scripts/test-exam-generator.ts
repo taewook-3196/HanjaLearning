@@ -295,3 +295,13 @@ for(const grade of ["5","PRE4","4","PRE3","3"] as const){
  }
 }
 console.log("Priority grade word question source uniqueness passed.");
+
+const priorityRelationCandidates=[["5",5],["PRE4",7],["4",13],["PRE3",15],["3",20]] as const;
+for(const [grade,available] of priorityRelationCandidates){
+ const blueprint=DAEHAN_FIELD_BLUEPRINTS[grade];
+ const issues=examRotationShortages({...base,wordRelations:wordRelations.slice(0,Math.min(available,wordRelations.length))},blueprint,3);
+ const shortage=issues.find(issue=>issue.type==="WORD_SYNONYM_ANTONYM");
+ if(grade==="5"&&!shortage)throw new Error("Grade 5 relation bank must flag three-exam shortage");
+ if(grade!=="5"&&shortage)throw new Error(grade+": relation bank unexpectedly insufficient for three exams");
+}
+console.log("Priority grade word-relation coverage thresholds passed.");
