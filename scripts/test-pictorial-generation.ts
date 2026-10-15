@@ -112,3 +112,7 @@ for(let run=0;run<100;run++){
  assert.equal(questions[0].correct,"日");
 }
 console.log("PASS: invalid picture candidates cannot displace valid picture questions");
+
+assert.match(examPage,/previous\.filter\(key=>!fresh\.includes\(key\)\)/,"Recent picture history should move re-used questions to the end");
+assert.match(examPage,/\.slice\(-6\)/,"Only the two most recent grade-8 picture sets should remain in session rotation");
+console.log("PASS: bounded picture rotation cache avoids permanently marking all nine images as recent");
