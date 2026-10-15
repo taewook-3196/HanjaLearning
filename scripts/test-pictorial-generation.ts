@@ -96,3 +96,19 @@ for(let run=0;run<50;run++){
  assert.equal(new Set(questions[0].choices).size,4,"Picture choices must be unique even when the pool contains duplicate characters");
 }
 console.log("PASS: picture choices remain unique with duplicate characters in the pool");
+
+const invalidPictureCandidates=[
+ {id:200,hanja_id:999,asset_path:"/exam-images/missing.svg",alt_text:"없는 한자"},
+ {id:201,hanja_id:1,asset_path:"/exam-images/sun.svg",alt_text:"해"},
+];
+for(let run=0;run<100;run++){
+ const questions=generateExamQuestions({
+  pool,words:[],relations:[],wordRelations:[],metadata:[],wordContexts:[],wordStructures:[],
+  commonCharacterSets:[],idioms:[],cultureItems:[],usageItems:[],specialReadings:[],
+  imageItems:invalidPictureCandidates,characterById,questionCount:1,blueprint
+ });
+ assert.equal(questions.length,1,"Invalid picture candidates must not consume the image quota");
+ assert.equal(questions[0].id,"image:201");
+ assert.equal(questions[0].correct,"日");
+}
+console.log("PASS: invalid picture candidates cannot displace valid picture questions");
