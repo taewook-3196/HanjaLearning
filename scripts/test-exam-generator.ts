@@ -245,3 +245,12 @@ for(const [gradeCode,blueprint] of Object.entries(DAEHAN_FIELD_BLUEPRINTS)){
  }
 }
 console.log("Cross-type Hanja uniqueness verified across 100 runs per grade.");
+
+for(const [gradeCode,blueprint] of Object.entries(DAEHAN_FIELD_BLUEPRINTS)){
+ for(let run=0;run<100;run++){
+  const questions=generateExamQuestions({...base,questionCount:blueprint.questionCount,blueprint});
+  const contextIds=questions.filter(q=>q.id.startsWith("context-reading:")||q.id.startsWith("context-hanja:")).map(q=>q.id.split(":").at(-1));
+  if(new Set(contextIds).size!==contextIds.length)throw new Error(gradeCode+": same context used in both question types");
+ }
+}
+console.log("Cross-type context uniqueness verified across 100 runs per grade.");
