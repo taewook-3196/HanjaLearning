@@ -42,7 +42,13 @@ export function examReadinessSummary(input:ExamReadinessInput){
   WORD_RELATIONS:input.wordRelations.filter(r=>input.words.some(w=>w.id===r.from_word_id&&w.word&&w.reading&&w.meaning)&&input.words.some(w=>w.id===r.to_word_id&&w.word&&w.reading&&w.meaning)&&new Set(input.words.filter(w=>w.word&&w.reading&&w.meaning&&w.id!==r.from_word_id&&w.id!==r.to_word_id&&w.word!==input.words.find(x=>x.id===r.to_word_id)?.word).map(w=>w.word)).size>=3).length,
   CHARACTER_PRINCIPLE:input.metadata.filter(x=>Boolean(x.formation_type&&formationLabels[x.formation_type])&&input.pool.some(h=>h.id===x.hanja_id&&validCharacter(h.character))).length,
   DICTIONARY_LOOKUP:countDictionaryCandidates(input),
-  WORD_CONTEXTS:input.wordContexts.length,
+  WORD_CONTEXTS:input.wordContexts.filter(ctx=>{
+   const w=input.words.find(x=>x.id===ctx.word_id&&x.word&&x.reading&&x.meaning);
+   if(!w||ctx.blank_text!==w.reading||!ctx.sentence.includes(ctx.blank_text))return false;
+   const readingChoices=new Set(input.words.filter(x=>x.word&&x.reading&&x.meaning&&x.id!==w.id&&x.reading!==w.reading).map(x=>x.reading));
+   const hanjaChoices=new Set(input.words.filter(x=>x.word&&x.reading&&x.meaning&&x.id!==w.id&&x.word!==w.word&&!ctx.sentence.includes(x.reading)).map(x=>x.word));
+   return readingChoices.size>=3||hanjaChoices.size>=3;
+  }).length,
   WORD_STRUCTURES:input.wordStructures.filter(s=>input.words.some(w=>w.id===s.word_id&&w.word&&w.reading&&w.meaning)&&["SUBJECT_PREDICATE","VERB_OBJECT","MODIFIER_HEAD","PARALLEL","OTHER"].includes(s.structure_type)).length,
   COMMON_CHARACTER_SETS:input.commonCharacterSets.length,
   IDIOMS:input.idioms.length,
