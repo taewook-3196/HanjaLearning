@@ -261,3 +261,20 @@ const sharedWordIssues=examRotationShortages({...base,words:words.slice(0,wordDe
 const sharedWordIssue=sharedWordIssues.find(x=>x.type==="WORD_SHARED_POOL");
 if(!sharedWordIssue||sharedWordIssue.required!==wordDemand*3||sharedWordIssue.available!==wordDemand)throw new Error("Shared word shortage must sum word question types across three exams");
 console.log("Shared word pool demand regression passed.");
+
+const priorityGrades=["5","PRE4","4","PRE3","3"] as const;
+for(const grade of priorityGrades){
+ const blueprint=DAEHAN_FIELD_BLUEPRINTS[grade];
+ const expected=blueprint.items.reduce((sum,item)=>sum+item.count,0);
+ if(expected!==50||blueprint.questionCount!==50)throw new Error(grade+": official blueprint must total 50 questions");
+ for(let attempt=0;attempt<100;attempt++){
+  const questions=generateExamQuestions({...base,questionCount:50,blueprint});
+  const issues=validateExamQuestions(questions,50,blueprint);
+  if(issues.length)throw new Error(grade+": priority exam validation failed: "+issues.join("; "));
+  const ids=questions.filter(q=>q.id.startsWith("hanja-forward:")||q.id.startsWith("hanja-reverse:")).map(q=>q.id.split(":").at(-1));
+  if(ids.length!==new Set(ids).size)throw new Error(grade+": repeated Hanja within exam");
+  const contexts=questions.filter(q=>q.id.startsWith("context-reading:")||q.id.startsWith("context-hanja:")).map(q=>q.id.split(":").at(-1));
+  if(contexts.length!==new Set(contexts).size)throw new Error(grade+": repeated context within exam");
+ }
+ console.log(grade+": 100 priority mock exams passed blueprint and uniqueness checks");
+}
