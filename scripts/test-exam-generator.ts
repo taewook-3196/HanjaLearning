@@ -236,3 +236,12 @@ const sharedHanjaIssues=examRotationShortages({...base,pool:smallHanjaPool},shar
 const sharedHanjaIssue=sharedHanjaIssues.find(issue=>issue.type==="HANJA_SHARED_POOL");
 if(!sharedHanjaIssue||sharedHanjaIssue.required!==45||sharedHanjaIssue.available!==30)throw new Error("Shared Hanja pool shortage must account for both reading directions");
 console.log("Shared Hanja pool rotation shortage validated.");
+
+for(const [gradeCode,blueprint] of Object.entries(DAEHAN_FIELD_BLUEPRINTS)){
+ for(let run=0;run<100;run++){
+  const questions=generateExamQuestions({...base,questionCount:blueprint.questionCount,blueprint});
+  const hanjaIds=questions.filter(q=>q.id.startsWith("hanja-forward:")||q.id.startsWith("hanja-reverse:")).map(q=>q.id.split(":").at(-1));
+  if(new Set(hanjaIds).size!==hanjaIds.length)throw new Error(gradeCode+": same Hanja appeared in both question directions");
+ }
+}
+console.log("Cross-type Hanja uniqueness verified across 100 runs per grade.");
