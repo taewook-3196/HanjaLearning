@@ -161,3 +161,18 @@ if(invalidReadiness.CHARACTER_PRINCIPLE!==0)throw new Error("Invalid or out-of-g
 if(invalidReadiness.USAGE_ITEMS!==0)throw new Error("Usage questions with duplicate choices must not count as ready");
 if(invalidReadiness.SPECIAL_READINGS!==0)throw new Error("Out-of-grade special reading must not count as ready");
 console.log("Invalid principle, usage, and special-reading readiness checks passed.");
+
+const invalidRelations=examReadinessSummary({
+ ...base,
+ relations:[{from_hanja_id:1,to_hanja_id:99999,relation_type:"SIMILAR"}],
+ wordRelations:[{from_word_id:1,to_word_id:99999,relation_type:"SIMILAR"}]
+});
+if(invalidRelations.RELATIONS!==0)throw new Error("Out-of-grade character relation must not count as ready");
+if(invalidRelations.WORD_RELATIONS!==0)throw new Error("Unpublished word relation must not count as ready");
+const sparseRelations=examReadinessSummary({
+ ...base,pool:pool.slice(0,3),words:words.slice(0,3),
+ relations:[{from_hanja_id:1,to_hanja_id:2,relation_type:"SIMILAR"}],
+ wordRelations:[{from_word_id:1,to_word_id:2,relation_type:"SIMILAR"}]
+});
+if(sparseRelations.RELATIONS!==0||sparseRelations.WORD_RELATIONS!==0)throw new Error("Relations without three distractors must not count as ready");
+console.log("Relation readiness excludes invalid links and insufficient distractors.");
