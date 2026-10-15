@@ -150,3 +150,14 @@ if(!missingImage.some(x=>x.includes("missing an image")))throw new Error("Pictur
 const leakingAlt=validateExamQuestions([{...picture,image:{...picture.image!,alt:`정답은 ${picture.correct}`}}],1,pictureBlueprint);
 if(!leakingAlt.some(x=>x.includes("alt text reveals")))throw new Error("Picture answer leakage through alt text was not rejected");
 console.log("Picture image presence and alt-answer leakage validation passed.");
+
+const invalidReadiness=examReadinessSummary({
+ ...base,
+ metadata:[{hanja_id:99999,radical:"부수",total_strokes:3,formation_type:"PICTOGRAPH"},{hanja_id:1,radical:"부수",total_strokes:3,formation_type:"NOT_A_FORMATION"}],
+ usageItems:[{id:999,hanja_id:1,prompt:"잘못된 보기",choice_a:"같음",choice_b:"같음",choice_c:"다름",choice_d:"기타",correct_choice:1}],
+ specialReadings:[{id:999,hanja_id:99999,reading:"읽기",meaning:"뜻",usage_note:"예",choice_a:"읽기",choice_b:"A",choice_c:"B",choice_d:"C",correct_choice:1}]
+});
+if(invalidReadiness.CHARACTER_PRINCIPLE!==0)throw new Error("Invalid or out-of-grade formation must not count as ready");
+if(invalidReadiness.USAGE_ITEMS!==0)throw new Error("Usage questions with duplicate choices must not count as ready");
+if(invalidReadiness.SPECIAL_READINGS!==0)throw new Error("Out-of-grade special reading must not count as ready");
+console.log("Invalid principle, usage, and special-reading readiness checks passed.");
