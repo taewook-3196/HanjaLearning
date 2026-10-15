@@ -6,7 +6,7 @@ const words:PublishedWord[]=Array.from({length:80},(_,i)=>({id:i+1,word:i<4?`詞
 const characterById=new Map(pool.map(x=>[x.id,x.character]));
 const metadata=pool.slice(0,12).map((x,i)=>({hanja_id:x.id,radical:`부수${i}`,total_strokes:i+1,formation_type:["PICTOGRAPH","IDEOGRAPH","COMPOUND_IDEOGRAPH","PHONO_SEMANTIC"][i%4]}));
 const relations=Array.from({length:8},(_,i)=>({from_hanja_id:i+1,to_hanja_id:i+21,relation_type:i%2?"SIMILAR":"ANTONYM"}));
-const wordRelations=Array.from({length:8},(_,i)=>({from_word_id:i+1,to_word_id:i+21,relation_type:i%2?"SIMILAR":"ANTONYM"}));
+const wordRelations=Array.from({length:8},(_,i)=>({from_word_id:i+1,to_word_id:i+21,relation_type:i%2?"SIMILAR":"OPPOSITE"}));
 const wordContexts=Array.from({length:30},(_,i)=>({id:i+1,word_id:i+1,sentence:`문장 속 읽기${i+1} 표현`,blank_text:`읽기${i+1}`}));
 const wordStructures=Array.from({length:8},(_,i)=>({word_id:i+1,structure_type:["SUBJECT_PREDICATE","VERB_OBJECT","MODIFIER_HEAD","PARALLEL"][i%4]}));
 const commonCharacterSets=Array.from({length:4},(_,i)=>({id:i+1,common_hanja_id:i+1,word_ids:[i+1,i+11],word_hanja_ids:{[i+1]:[i+1],[i+11]:[i+1]}}));
