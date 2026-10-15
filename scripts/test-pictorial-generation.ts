@@ -1,4 +1,5 @@
 import { strict as assert } from "node:assert";
+import { readFileSync } from "node:fs";
 import { generateExamQuestions } from "../src/lib/exam-generator.ts";
 import type { ExamBlueprint } from "../src/lib/exam-blueprints.ts";
 
@@ -67,3 +68,10 @@ for(let run=0;run<50;run++){
  assert.equal(seen.size,9);
 }
 console.log("PASS: 50 simulations of three exams with 9 unique picture questions and valid choices");
+
+// Answer-bearing image descriptions must only appear in the submitted review,
+// never while the learner is selecting an answer.
+const examPage=readFileSync("src/app/exam/page.tsx","utf8");
+assert.equal((examPage.match(/alt=\{q\.image\.alt\}/g)??[]).length,1,"Descriptive alt text belongs only in review");
+assert.match(examPage,/alt="그림을 보고 알맞은 한자를 고르는 문제"/);
+console.log("PASS: exam image answer is not disclosed in pre-submit alt text");
