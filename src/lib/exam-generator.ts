@@ -36,7 +36,7 @@ function countDictionaryCandidates(input:ExamReadinessInput):number{
 
 export function examReadinessSummary(input:ExamReadinessInput){
  return {
-  HANJA_READING:input.pool.length,
+  HANJA_READING:input.pool.filter(h=>validCharacter(h.character)&&Boolean(h.answer?.trim())).length,
   WORDS:input.words.filter(x=>x.word&&x.reading&&x.meaning).length,
   RELATIONS:input.relations.filter(r=>input.pool.some(h=>h.id===r.from_hanja_id&&validCharacter(h.character))&&input.pool.some(h=>h.id===r.to_hanja_id&&validCharacter(h.character))&&new Set(input.pool.filter(h=>h.id!==r.from_hanja_id&&h.id!==r.to_hanja_id&&!input.relations.some(other=>other.from_hanja_id===r.from_hanja_id&&other.relation_type===r.relation_type&&input.pool.find(x=>x.id===other.to_hanja_id)?.character===h.character)).map(h=>h.character)).size>=3).length,
   WORD_RELATIONS:input.wordRelations.filter(r=>input.words.some(w=>w.id===r.from_word_id&&w.word&&w.reading&&w.meaning)&&input.words.some(w=>w.id===r.to_word_id&&w.word&&w.reading&&w.meaning)&&new Set(input.words.filter(w=>w.word&&w.reading&&w.meaning&&w.id!==r.from_word_id&&w.id!==r.to_word_id&&w.word!==input.words.find(x=>x.id===r.to_word_id)?.word).map(w=>w.word)).size>=3).length,
