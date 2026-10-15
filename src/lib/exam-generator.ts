@@ -123,7 +123,16 @@ export function examRotationShortages(input:ExamReadinessInput,blueprint:ExamBlu
  }
  const issues=[...required].flatMap(([type,needed])=>(available[type]??0)<needed?[{type,required:needed,available:available[type]??0}]:[]);
  const sharedContextDemand=(required.get("CONTEXT_READING")??0)+(required.get("CONTEXT_TO_HANJA")??0);
- if(sharedContextDemand>0&&summary.WORD_CONTEXTS<sharedContextDemand)issues.push({type:"CONTEXT_SHARED_POOL",required:sharedContextDemand,available:summary.WORD_CONTEXTS});
+ if(sharedContextDemand>0){
+  const sharedEligible=input.wordContexts.filter(ctx=>{
+   const w=input.words.find(x=>x.id===ctx.word_id&&x.word&&x.reading&&x.meaning);
+   if(!w||ctx.blank_text!==w.reading||!ctx.sentence.includes(ctx.blank_text))return false;
+   const readingCount=new Set(input.words.filter(x=>x.word&&x.reading&&x.meaning&&x.id!==w.id&&x.reading!==w.reading).map(x=>x.reading)).size;
+   const hanjaCount=new Set(input.words.filter(x=>x.word&&x.reading&&x.meaning&&x.id!==w.id&&x.word!==w.word&&!ctx.sentence.includes(x.reading)).map(x=>x.word)).size;
+   return readingCount>=3||hanjaCount>=3;
+  }).length;
+  if(sharedEligible<sharedContextDemand)issues.push({type:"CONTEXT_SHARED_POOL",required:sharedContextDemand,available:sharedEligible});
+ }
  const sharedWordDemand=(required.get("WORD_READING")??0)+(required.get("WORD_MEANING")??0)+(required.get("WORD_TO_HANJA")??0);
  if(sharedWordDemand>0&&summary.WORDS<sharedWordDemand)issues.push({type:"WORD_SHARED_POOL",required:sharedWordDemand,available:summary.WORDS});
  return issues;
