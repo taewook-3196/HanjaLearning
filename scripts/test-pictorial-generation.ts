@@ -116,3 +116,6 @@ console.log("PASS: invalid picture candidates cannot displace valid picture ques
 assert.match(examPage,/previous\.filter\(key=>!fresh\.includes\(key\)\)/,"Recent picture history should move re-used questions to the end");
 assert.match(examPage,/\.slice\(-6\)/,"Only the two most recent grade-8 picture sets should remain in session rotation");
 console.log("PASS: bounded picture rotation cache avoids permanently marking all nine images as recent");
+
+assert.match(examPage,/\.filter\(key=>!key\.startsWith\("image:"\)\)/,"Picture rotation must not be overridden by five-attempt server history");
+console.log("PASS: picture recency uses the bounded cache, while other question types retain server history");
