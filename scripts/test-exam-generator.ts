@@ -254,3 +254,10 @@ for(const [gradeCode,blueprint] of Object.entries(DAEHAN_FIELD_BLUEPRINTS)){
  }
 }
 console.log("Cross-type context uniqueness verified across 100 runs per grade.");
+
+const sharedWordBlueprint=DAEHAN_FIELD_BLUEPRINTS["8"];
+const wordDemand=sharedWordBlueprint.items.filter(x=>["WORD_READING","WORD_MEANING","WORD_TO_HANJA"].includes(x.type)).reduce((sum,x)=>sum+x.count,0);
+const sharedWordIssues=examRotationShortages({...base,words:words.slice(0,wordDemand)},sharedWordBlueprint,3);
+const sharedWordIssue=sharedWordIssues.find(x=>x.type==="WORD_SHARED_POOL");
+if(!sharedWordIssue||sharedWordIssue.required!==wordDemand*3||sharedWordIssue.available!==wordDemand)throw new Error("Shared word shortage must sum word question types across three exams");
+console.log("Shared word pool demand regression passed.");
