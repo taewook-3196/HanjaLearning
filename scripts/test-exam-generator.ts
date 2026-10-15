@@ -305,3 +305,13 @@ for(const [grade,available] of priorityRelationCandidates){
  if(grade!=="5"&&shortage)throw new Error(grade+": relation bank unexpectedly insufficient for three exams");
 }
 console.log("Priority grade word-relation coverage thresholds passed.");
+
+const invalidWordRelation={from_word_id:1,to_word_id:21,relation_type:"RELATED"};
+const invalidWordRelationInput={...base,wordRelations:[invalidWordRelation]};
+if(examReadinessSummary(invalidWordRelationInput).WORD_RELATIONS!==0)throw new Error("Unsupported word relation must not be counted as exam ready");
+for(const grade of ["5","PRE4","4","PRE3","3"] as const){
+ const blueprint=DAEHAN_FIELD_BLUEPRINTS[grade];
+ const questions=generateExamQuestions({...invalidWordRelationInput,questionCount:50,blueprint});
+ if(questions.some(q=>q.id.startsWith("word-relation:RELATED:")))throw new Error(grade+": unsupported relation emitted as antonym");
+}
+console.log("Unsupported relation type rejection passed.");
