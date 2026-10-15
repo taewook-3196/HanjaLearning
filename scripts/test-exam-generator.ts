@@ -185,3 +185,9 @@ const invalidStructureCulture=examReadinessSummary({
 if(invalidStructureCulture.WORD_STRUCTURES!==0)throw new Error("Invalid or out-of-grade word structures must not count as ready");
 if(invalidStructureCulture.CULTURE_CONTENT!==0)throw new Error("Culture items with duplicate choices must not count as ready");
 console.log("Word structure and culture readiness invalid-record checks passed.");
+
+const invalidContextReadiness=examReadinessSummary({...base,wordContexts:[{id:999,word_id:99999,sentence:"없는 자료",blank_text:"읽기"}]});
+if(invalidContextReadiness.WORD_CONTEXTS!==0||invalidContextReadiness.WORD_CONTEXTS_READING!==0||invalidContextReadiness.WORD_CONTEXTS_HANJA!==0)throw new Error("Orphaned context must not count as ready");
+const sparseContextReadiness=examReadinessSummary({...base,words:words.slice(0,3),wordContexts:[{id:999,word_id:1,sentence:"읽기1 사용",blank_text:"읽기1"}]});
+if(sparseContextReadiness.WORD_CONTEXTS_READING!==0||sparseContextReadiness.WORD_CONTEXTS_HANJA!==0)throw new Error("Context without three distractors must not count as ready");
+console.log("Context reading and Hanja readiness checks passed.");
