@@ -64,7 +64,7 @@ export function examReadinessSummary(input:ExamReadinessInput){
    if(!set.word_ids.every(id=>(set.word_hanja_ids[id]??[]).includes(set.common_hanja_id)))return false;
    return new Set(input.pool.filter(h=>h.id!==set.common_hanja_id&&validCharacter(h.character)&&h.character!==correct&&!set.word_ids.every(id=>(set.word_hanja_ids[id]??[]).includes(h.id))).map(h=>h.character)).size>=3;
   }).length,
-  IDIOMS:input.idioms.filter(i=>Boolean(i.idiom&&i.meaning)&&new Set(input.idioms.filter(other=>other.idiom&&other.meaning&&other.meaning!==i.meaning).map(other=>other.meaning)).size>=3).length,
+  IDIOMS:input.idioms.filter(i=>Boolean(i.idiom&&i.meaning)).length,
   CULTURE_CONTENT:input.cultureItems.filter(x=>Boolean(x.prompt_summary?.trim())&&x.correct_choice>=1&&x.correct_choice<=4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d].every(Boolean)&&new Set([x.choice_a,x.choice_b,x.choice_c,x.choice_d]).size===4).length,
   USAGE_ITEMS:input.usageItems.filter(x=>x.correct_choice>=1&&x.correct_choice<=4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d].every(Boolean)&&new Set([x.choice_a,x.choice_b,x.choice_c,x.choice_d]).size===4).length,
   SPECIAL_READINGS:input.specialReadings.filter(x=>x.reading&&x.meaning&&input.pool.some(h=>h.id===x.hanja_id&&validCharacter(h.character))&&x.correct_choice>=1&&x.correct_choice<=4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d].every(Boolean)&&new Set([x.choice_a,x.choice_b,x.choice_c,x.choice_d]).size===4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d][x.correct_choice-1]===x.reading).length,
