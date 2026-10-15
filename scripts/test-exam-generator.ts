@@ -221,3 +221,11 @@ for(let session=0;session<3;session++){
 }
 if(previousImages.size!==9)throw new Error("3회 시험의 그림 문제 9개가 서로 달라야 함");
 console.log("8급 3회 연속 시험 그림 문제 회전 검증 완료");
+
+const invalidHanjaReadiness=examReadinessSummary({...base,pool:[
+ {id:90001,character:"-",answer:"잘못된 문자",examples:[]},
+ {id:90002,character:"山",answer:" ",examples:[]},
+ {id:90003,character:"水",answer:"물 수",examples:[]}
+]});
+if(invalidHanjaReadiness.HANJA_READING!==1)throw new Error("Hanja readiness must exclude invalid characters and missing answers");
+console.log("Hanja pool readiness validation passed.");
