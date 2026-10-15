@@ -136,6 +136,8 @@ export function validateExamQuestions(questions:ExamQuestion[],expectedCount:num
   if(q.type==="SPECIAL_READING"&&q.correct.trim()&&q.prompt.includes(q.correct.trim()))errors.push(`${label}: special reading answer leaked in prompt`);
   if(q.type==="COMMON_CHARACTER"&&q.correct.trim()&&q.stem.includes(q.correct.trim()))errors.push(`${label}: common character answer leaked in stem`);
   if(q.type==="COMMON_CHARACTER"&&!q.stem.includes("□"))errors.push(`${label}: common character blank is missing`);
+  if(q.type==="IMAGE_RECOGNITION"&&!q.image)errors.push(`${label}: picture question is missing an image`);
+  if(q.type==="IMAGE_RECOGNITION"&&q.image&&q.image.alt.includes(q.correct.trim()))errors.push(`${label}: picture alt text reveals the correct answer`);
   if(q.type==="WORD_READING"||q.type==="WORD_MEANING"){if(!/^[\u3400-\u9fff\uf900-\ufaff]+$/u.test(q.stem))errors.push(`${label}: expected Hanja word stem`)}
   if(q.type==="WORD_TO_HANJA"){if(!/^[\u3400-\u9fff\uf900-\ufaff]+$/u.test(q.correct))errors.push(`${label}: expected Hanja answer`);if(!q.choices.every(choice=>/^[\u3400-\u9fff\uf900-\ufaff]+$/u.test(choice)))errors.push(`${label}: expected Hanja choices`)}
  });
