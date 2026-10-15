@@ -133,6 +133,8 @@ export function examRotationShortages(input:ExamReadinessInput,blueprint:ExamBlu
   }).length;
   if(sharedEligible<sharedContextDemand)issues.push({type:"CONTEXT_SHARED_POOL",required:sharedContextDemand,available:sharedEligible});
  }
+ const sharedHanjaDemand=(required.get("HANJA_TO_READING_MEANING")??0)+(required.get("READING_MEANING_TO_HANJA")??0);
+ if(sharedHanjaDemand>0&&summary.HANJA_READING<sharedHanjaDemand)issues.push({type:"HANJA_SHARED_POOL",required:sharedHanjaDemand,available:summary.HANJA_READING});
  const sharedWordDemand=(required.get("WORD_READING")??0)+(required.get("WORD_MEANING")??0)+(required.get("WORD_TO_HANJA")??0);
  if(sharedWordDemand>0&&summary.WORDS<sharedWordDemand)issues.push({type:"WORD_SHARED_POOL",required:sharedWordDemand,available:summary.WORDS});
  return issues;
