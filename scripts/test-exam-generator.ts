@@ -285,3 +285,13 @@ const gradeFiveRelationIssues=examRotationShortages({...base,wordRelations:wordR
 const gradeFiveRelationIssue=gradeFiveRelationIssues.find(issue=>issue.type==="WORD_SYNONYM_ANTONYM");
 if(gradeFiveRelationDemand!==2||!gradeFiveRelationIssue||gradeFiveRelationIssue.required!==6||gradeFiveRelationIssue.available!==5)throw new Error("Grade 5 must flag five word relations as insufficient for three nonrepeating exams");
 console.log("Grade 5 word relation rotation shortage verified.");
+
+for(const grade of ["5","PRE4","4","PRE3","3"] as const){
+ const blueprint=DAEHAN_FIELD_BLUEPRINTS[grade];
+ for(let attempt=0;attempt<100;attempt++){
+  const questions=generateExamQuestions({...base,questionCount:50,blueprint});
+  const wordIds=questions.filter(q=>q.id.startsWith("word-reading:")||q.id.startsWith("word-hanja:")||q.id.startsWith("word-meaning:")).map(q=>q.id.split(":").at(-1));
+  if(wordIds.length!==new Set(wordIds).size)throw new Error(grade+": same word appears across reading, meaning and Hanja questions");
+ }
+}
+console.log("Priority grade word question source uniqueness passed.");
