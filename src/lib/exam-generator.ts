@@ -57,8 +57,14 @@ export function examReadinessSummary(input:ExamReadinessInput){
    return new Set(input.words.filter(x=>x.word&&x.reading&&x.meaning&&x.id!==w.id&&x.word!==w.word&&!ctx.sentence.includes(x.reading)).map(x=>x.word)).size>=3;
   }).length,
   WORD_STRUCTURES:input.wordStructures.filter(s=>input.words.some(w=>w.id===s.word_id&&w.word&&w.reading&&w.meaning)&&["SUBJECT_PREDICATE","VERB_OBJECT","MODIFIER_HEAD","PARALLEL","OTHER"].includes(s.structure_type)).length,
-  COMMON_CHARACTER_SETS:input.commonCharacterSets.length,
-  IDIOMS:input.idioms.length,
+  COMMON_CHARACTER_SETS:input.commonCharacterSets.filter(set=>{
+   const correct=input.pool.find(h=>h.id===set.common_hanja_id)?.character;
+   if(!validCharacter(correct)||set.word_ids.length<2)return false;
+   if(set.word_ids.some(id=>!input.words.some(w=>w.id===id&&w.word&&w.reading&&w.meaning&&w.word.includes(correct))))return false;
+   if(!set.word_ids.every(id=>(set.word_hanja_ids[id]??[]).includes(set.common_hanja_id)))return false;
+   return new Set(input.pool.filter(h=>h.id!==set.common_hanja_id&&validCharacter(h.character)&&h.character!==correct&&!set.word_ids.every(id=>(set.word_hanja_ids[id]??[]).includes(h.id))).map(h=>h.character)).size>=3;
+  }).length,
+  IDIOMS:input.idioms.filter(i=>Boolean(i.idiom&&i.meaning)&&new Set(input.idioms.filter(other=>other.idiom&&other.meaning&&other.meaning!==i.meaning).map(other=>other.meaning)).size>=3).length,
   CULTURE_CONTENT:input.cultureItems.filter(x=>Boolean(x.prompt_summary?.trim())&&x.correct_choice>=1&&x.correct_choice<=4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d].every(Boolean)&&new Set([x.choice_a,x.choice_b,x.choice_c,x.choice_d]).size===4).length,
   USAGE_ITEMS:input.usageItems.filter(x=>x.correct_choice>=1&&x.correct_choice<=4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d].every(Boolean)&&new Set([x.choice_a,x.choice_b,x.choice_c,x.choice_d]).size===4).length,
   SPECIAL_READINGS:input.specialReadings.filter(x=>x.reading&&x.meaning&&input.pool.some(h=>h.id===x.hanja_id&&validCharacter(h.character))&&x.correct_choice>=1&&x.correct_choice<=4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d].every(Boolean)&&new Set([x.choice_a,x.choice_b,x.choice_c,x.choice_d]).size===4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d][x.correct_choice-1]===x.reading).length,
