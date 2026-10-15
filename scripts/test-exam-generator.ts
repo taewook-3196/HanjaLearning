@@ -176,3 +176,12 @@ const sparseRelations=examReadinessSummary({
 });
 if(sparseRelations.RELATIONS!==0||sparseRelations.WORD_RELATIONS!==0)throw new Error("Relations without three distractors must not count as ready");
 console.log("Relation readiness excludes invalid links and insufficient distractors.");
+
+const invalidStructureCulture=examReadinessSummary({
+ ...base,
+ wordStructures:[{word_id:99999,structure_type:"SUBJECT_PREDICATE"},{word_id:1,structure_type:"INVALID"}],
+ cultureItems:[{id:900,prompt_summary:"중복 보기",choice_a:"A",choice_b:"A",choice_c:"C",choice_d:"D",correct_choice:1}]
+});
+if(invalidStructureCulture.WORD_STRUCTURES!==0)throw new Error("Invalid or out-of-grade word structures must not count as ready");
+if(invalidStructureCulture.CULTURE_CONTENT!==0)throw new Error("Culture items with duplicate choices must not count as ready");
+console.log("Word structure and culture readiness invalid-record checks passed.");
