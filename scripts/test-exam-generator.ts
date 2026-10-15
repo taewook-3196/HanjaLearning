@@ -191,3 +191,11 @@ if(invalidContextReadiness.WORD_CONTEXTS!==0||invalidContextReadiness.WORD_CONTE
 const sparseContextReadiness=examReadinessSummary({...base,words:words.slice(0,3),wordContexts:[{id:999,word_id:1,sentence:"읽기1 사용",blank_text:"읽기1"}]});
 if(sparseContextReadiness.WORD_CONTEXTS_READING!==0||sparseContextReadiness.WORD_CONTEXTS_HANJA!==0)throw new Error("Context without three distractors must not count as ready");
 console.log("Context reading and Hanja readiness checks passed.");
+
+const invalidCommonReadiness=examReadinessSummary({...base,
+ commonCharacterSets:[{id:999,common_hanja_id:99999,word_ids:[1,2],word_hanja_ids:{1:[99999],2:[99999]}}],
+ idioms:[{id:999,idiom:"",meaning:"뜻"}]
+});
+if(invalidCommonReadiness.COMMON_CHARACTER_SETS!==0)throw new Error("Common-character sets with missing target must not count as ready");
+if(invalidCommonReadiness.IDIOMS!==0)throw new Error("Idioms without text must not count as ready");
+console.log("Common-character and idiom readiness checks passed.");
