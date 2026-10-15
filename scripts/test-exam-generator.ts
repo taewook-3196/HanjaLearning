@@ -199,3 +199,8 @@ const invalidCommonReadiness=examReadinessSummary({...base,
 if(invalidCommonReadiness.COMMON_CHARACTER_SETS!==0)throw new Error("Common-character sets with missing target must not count as ready");
 if(invalidCommonReadiness.IDIOMS!==0)throw new Error("Idioms without text must not count as ready");
 console.log("Common-character and idiom readiness checks passed.");
+
+const invalidRotation=examRotationShortages({...base,wordContexts:[{id:991,word_id:99999,sentence:"잘못된 문장",blank_text:"읽기"}]},DAEHAN_FIELD_BLUEPRINTS["6"],3);
+const invalidShared=invalidRotation.find(issue=>issue.type==="CONTEXT_SHARED_POOL");
+if(invalidShared&&invalidShared.available!==0)throw new Error("Shared context rotation must exclude orphaned records");
+console.log("Shared context rotation excludes unusable records.");
