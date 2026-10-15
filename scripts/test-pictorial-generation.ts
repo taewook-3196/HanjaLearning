@@ -75,3 +75,24 @@ const examPage=readFileSync("src/app/exam/page.tsx","utf8");
 assert.equal((examPage.match(/alt=\{q\.image\.alt\}/g)??[]).length,1,"Descriptive alt text belongs only in review");
 assert.match(examPage,/alt="그림을 보고 알맞은 한자를 고르는 문제"/);
 console.log("PASS: exam image answer is not disclosed in pre-submit alt text");
+
+const duplicatePool=[
+ {id:1,character:"日",answer:"해 일",examples:[]},
+ {id:2,character:"月",answer:"달 월",examples:[]},
+ {id:3,character:"木",answer:"나무 목",examples:[]},
+ {id:4,character:"水",answer:"물 수",examples:[]},
+ {id:5,character:"火",answer:"불 화",examples:[]},
+ {id:6,character:"月",answer:"달 월",examples:[]},
+];
+const duplicateMap=new Map(duplicatePool.map(x=>[x.id,x.character]));
+for(let run=0;run<50;run++){
+ const questions=generateExamQuestions({
+  pool:duplicatePool,words:[],relations:[],wordRelations:[],metadata:[],wordContexts:[],wordStructures:[],
+  commonCharacterSets:[],idioms:[],cultureItems:[],usageItems:[],specialReadings:[],
+  imageItems:[{id:101,hanja_id:1,asset_path:"/exam-images/sun.svg",alt_text:"해"}],
+  characterById:duplicateMap,questionCount:1,blueprint
+ });
+ assert.equal(questions.length,1);
+ assert.equal(new Set(questions[0].choices).size,4,"Picture choices must be unique even when the pool contains duplicate characters");
+}
+console.log("PASS: picture choices remain unique with duplicate characters in the pool");
