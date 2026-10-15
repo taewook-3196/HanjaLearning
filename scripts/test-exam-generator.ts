@@ -229,3 +229,10 @@ const invalidHanjaReadiness=examReadinessSummary({...base,pool:[
 ]});
 if(invalidHanjaReadiness.HANJA_READING!==1)throw new Error("Hanja readiness must exclude invalid characters and missing answers");
 console.log("Hanja pool readiness validation passed.");
+
+const sharedHanjaBlueprint=DAEHAN_FIELD_BLUEPRINTS["8"];
+const smallHanjaPool=pool.slice(0,30);
+const sharedHanjaIssues=examRotationShortages({...base,pool:smallHanjaPool},sharedHanjaBlueprint,3);
+const sharedHanjaIssue=sharedHanjaIssues.find(issue=>issue.type==="HANJA_SHARED_POOL");
+if(!sharedHanjaIssue||sharedHanjaIssue.required!==45||sharedHanjaIssue.available!==30)throw new Error("Shared Hanja pool shortage must account for both reading directions");
+console.log("Shared Hanja pool rotation shortage validated.");
