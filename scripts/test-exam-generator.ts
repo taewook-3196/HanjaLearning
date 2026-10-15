@@ -278,3 +278,10 @@ for(const grade of priorityGrades){
  }
  console.log(grade+": 100 priority mock exams passed blueprint and uniqueness checks");
 }
+
+const gradeFiveBlueprint=DAEHAN_FIELD_BLUEPRINTS["5"];
+const gradeFiveRelationDemand=gradeFiveBlueprint.items.filter(item=>item.type==="WORD_SYNONYM_ANTONYM").reduce((sum,item)=>sum+item.count,0);
+const gradeFiveRelationIssues=examRotationShortages({...base,wordRelations:wordRelations.slice(0,5)},gradeFiveBlueprint,3);
+const gradeFiveRelationIssue=gradeFiveRelationIssues.find(issue=>issue.type==="WORD_SYNONYM_ANTONYM");
+if(gradeFiveRelationDemand!==2||!gradeFiveRelationIssue||gradeFiveRelationIssue.required!==6||gradeFiveRelationIssue.available!==5)throw new Error("Grade 5 must flag five word relations as insufficient for three nonrepeating exams");
+console.log("Grade 5 word relation rotation shortage verified.");
