@@ -119,3 +119,16 @@ console.log("PASS: bounded picture rotation cache avoids permanently marking all
 
 assert.match(examPage,/\.filter\(key=>!key\.startsWith\("image:"\)\)/,"Picture rotation must not be overridden by five-attempt server history");
 console.log("PASS: picture recency uses the bounded cache, while other question types retain server history");
+
+const {examReadinessSummary}=await import("../src/lib/exam-generator.ts");
+const sameAnswerPool=[
+ {id:1,character:"日",answer:"해 일",examples:[]},
+ {id:2,character:"月",answer:"해 일",examples:[]},
+ {id:3,character:"木",answer:"해 일",examples:[]},
+ {id:4,character:"火",answer:"불 화",examples:[]},
+ {id:5,character:"水",answer:"물 수",examples:[]}
+];
+const sameAnswerImage=[{id:901,hanja_id:1,asset_path:"/exam-images/sun.svg",alt_text:"해가 빛나는 그림"}];
+const sameAnswerReadiness=examReadinessSummary({pool:sameAnswerPool,words:[],relations:[],wordRelations:[],metadata:[],wordContexts:[],wordStructures:[],commonCharacterSets:[],idioms:[],cultureItems:[],usageItems:[],specialReadings:[],imageItems:sameAnswerImage});
+assert.equal(sameAnswerReadiness.ORIGINAL_IMAGES,0,"Readiness must exclude pictures without three distinct viable distractors");
+console.log("PASS: picture readiness excludes invalid distractor pools");
