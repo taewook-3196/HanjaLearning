@@ -204,3 +204,20 @@ const invalidRotation=examRotationShortages({...base,wordContexts:[{id:991,word_
 const invalidShared=invalidRotation.find(issue=>issue.type==="CONTEXT_SHARED_POOL");
 if(invalidShared&&invalidShared.available!==0)throw new Error("Shared context rotation must exclude orphaned records");
 console.log("Shared context rotation excludes unusable records.");
+
+const rotationImages=Array.from({length:9},(_,i)=>({id:100+i,hanja_id:i+1,asset_path:"/exam-images/rotation-"+(i+1)+".svg",alt_text:"그림 "+(i+1)}));
+const rotationBlueprint=DAEHAN_FIELD_BLUEPRINTS["8"];
+const previousImages=new Set<string>();
+for(let session=0;session<3;session++){
+ const questions=generateExamQuestions({...base,imageItems:rotationImages,questionCount:rotationBlueprint.questionCount,blueprint:rotationBlueprint,recentQuestionKeys:new Set(previousImages)});
+ const errors=validateExamQuestions(questions,rotationBlueprint.questionCount,rotationBlueprint);
+ if(errors.length)throw new Error("8급 연속 시험 검증 실패: "+errors.join("; "));
+ const images=questions.filter(q=>q.type==="IMAGE_RECOGNITION");
+ if(images.length!==3)throw new Error("8급 그림 문제 3개 출제 실패");
+ for(const item of images){
+  if(previousImages.has(item.id))throw new Error("그림 문제 조기 반복: "+item.id);
+  previousImages.add(item.id);
+ }
+}
+if(previousImages.size!==9)throw new Error("3회 시험의 그림 문제 9개가 서로 달라야 함");
+console.log("8급 3회 연속 시험 그림 문제 회전 검증 완료");
