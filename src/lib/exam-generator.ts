@@ -40,15 +40,15 @@ export function examReadinessSummary(input:ExamReadinessInput){
   WORDS:input.words.filter(x=>x.word&&x.reading&&x.meaning).length,
   RELATIONS:input.relations.length,
   WORD_RELATIONS:input.wordRelations.length,
-  CHARACTER_PRINCIPLE:input.metadata.filter(x=>Boolean(x.formation_type)).length,
+  CHARACTER_PRINCIPLE:input.metadata.filter(x=>Boolean(x.formation_type&&formationLabels[x.formation_type])&&input.pool.some(h=>h.id===x.hanja_id&&validCharacter(h.character))).length,
   DICTIONARY_LOOKUP:countDictionaryCandidates(input),
   WORD_CONTEXTS:input.wordContexts.length,
   WORD_STRUCTURES:input.wordStructures.length,
   COMMON_CHARACTER_SETS:input.commonCharacterSets.length,
   IDIOMS:input.idioms.length,
   CULTURE_CONTENT:input.cultureItems.length,
-  USAGE_ITEMS:input.usageItems.length,
-  SPECIAL_READINGS:input.specialReadings.filter(x=>x.reading&&x.meaning&&input.pool.some(h=>h.id===x.hanja_id)&&x.correct_choice>=1&&x.correct_choice<=4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d].every(Boolean)&&new Set([x.choice_a,x.choice_b,x.choice_c,x.choice_d]).size===4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d][x.correct_choice-1]===x.reading).length,
+  USAGE_ITEMS:input.usageItems.filter(x=>x.correct_choice>=1&&x.correct_choice<=4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d].every(Boolean)&&new Set([x.choice_a,x.choice_b,x.choice_c,x.choice_d]).size===4).length,
+  SPECIAL_READINGS:input.specialReadings.filter(x=>x.reading&&x.meaning&&input.pool.some(h=>h.id===x.hanja_id&&validCharacter(h.character))&&x.correct_choice>=1&&x.correct_choice<=4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d].every(Boolean)&&new Set([x.choice_a,x.choice_b,x.choice_c,x.choice_d]).size===4&&[x.choice_a,x.choice_b,x.choice_c,x.choice_d][x.correct_choice-1]===x.reading).length,
   ORIGINAL_IMAGES:input.imageItems.filter(x=>input.pool.some(h=>h.id===x.hanja_id&&validCharacter(h.character))&&Boolean(x.asset_path?.startsWith("/exam-images/"))&&Boolean(x.alt_text?.trim())&&new Set(input.pool.filter(h=>h.id!==x.hanja_id&&validCharacter(h.character)&&h.character!==input.pool.find(t=>t.id===x.hanja_id)?.character&&h.answer!==input.pool.find(t=>t.id===x.hanja_id)?.answer).map(h=>h.character)).size>=3).length,
  };
 }
