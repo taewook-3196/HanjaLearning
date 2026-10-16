@@ -379,3 +379,13 @@ const invalidAlternateRelations=[{from_word_id:1,to_word_id:21,relation_type:"SI
 const invalidAlternateReadiness=examReadinessSummary({...base,words:invalidAlternateWords,wordRelations:invalidAlternateRelations});
 if(invalidAlternateReadiness.WORD_RELATIONS!==1)throw new Error("Unusable alternate target must remain eligible as distractor only when valid");
 console.log("Relation readiness ignores unusable alternate answer records.");
+
+const duplicateTextWords=words.map(w=>w.id===2?{...w,word:words[0].word}:w);
+const duplicateTextRelations=[{from_word_id:1,to_word_id:21,relation_type:"SIMILAR"},{from_word_id:2,to_word_id:22,relation_type:"SIMILAR"}];
+const duplicateTextReadiness=examReadinessSummary({...base,words:duplicateTextWords,wordRelations:duplicateTextRelations});
+if(duplicateTextReadiness.WORD_RELATIONS!==1)throw new Error("Identical source word text across IDs must count once");
+for(let attempt=0;attempt<30;attempt++){
+ const questions=generateExamQuestions({...base,words:duplicateTextWords,wordRelations:duplicateTextRelations,questionCount:50,blueprint:DAEHAN_FIELD_BLUEPRINTS["5"]});
+ if(questions.filter(q=>q.id.startsWith("word-relation:")).length>1)throw new Error("Identical source word text generated duplicate prompts");
+}
+console.log("Duplicate source word text across IDs is deduplicated.");
