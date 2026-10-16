@@ -389,3 +389,35 @@ for(let attempt=0;attempt<30;attempt++){
  if(questions.filter(q=>q.id.startsWith("word-relation:")).length>1)throw new Error("Identical source word text generated duplicate prompts");
 }
 console.log("Duplicate source word text across IDs is deduplicated.");
+
+// Production-derived grade 5 relation IDs and Hanja forms (read-only snapshot).
+const realFivePairs=[
+[216,705,"午前","午後","OPPOSITE"],
+[252,613,"本人","自己","SIMILAR"],
+[212,649,"北方","南方","OPPOSITE"],
+[223,236,"入口","出口","OPPOSITE"],
+[475,497,"夜間","晝間","OPPOSITE"],
+[259,613,"自身","自己","SIMILAR"]
+] as const;
+const realFiveWords=new Map<number,{id:number;word:string;reading:string;meaning:string}>();
+for(const [from,to,source,answer] of realFivePairs){
+ for(const [id,word] of [[from,source],[to,answer]] as const){
+  realFiveWords.set(id,{id,word,reading:"읽기",meaning:"뜻풀이"});
+ }
+}
+const realFiveInput={...base,words:[...realFiveWords.values(),...words.map(w=>({...w,id:w.id+10000}))],wordRelations:realFivePairs.map(([from,to,, ,type])=>({from_word_id:from,to_word_id:to,relation_type:type}))};
+if(examReadinessSummary(realFiveInput).WORD_RELATIONS!==6)throw new Error("Grade 5 production-derived relation readiness must equal six");
+const realFiveSeen=new Set<string>();
+for(let run=0;run<3;run++){
+ const questions=generateExamQuestions({...realFiveInput,questionCount:50,blueprint:DAEHAN_FIELD_BLUEPRINTS["5"],recentQuestionKeys:realFiveSeen});
+ const issues=validateExamQuestions(questions,50,DAEHAN_FIELD_BLUEPRINTS["5"]);
+ if(issues.length)throw new Error("Grade 5 production-derived blueprint validation: "+issues.join("; "));
+ const relationQuestions=questions.filter(q=>q.id.startsWith("word-relation:"));
+ if(relationQuestions.length!==2)throw new Error("Grade 5 must have two relation questions per exam");
+ for(const q of relationQuestions){
+  if(realFiveSeen.has(q.id)||q.choices.length!==4||new Set(q.choices).size!==4||!q.choices.includes(q.correct))throw new Error("Grade 5 relation repeated or invalid choices");
+  realFiveSeen.add(q.id);
+ }
+}
+if(realFiveSeen.size!==6)throw new Error("Grade 5 must rotate all six relations across three exams");
+console.log("Grade 5 production-derived relation fixture passes three 50-question exams.");
