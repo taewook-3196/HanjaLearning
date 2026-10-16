@@ -355,3 +355,15 @@ if(examReadinessSummary(nonHanjaRelationInput).WORD_RELATIONS!==0)throw new Erro
 const nonHanjaAnswerInput={...nonHanjaRelationInput,words:[words[0],...words.slice(1,3),{...words[20],word:"가나다"},...words.slice(21,23)]};
 if(examReadinessSummary(nonHanjaAnswerInput).WORD_RELATIONS!==0)throw new Error("Non-Hanja answer must not count as relation ready");
 console.log("Relation readiness rejects non-Hanja source and answer.");
+
+const sameStemRelations=[...wordRelations,{from_word_id:1,to_word_id:22,relation_type:"OPPOSITE"}];
+for(let attempt=0;attempt<100;attempt++){
+ const questions=generateExamQuestions({...base,wordRelations:sameStemRelations,questionCount:50,blueprint:DAEHAN_FIELD_BLUEPRINTS["5"]});
+ const seen=new Set<string>();
+ for(const q of questions.filter(q=>q.id.startsWith("word-relation:"))){
+  const key=q.stem+"|"+q.prompt;
+  if(seen.has(key))throw new Error("Repeated source and relation type in the same mock exam");
+  seen.add(key);
+ }
+}
+console.log("Relation questions avoid duplicate source/type prompts.");
