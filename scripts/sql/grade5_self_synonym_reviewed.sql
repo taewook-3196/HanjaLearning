@@ -9,7 +9,7 @@ BEGIN
     SELECT 1 FROM hanja_word_relations
     WHERE from_word_id = 613 AND to_word_id = 259 AND relation_type = 'SIMILAR'
   ) THEN
-    IF NOT EXISTS (
+    IF EXISTS (
       SELECT 1 FROM hanja_words w
       WHERE w.id IN (613,259) AND w.content_status <> 'PUBLISHED'
     ) OR (SELECT count(*) FROM hanja_words WHERE id IN (613,259) AND content_status='PUBLISHED') <> 2 THEN
