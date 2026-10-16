@@ -6,7 +6,7 @@ const words:PublishedWord[]=Array.from({length:80},(_,i)=>({id:i+1,word:i<4?`詞
 const characterById=new Map(pool.map(x=>[x.id,x.character]));
 const metadata=pool.slice(0,12).map((x,i)=>({hanja_id:x.id,radical:`부수${i}`,total_strokes:i+1,formation_type:["PICTOGRAPH","IDEOGRAPH","COMPOUND_IDEOGRAPH","PHONO_SEMANTIC"][i%4]}));
 const relations=Array.from({length:8},(_,i)=>({from_hanja_id:i+1,to_hanja_id:i+21,relation_type:i%2?"SIMILAR":"ANTONYM"}));
-const wordRelations=Array.from({length:8},(_,i)=>({from_word_id:i+1,to_word_id:i+21,relation_type:i%2?"SIMILAR":"ANTONYM"}));
+const wordRelations=Array.from({length:8},(_,i)=>({from_word_id:i+1,to_word_id:i+21,relation_type:i%2?"SIMILAR":"OPPOSITE"}));
 const wordContexts=Array.from({length:30},(_,i)=>({id:i+1,word_id:i+1,sentence:`문장 속 읽기${i+1} 표현`,blank_text:`읽기${i+1}`}));
 const wordStructures=Array.from({length:8},(_,i)=>({word_id:i+1,structure_type:["SUBJECT_PREDICATE","VERB_OBJECT","MODIFIER_HEAD","PARALLEL"][i%4]}));
 const commonCharacterSets=Array.from({length:4},(_,i)=>({id:i+1,common_hanja_id:i+1,word_ids:[i+1,i+11],word_hanja_ids:{[i+1]:[i+1],[i+11]:[i+1]}}));
@@ -305,3 +305,13 @@ for(const [grade,available] of priorityRelationCandidates){
  if(grade!=="5"&&shortage)throw new Error(grade+": relation bank unexpectedly insufficient for three exams");
 }
 console.log("Priority grade word-relation coverage thresholds passed.");
+
+const invalidWordRelation={from_word_id:1,to_word_id:21,relation_type:"RELATED"};
+const invalidWordRelationInput={...base,wordRelations:[invalidWordRelation]};
+if(examReadinessSummary(invalidWordRelationInput).WORD_RELATIONS!==0)throw new Error("Unsupported word relation must not be counted as exam ready");
+for(const grade of ["5","PRE4","4","PRE3","3"] as const){
+ const blueprint=DAEHAN_FIELD_BLUEPRINTS[grade];
+ const questions=generateExamQuestions({...invalidWordRelationInput,questionCount:50,blueprint});
+ if(questions.some(q=>q.id.startsWith("word-relation:RELATED:")))throw new Error(grade+": unsupported relation emitted as antonym");
+}
+console.log("Unsupported relation type rejection passed.");
