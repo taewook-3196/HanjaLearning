@@ -4,7 +4,16 @@ function seoulDateKey(d:Date){return new Intl.DateTimeFormat("en-CA",{timeZone:"
 function dateOrdinal(key:string){const [y,m,d]=key.split("-").map(Number);return Date.UTC(y,m-1,d);}
 export function buildStudyPlan(input:{unseen:number;dueReviews:number;weakNotDue?:number;examDate?:string|null;now?:Date;defaultTotal?:number}):StudyPlan{
  const now=input.now??new Date(),base=input.defaultTotal??8,due=Math.max(0,input.dueReviews),unseen=Math.max(0,input.unseen),weak=Math.max(0,input.weakNotDue??0);
- if(!input.examDate){const reviewTarget=Math.min(MAX_TOTAL,Math.max(base,due>base?Math.min(due,base+4):base));const reviewCount=Math.min(reviewTarget,due);const remaining=Math.max(0,Math.min(MAX_TOTAL,base+Math.min(4,due))-reviewCount);const newCount=Math.min(remaining,unseen);return{newCount,reviewCount,extraMasteryReviews:0,total:newCount+reviewCount,daysUntilExam:null,masteryDays:null,phase:"DEFAULT",isTight:false};}
+ if(!input.examDate){
+  // Without a deadline, keep introducing new characters even when reviews are overdue.
+  // Reserve three of the default eight slots for new learning while preserving five for reviews.
+  const desiredTotal=Math.min(MAX_TOTAL,Math.max(base,due>base?Math.min(due,base+4):base));
+  const newReserve=Math.min(unseen,Math.max(1,Math.min(3,Math.floor(base*.4))));
+  const newCount=Math.min(newReserve,desiredTotal);
+  const reviewCount=Math.min(due,Math.max(0,desiredTotal-newCount));
+  const extraNew=Math.min(unseen-newCount,Math.max(0,Math.min(base,desiredTotal)-newCount-reviewCount));
+  return{newCount:newCount+extraNew,reviewCount,extraMasteryReviews:0,total:newCount+extraNew+reviewCount,daysUntilExam:null,masteryDays:null,phase:"DEFAULT",isTight:false};
+ }
  const days=Math.max(0,Math.round((dateOrdinal(input.examDate)-dateOrdinal(seoulDateKey(now)))/DAY));
  const masteryDays=Math.max(7,Math.ceil(days*.2)),learningDays=Math.max(1,days-masteryDays);
  const idealNew=days>masteryDays?Math.ceil(unseen/learningDays):0,catchUpNew=unseen>0&&days>0?Math.ceil(unseen/Math.max(1,days)):0;
