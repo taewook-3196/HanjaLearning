@@ -367,3 +367,9 @@ for(let attempt=0;attempt<100;attempt++){
  }
 }
 console.log("Relation questions avoid duplicate source/type prompts.");
+
+const sameStemReadiness=examReadinessSummary({...base,wordRelations:[{from_word_id:1,to_word_id:21,relation_type:"SIMILAR"},{from_word_id:1,to_word_id:22,relation_type:"SIMILAR"}]});
+if(sameStemReadiness.WORD_RELATIONS!==1)throw new Error("Two alternate answers with one source/type must count as one relation question");
+const differentTypeReadiness=examReadinessSummary({...base,wordRelations:[{from_word_id:1,to_word_id:21,relation_type:"SIMILAR"},{from_word_id:1,to_word_id:22,relation_type:"OPPOSITE"}]});
+if(differentTypeReadiness.WORD_RELATIONS!==2)throw new Error("Distinct relation types must remain separately countable");
+console.log("Relation readiness counts distinct source/type prompts.");
