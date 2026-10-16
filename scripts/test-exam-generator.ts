@@ -73,6 +73,31 @@ for(const gradeCode of gradeCodes){
 }
 console.log(`Exam generator invariant checks passed for ${gradeCodes.join(", ")} across 200 runs each.`);
 
+// Three consecutive complete 50-question exams per grade with the actual
+// culture draft choices and a synthetic bank for all other question types.
+// This is not a production-data rotation certification.
+for(const gradeCode of ["5","4","PRE3","3"] as const){
+ const blueprint=DAEHAN_FIELD_BLUEPRINTS[gradeCode];
+ const recent=new Set<string>();
+ const cultureSeen=new Set<string>();
+ const expectedCulture=blueprint.items.filter(item=>item.type==="CULTURE_ETIQUETTE").reduce((sum,item)=>sum+item.count,0);
+ for(let run=0;run<3;run++){
+  const qs=generateExamQuestions({...base,questionCount:50,blueprint,recentQuestionKeys:recent});
+  const issues=validateExamQuestions(qs,50,blueprint);
+  if(issues.length)throw new Error(`${gradeCode} full exam ${run+1}: ${issues.join("; ")}`);
+  if(new Set(qs.map(q=>q.id)).size!==50)throw new Error(`${gradeCode} full exam ${run+1}: duplicate question ids`);
+  const culture=qs.filter(q=>q.id.startsWith("culture:"));
+  if(culture.length<expectedCulture)throw new Error(`${gradeCode} full exam ${run+1}: missing culture items`);
+  for(const q of culture){
+   if(cultureSeen.has(q.id))throw new Error(`${gradeCode} full exam ${run+1}: culture repeated across exams`);
+   cultureSeen.add(q.id);
+  }
+  for(const q of qs)recent.add(q.id);
+ }
+ console.log(`${gradeCode}: three full 50-question synthetic exams validated; ${cultureSeen.size} distinct culture questions`);
+}
+
+
 
 const confusablePool:HanjaPoolItem[]=[
  {id:1001,character:"田",answer:"밭 전",examples:[]},
