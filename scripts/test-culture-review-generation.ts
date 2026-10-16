@@ -1,0 +1,42 @@
+import {readFileSync} from "node:fs";
+import {dirname,resolve} from "node:path";
+import {fileURLToPath} from "node:url";
+import {DAEHAN_FIELD_BLUEPRINTS} from "../src/lib/exam-blueprints.ts";
+import {generateExamQuestions,validateExamQuestions,type HanjaPoolItem,type PublishedWord} from "../src/lib/exam-generator.ts";
+
+// Draft-only simulation: reads Markdown and uses synthetic non-culture fixtures.
+// It does NOT publish questions, write to the DB, or certify three full 50-question exams.
+const markdown=readFileSync(resolve(dirname(fileURLToPath(import.meta.url)),"../docs/upper-grade-culture-review.md"),"utf8");
+const section=markdown.split("## 공개 단어 기반 4지선다 신규 문항 초안 (검토 대기)")[1]?.split("## 편집 1차 검토 결과")[0];
+if(!section)throw new Error("Missing culture draft section");
+const draftSections=section.split(/^### /m).slice(1);
+const drafts=draftSections.map((chunk,i)=>{
+ const [heading,...lines]=chunk.split("\n");
+ const grade=heading.match(/^(5|4|PRE3|3)급 — /)?.[1];
+ const prompt=lines.find(x=>x.trim().endsWith("?"));
+ const choices=[...chunk.matchAll(/^([1-4])\. (.+)$/gm)].map(m=>m[2]);
+ const answer=Number(chunk.match(/^정답: ([1-4])번\./m)?.[1]);
+ if(!grade||!prompt||choices.length!==4||answer<1||answer>4)throw new Error(`Invalid draft ${heading}`);
+ return {grade,id:1000+i,prompt_summary:prompt,choice_a:choices[0],choice_b:choices[1],choice_c:choices[2],choice_d:choices[3],correct_choice:answer};
+});
+const pool:HanjaPoolItem[]=Array.from({length:80},(_,i)=>({id:i+1,character:String.fromCodePoint(0x4e00+i),answer:`뜻${i+1} 음${i+1}`,examples:[]}));
+const words:PublishedWord[]=Array.from({length:80},(_,i)=>({id:i+1,word:`詞${String.fromCodePoint(0x4e00+i)}`,reading:`읽기${i+1}`,meaning:`뜻풀이${i+1}`}));
+const characterById=new Map(pool.map(x=>[x.id,x.character]));
+for(const grade of ["5","4","PRE3","3"] as const){
+ const blueprint=DAEHAN_FIELD_BLUEPRINTS[grade];
+ const count=blueprint.items.filter(x=>x.type==="CULTURE_ETIQUETTE").reduce((n,x)=>n+x.count,0);
+ if(!count)throw new Error(`No culture questions required in grade ${grade}`);
+ const cultureBlueprint={...blueprint,questionCount:count,items:blueprint.items.filter(x=>x.type==="CULTURE_ETIQUETTE")};
+ const items=drafts.filter(x=>x.grade===grade).map(({grade:_,...item})=>item);
+ const used=new Set<string>();
+ for(let run=0;run<3;run++){
+  const questions=generateExamQuestions({pool,words,relations:[],wordRelations:[],metadata:[],wordContexts:[],wordStructures:[],commonCharacterSets:[],idioms:[],cultureItems:items,usageItems:[],specialReadings:[],imageItems:[],characterById,questionCount:count,blueprint:cultureBlueprint,recentQuestionKeys:used});
+  const errors=validateExamQuestions(questions,count,cultureBlueprint);
+  if(errors.length)throw new Error(`Grade ${grade} run ${run+1}: ${errors.join("; ")}`);
+  for(const q of questions){
+   if(!q.id.startsWith("culture:")||q.choices.length!==4||new Set(q.choices).size!==4||!q.choices.includes(q.correct))throw new Error(`Invalid culture question in grade ${grade}`);
+   used.add(q.id);
+  }
+ }
+ console.log(`Grade ${grade}: three focused culture-only generations passed (${count} per run, ${items.length} draft candidates)`);
+}
