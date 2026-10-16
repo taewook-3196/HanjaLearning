@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { buildStudyPlan } from "../src/lib/study-plan.ts";
 import { orderLearningIds } from "../src/lib/learning-order.ts";
 
 const ids = [5, 3, 2, 4, 1];
@@ -11,3 +12,15 @@ const random = orderLearningIds(ids, "RANDOM", { userId: "student-1", day: "2026
 assert.deepEqual(random, orderLearningIds([...ids].reverse(), "RANDOM", { userId: "student-1", day: "2026-10-14" }));
 assert.deepEqual([...random].sort(), [...ids].sort());
 console.log("Learning order regression checks passed");
+
+for(const dueReviews of [0,3,8,12,30]){
+ const plan=buildStudyPlan({unseen:100,dueReviews,examDate:null});
+ assert.ok(plan.newCount>=3,`new characters must remain available with ${dueReviews} due reviews`);
+ assert.ok(plan.reviewCount<=dueReviews);
+ assert.equal(plan.total,plan.newCount+plan.reviewCount);
+ assert.ok(plan.total<=16);
+}
+assert.equal(buildStudyPlan({unseen:0,dueReviews:20}).newCount,0);
+assert.equal(buildStudyPlan({unseen:5,dueReviews:8}).newCount,3);
+assert.equal(buildStudyPlan({unseen:5,dueReviews:8}).reviewCount,5);
+console.log("No-deadline daily learning balances new and review characters.");
