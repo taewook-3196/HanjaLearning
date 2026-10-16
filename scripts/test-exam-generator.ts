@@ -332,7 +332,20 @@ const ambiguousReadiness=examReadinessSummary({...base,words:limitedRelationWord
 if(ambiguousReadiness.WORD_RELATIONS!==0)throw new Error("Relation readiness must reject records without three non-answer distractors");
 console.log("Word relation readiness and distractor eligibility agree.");
 
-const gradeFiveExpandedRelations=[...wordRelations.slice(0,5),{from_word_id:1,to_word_id:22,relation_type:"SIMILAR"}];
+const gradeFiveExpandedRelations=[...wordRelations.slice(0,5),{from_word_id:6,to_word_id:26,relation_type:"SIMILAR"}];
 const expandedFiveIssues=examRotationShortages({...base,wordRelations:gradeFiveExpandedRelations},DAEHAN_FIELD_BLUEPRINTS["5"],3);
 if(expandedFiveIssues.some(issue=>issue.type==="WORD_SYNONYM_ANTONYM"))throw new Error("Six distinct grade 5 relations should satisfy three two-question exams");
 console.log("Grade 5 relation expansion threshold verified.");
+
+const expandedFiveRecent:string[]=[];
+for(let exam=0;exam<3;exam++){
+ const questions=generateExamQuestions({...base,wordRelations:gradeFiveExpandedRelations,questionCount:50,blueprint:DAEHAN_FIELD_BLUEPRINTS["5"],recentQuestionKeys:new Set(expandedFiveRecent)});
+ const relations=questions.filter(q=>q.id.startsWith("word-relation:"));
+ if(relations.length!==2)throw new Error("Grade 5 relation expansion must generate two relation questions per exam");
+ for(const q of relations){
+  if(expandedFiveRecent.includes(q.id))throw new Error("Grade 5 relation expansion reused a relation across three exams");
+  expandedFiveRecent.push(q.id);
+ }
+}
+console.log("Grade 5 six distinct relations generate three nonrepeating exams.");
+
