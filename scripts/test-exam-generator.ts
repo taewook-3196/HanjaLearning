@@ -405,7 +405,7 @@ for(const [from,to,source,answer] of realFivePairs){
   realFiveWords.set(id,{id,word,reading:"읽기",meaning:"뜻풀이"});
  }
 }
-const realFiveInput={...base,words:[...realFiveWords.values(),...words.map(w=>({...w,id:w.id+10000}))],wordRelations:realFivePairs.map(([from,to,, ,type])=>({from_word_id:from,to_word_id:to,relation_type:type}))};
+const realFiveInput={...base,words:[...realFiveWords.values(),...words],wordRelations:realFivePairs.map(([from,to,, ,type])=>({from_word_id:from,to_word_id:to,relation_type:type}))};
 if(examReadinessSummary(realFiveInput).WORD_RELATIONS!==6)throw new Error("Grade 5 production-derived relation readiness must equal six");
 const realFiveSeen=new Set<string>();
 for(let run=0;run<3;run++){
