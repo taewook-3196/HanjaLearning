@@ -349,3 +349,9 @@ for(let exam=0;exam<3;exam++){
 }
 console.log("Grade 5 six distinct relations generate three nonrepeating exams.");
 
+
+const nonHanjaRelationInput={...base,words:[{...words[0],word:"가나다"},...words.slice(1,3),...words.slice(20,23)],wordRelations:[{from_word_id:1,to_word_id:21,relation_type:"SIMILAR"}]};
+if(examReadinessSummary(nonHanjaRelationInput).WORD_RELATIONS!==0)throw new Error("Non-Hanja source must not count as relation ready");
+const nonHanjaAnswerInput={...nonHanjaRelationInput,words:[words[0],...words.slice(1,3),{...words[20],word:"가나다"},...words.slice(21,23)]};
+if(examReadinessSummary(nonHanjaAnswerInput).WORD_RELATIONS!==0)throw new Error("Non-Hanja answer must not count as relation ready");
+console.log("Relation readiness rejects non-Hanja source and answer.");
