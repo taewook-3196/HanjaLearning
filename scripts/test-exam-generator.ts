@@ -339,7 +339,7 @@ console.log("Grade 5 relation expansion threshold verified.");
 
 const expandedFiveRecent:string[]=[];
 for(let exam=0;exam<3;exam++){
- const questions=generateExamQuestions({...base,wordRelations:gradeFiveExpandedRelations,questionCount:50,blueprint:DAEHAN_FIELD_BLUEPRINTS["5"],recentQuestionKeys:expandedFiveRecent});
+ const questions=generateExamQuestions({...base,wordRelations:gradeFiveExpandedRelations,questionCount:50,blueprint:DAEHAN_FIELD_BLUEPRINTS["5"],recentQuestionKeys:new Set(expandedFiveRecent)});
  const relations=questions.filter(q=>q.id.startsWith("word-relation:"));
  if(relations.length!==2)throw new Error("Grade 5 relation expansion must generate two relation questions per exam");
  for(const q of relations){
