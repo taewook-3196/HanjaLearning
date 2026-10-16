@@ -331,3 +331,8 @@ const ambiguousRelations=[{from_word_id:1,to_word_id:21,relation_type:"SIMILAR"}
 const ambiguousReadiness=examReadinessSummary({...base,words:limitedRelationWords,wordRelations:ambiguousRelations});
 if(ambiguousReadiness.WORD_RELATIONS!==0)throw new Error("Relation readiness must reject records without three non-answer distractors");
 console.log("Word relation readiness and distractor eligibility agree.");
+
+const gradeFiveExpandedRelations=[...wordRelations.slice(0,5),{from_word_id:1,to_word_id:22,relation_type:"SIMILAR"}];
+const expandedFiveIssues=examRotationShortages({...base,wordRelations:gradeFiveExpandedRelations},DAEHAN_FIELD_BLUEPRINTS["5"],3);
+if(expandedFiveIssues.some(issue=>issue.type==="WORD_SYNONYM_ANTONYM"))throw new Error("Six distinct grade 5 relations should satisfy three two-question exams");
+console.log("Grade 5 relation expansion threshold verified.");
