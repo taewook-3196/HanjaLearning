@@ -373,3 +373,9 @@ if(sameStemReadiness.WORD_RELATIONS!==1)throw new Error("Two alternate answers w
 const differentTypeReadiness=examReadinessSummary({...base,wordRelations:[{from_word_id:1,to_word_id:21,relation_type:"SIMILAR"},{from_word_id:1,to_word_id:22,relation_type:"OPPOSITE"}]});
 if(differentTypeReadiness.WORD_RELATIONS!==2)throw new Error("Distinct relation types must remain separately countable");
 console.log("Relation readiness counts distinct source/type prompts.");
+
+const invalidAlternateWords=[words[0],...words.slice(1,4),words[20],{...words[21],reading:null}];
+const invalidAlternateRelations=[{from_word_id:1,to_word_id:21,relation_type:"SIMILAR"},{from_word_id:1,to_word_id:22,relation_type:"SIMILAR"}];
+const invalidAlternateReadiness=examReadinessSummary({...base,words:invalidAlternateWords,wordRelations:invalidAlternateRelations});
+if(invalidAlternateReadiness.WORD_RELATIONS!==1)throw new Error("Unusable alternate target must remain eligible as distractor only when valid");
+console.log("Relation readiness ignores unusable alternate answer records.");
