@@ -1,5 +1,5 @@
 -- Add a reviewed fifth-grade synonym pair without changing existing relations.
--- 自己 (자기) → 自身 (자신). Both published and all characters are in grade 5.
+-- 自身 (자신) → 自己 (자기). Both published and all characters are in grade 5.
 -- Run manually after review. This file is not an automatic deployment migration.
 BEGIN;
 DO $$
@@ -7,9 +7,9 @@ DECLARE next_id bigint;
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM hanja_word_relations
-    WHERE from_word_id = 613 AND to_word_id = 259 AND relation_type = 'SIMILAR'
+    WHERE from_word_id = 259 AND to_word_id = 613 AND relation_type = 'SIMILAR'
   ) THEN
-    IF NOT EXISTS (
+    IF EXISTS (
       SELECT 1 FROM hanja_words w
       WHERE w.id IN (613,259) AND w.content_status <> 'PUBLISHED'
     ) OR (SELECT count(*) FROM hanja_words WHERE id IN (613,259) AND content_status='PUBLISHED') <> 2 THEN
@@ -30,8 +30,8 @@ BEGIN
     SELECT coalesce(max(id),0)+1 INTO next_id FROM hanja_word_relations;
     INSERT INTO hanja_word_relations
       (id,from_word_id,to_word_id,relation_type,content_status,source_note)
-    VALUES (next_id,613,259,'SIMILAR','PUBLISHED',
-      'Reviewed grade 5 synonym: 自己(자기) → 自身(자신)');
+    VALUES (next_id,259,613,'SIMILAR','PUBLISHED',
+      'Reviewed grade 5 synonym: 自身(자신) → 自己(자기)');
   END IF;
 END $$;
 COMMIT;
