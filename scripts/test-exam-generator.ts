@@ -326,7 +326,7 @@ for(let attempt=0;attempt<100;attempt++){
 }
 console.log("Alternate relation answers excluded from distractors.");
 
-const limitedRelationWords=words.slice(0,4).concat(words.slice(20,22));
+const limitedRelationWords=words.slice(0,3).concat(words.slice(20,22));
 const ambiguousRelations=[{from_word_id:1,to_word_id:21,relation_type:"SIMILAR"},{from_word_id:1,to_word_id:22,relation_type:"SIMILAR"}];
 const ambiguousReadiness=examReadinessSummary({...base,words:limitedRelationWords,wordRelations:ambiguousRelations});
 if(ambiguousReadiness.WORD_RELATIONS!==0)throw new Error("Relation readiness must reject records without three non-answer distractors");
