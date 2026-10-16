@@ -315,3 +315,13 @@ for(const grade of ["5","PRE4","4","PRE3","3"] as const){
  if(questions.some(q=>q.id.startsWith("word-relation:RELATED:")))throw new Error(grade+": unsupported relation emitted as antonym");
 }
 console.log("Unsupported relation type rejection passed.");
+
+const alternateWordRelations=[...wordRelations,{from_word_id:1,to_word_id:22,relation_type:"OPPOSITE"}];
+for(let attempt=0;attempt<100;attempt++){
+ const questions=generateExamQuestions({...base,wordRelations:alternateWordRelations,questionCount:50,blueprint:DAEHAN_FIELD_BLUEPRINTS["5"]});
+ for(const q of questions.filter(q=>q.id.startsWith("word-relation:OPPOSITE:1:"))){
+  const alternative=words.find(w=>w.id===(q.correct===words[20].word?22:21))?.word;
+  if(alternative&&q.choices.includes(alternative))throw new Error("Alternative correct relation answer included as distractor");
+ }
+}
+console.log("Alternate relation answers excluded from distractors.");
