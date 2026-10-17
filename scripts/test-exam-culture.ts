@@ -41,3 +41,18 @@ for(let run=0;run<200;run++){
  for(const group of conceptGroups)if(group.every(id=>ids.has(id)))throw new Error(`PRE4 repeated culture concept: ${group.join(",")}`);
 }
 console.log("PRE4 culture concept exclusion: 200 randomized runs passed");
+
+const recentPre4=new Set<string>();
+for(let exam=0;exam<3;exam++){
+ const qs=generateExamQuestions({...base,cultureItems:auditedCulture,blueprint:pre4CultureBlueprint,questionCount:2,recentQuestionKeys:recentPre4});
+ const issues=validateExamQuestions(qs,2,pre4CultureBlueprint);
+ if(issues.length)throw new Error(`PRE4 rotation exam ${exam+1}: ${issues.join("; ")}`);
+ for(const q of qs){
+  if(recentPre4.has(q.id))throw new Error(`PRE4 culture repeated across three exams: ${q.id}`);
+  recentPre4.add(q.id);
+ }
+ const ids=new Set(qs.map(q=>Number(q.id.replace("culture:",""))));
+ for(const group of conceptGroups)if(group.every(id=>ids.has(id)))throw new Error(`PRE4 rotation exam ${exam+1}: overlapping concepts ${group.join(",")}`);
+}
+if(recentPre4.size!==6)throw new Error(`PRE4 expected six distinct questions, got ${recentPre4.size}`);
+console.log("PRE4 culture rotation: three exams, six distinct questions, no concept overlap");
