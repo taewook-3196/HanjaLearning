@@ -10,14 +10,23 @@ const markdown=readFileSync(resolve(dirname(fileURLToPath(import.meta.url)),"../
 const section=markdown.split("## 공개 단어 기반 4지선다 신규 문항 초안 (검토 대기)")[1]?.split("## 편집 1차 검토 결과")[0];
 if(!section)throw new Error("Missing culture draft section");
 const draftSections=section.split(/^### /m).slice(1);
+const explanationSection=markdown.split("## 신규 10문항 해설 초안 보강 (2026-10-17)")[1];
+if(!explanationSection)throw new Error("Missing culture explanation section");
+const explanationRows=[...explanationSection.matchAll(/^\| (5급|4급|준3급|3급) ([^|]+) \| ([1-4]) \| ([^|]+) \|$/gm)];
+if(explanationRows.length!==10)throw new Error(`Expected 10 culture explanations, got ${explanationRows.length}`);
+const gradeCode:Record<string,string>={"5급":"5","4급":"4","준3급":"PRE3","3급":"3"};
+const explanations=new Map(explanationRows.map(([,grade,topic,answer,explanation])=>[`${gradeCode[grade]}:${topic.trim()}`,{answer:Number(answer),explanation:explanation.trim()}]));
 const drafts=draftSections.map((chunk,i)=>{
  const [heading,...lines]=chunk.split("\n");
- const grade=heading.match(/^(5|4|PRE3|3)급 — /)?.[1];
+ const match=heading.match(/^(5|4|PRE3|3)급 — (.+)$/);
+ const grade=match?.[1];
+ const topic=match?.[2]?.trim();
  const prompt=lines.find(x=>x.trim().endsWith("?"));
  const choices=[...chunk.matchAll(/^([1-4])\. (.+)$/gm)].map(m=>m[2]);
  const answer=Number(chunk.match(/^정답: ([1-4])번\./m)?.[1]);
- if(!grade||!prompt||choices.length!==4||answer<1||answer>4)throw new Error(`Invalid draft ${heading}`);
- return {grade,id:1000+i,prompt_summary:prompt,choice_a:choices[0],choice_b:choices[1],choice_c:choices[2],choice_d:choices[3],correct_choice:answer};
+ const detail=explanations.get(`${grade}:${topic}`);
+ if(!grade||!prompt||choices.length!==4||answer<1||answer>4||!detail||detail.answer!==answer)throw new Error(`Invalid draft or explanation ${heading}`);
+ return {grade,id:1000+i,prompt_summary:prompt,choice_a:choices[0],choice_b:choices[1],choice_c:choices[2],choice_d:choices[3],correct_choice:answer,correct_explanation:detail.explanation};
 });
 const pool:HanjaPoolItem[]=Array.from({length:80},(_,i)=>({id:i+1,character:String.fromCodePoint(0x4e00+i),answer:`뜻${i+1} 음${i+1}`,examples:[]}));
 const words:PublishedWord[]=Array.from({length:80},(_,i)=>({id:i+1,word:`詞${String.fromCodePoint(0x4e00+i)}`,reading:`읽기${i+1}`,meaning:`뜻풀이${i+1}`}));
@@ -35,6 +44,8 @@ for(const grade of ["5","4","PRE3","3"] as const){
   if(errors.length)throw new Error(`Grade ${grade} run ${run+1}: ${errors.join("; ")}`);
   for(const q of questions){
    if(!q.id.startsWith("culture:")||q.choices.length!==4||new Set(q.choices).size!==4||!q.choices.includes(q.correct))throw new Error(`Invalid culture question in grade ${grade}`);
+   const source=items.find(item=>`culture:${item.id}`===q.id);
+   if(!source||q.explanation!==source.correct_explanation)throw new Error(`Missing or mismatched explanation for ${q.id}`);
    used.add(q.id);
   }
  }
