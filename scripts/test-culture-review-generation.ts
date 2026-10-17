@@ -40,7 +40,8 @@ for(const grade of ["5","4","PRE3","3"] as const){
  // Three consecutive culture-only exams need a sufficient pool of distinct drafts.
  // This checks source inventory separately from generator behavior; a small pool can
  // otherwise pass by silently reusing questions when the recent cache is exhausted.
- const requiredForThree=count*3;
+ const variableCultureSlots=grade==="PRE3"&&blueprint.items.some(item=>item.type==="VARIABLE_VERIFIED")?1:0;
+ const requiredForThree=(count+variableCultureSlots)*3;
  if(items.length<requiredForThree){
   console.log(`Grade ${grade}: draft inventory ${items.length}/${requiredForThree}; three non-repeating culture-only exams (including possible variable culture slots) are NOT supported by drafts alone`);
  }
