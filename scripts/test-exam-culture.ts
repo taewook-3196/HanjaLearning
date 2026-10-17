@@ -66,3 +66,19 @@ for(let run=0;run<100;run++){
  if(ids.every(id=>id<=102)||ids.every(id=>id>=103))throw new Error("Two questions share a concept tag");
 }
 console.log("Optional culture concept tags: 100 randomized paired selections passed");
+
+const pre4Fallback=[13,22,46,5].map((id,i)=>({id,prompt_summary:`Fallback item ${id}`,choice_a:`right ${i}`,choice_b:`wrong A ${i}`,choice_c:`wrong B ${i}`,choice_d:`wrong C ${i}`,correct_choice:1}));
+for(let run=0;run<100;run++){
+ const questions=generateExamQuestions({...base,cultureItems:pre4Fallback,blueprint:pre4CultureBlueprint,questionCount:2});
+ if(questions.length!==2)throw new Error("Legacy PRE4 culture items failed to generate");
+ const ids=new Set(questions.map(q=>Number(q.id.slice("culture:".length))));
+ if(ids.has(13)&&ids.has(22))throw new Error("Missing tags bypassed PRE4 legacy fallback");
+ if(ids.has(22)&&ids.has(46))throw new Error("Missing tags bypassed Chuseok fallback");
+}
+const pre4NullTags=pre4Fallback.map(item=>({...item,concept_tags:null}));
+for(let run=0;run<100;run++){
+ const questions=generateExamQuestions({...base,cultureItems:pre4NullTags,blueprint:pre4CultureBlueprint,questionCount:2});
+ const ids=new Set(questions.map(q=>Number(q.id.slice("culture:".length))));
+ if(ids.has(13)&&ids.has(22)||ids.has(22)&&ids.has(46))throw new Error("NULL tags bypassed legacy fallback");
+}
+console.log("PRE4 missing/NULL concept tags: 200 fallback runs passed");
