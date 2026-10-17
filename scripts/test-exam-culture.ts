@@ -41,3 +41,17 @@ for(let run=0;run<200;run++){
  for(const group of conceptGroups)if(group.every(id=>ids.has(id)))throw new Error(`PRE4 repeated culture concept: ${group.join(",")}`);
 }
 console.log("PRE4 culture concept exclusion: 200 randomized runs passed");
+
+const taggedItems=[101,102,103,104].map((id,i)=>({id,prompt_summary:`Tagged concept ${id}`,choice_a:`correct ${id}`,choice_b:`wrong A ${id}`,choice_c:`wrong B ${id}`,choice_d:`wrong C ${id}`,correct_choice:1,concept_tags:i<2?["shared-topic"]:["other-topic"]}));
+for(let run=0;run<100;run++){
+ const qs=generateExamQuestions({...base,cultureItems:taggedItems,blueprint:cultureBlueprint,questionCount:1});
+ if(qs.length!==1)throw new Error("Concept tag compatible culture generation failed");
+}
+const twoCultureBlueprint={...cultureBlueprint,questionCount:2,items:[{type:"CULTURE_ETIQUETTE" as const,count:2}]};
+for(let run=0;run<100;run++){
+ const qs=generateExamQuestions({...base,cultureItems:taggedItems,blueprint:twoCultureBlueprint,questionCount:2});
+ if(qs.length!==2)throw new Error("Concept tag two-question generation failed");
+ const ids=qs.map(q=>Number(q.id.split(":")[1]));
+ if(ids.every(id=>id<=102)||ids.every(id=>id>=103))throw new Error("Two questions share a concept tag");
+}
+console.log("Optional culture concept tags: 100 randomized paired selections passed");
