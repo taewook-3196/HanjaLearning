@@ -11,7 +11,7 @@ export type WordContext={id:number;word_id:number;sentence:string;blank_text:str
 export type WordStructure={word_id:number;structure_type:string};
 export type CommonCharacterSet={id:number;common_hanja_id:number;word_ids:number[];word_hanja_ids:Record<number,number[]>};
 export type Idiom={id:number;idiom:string;reading:string|null;meaning:string;child_explanation:string|null};
-export type CultureItem={id:number;prompt_summary:string;choice_a:string;choice_b:string;choice_c:string;choice_d:string;correct_choice:number;correct_explanation?:string|null};
+export type CultureItem={id:number;prompt_summary:string;choice_a:string;choice_b:string;choice_c:string;choice_d:string;correct_choice:number;correct_explanation?:string|null;concept_tags?:string[]|null};
 export type UsageItem={id:number;hanja_id:number;prompt:string;choice_a:string;choice_b:string;choice_c:string;choice_d:string;correct_choice:number};
 export type SpecialReading={id:number;hanja_id:number;reading:string;meaning:string;usage_note:string;choice_a:string;choice_b:string;choice_c:string;choice_d:string;correct_choice:number};
 export type ImageItem={id:number;hanja_id:number;asset_path:string;alt_text:string};
@@ -271,7 +271,7 @@ export function generateExamQuestions(args:{recentQuestionKeys?:Set<string>;pool
  const pre4Concepts:Record<number,string[]>={13:["sangwon"],22:["sangwon","chuseok"],46:["chuseok"],14:["filial"],41:["filial"],42:["elders"],43:["elders"]};
  const cultureSelected:typeof cultureCandidates=[];const selectedConcepts=new Set<string>();
  for(const item of cultureCandidates){
-  const concepts=blueprint?.gradeCode==="PRE4"?(pre4Concepts[item.id]??[]):[];
+  const concepts=Array.isArray(item.concept_tags)?[...new Set(item.concept_tags.filter((tag):tag is string=>typeof tag==="string"&&Boolean(tag.trim())).map(tag=>tag.trim()))]:(blueprint?.gradeCode==="PRE4"?(pre4Concepts[item.id]??[]):[]);
   if(concepts.some(concept=>selectedConcepts.has(concept)))continue;
   cultureSelected.push(item);for(const concept of concepts)selectedConcepts.add(concept);
   if(cultureSelected.length>=cultureCount)break;
