@@ -76,7 +76,7 @@ console.log(`Exam generator invariant checks passed for ${gradeCodes.join(", ")}
 // Three consecutive complete 50-question exams per grade with the actual
 // culture draft choices and a synthetic bank for all other question types.
 // This is not a production-data rotation certification.
-for(const gradeCode of ["5","4","PRE3","3"] as const){
+for(const gradeCode of ["5","PRE4","4","PRE3","3"] as const){
  const blueprint=DAEHAN_FIELD_BLUEPRINTS[gradeCode];
  const recent=new Set<string>();
  const cultureSeen=new Set<string>();
