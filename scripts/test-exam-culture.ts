@@ -56,3 +56,13 @@ for(let exam=0;exam<3;exam++){
 }
 if(recentPre4.size!==6)throw new Error(`PRE4 expected six distinct questions, got ${recentPre4.size}`);
 console.log("PRE4 culture rotation: three exams, six distinct questions, no concept overlap");
+
+const taggedItems=[101,102,103,104].map((id,i)=>({id,prompt_summary:`Tagged concept ${id}`,choice_a:`correct ${id}`,choice_b:`wrong A ${id}`,choice_c:`wrong B ${id}`,choice_d:`wrong C ${id}`,correct_choice:1,concept_tags:i<2?["shared-topic"]:["other-topic"]}));
+const taggedBlueprint={...cultureBlueprint,questionCount:2,items:[{type:"CULTURE_ETIQUETTE" as const,count:2}]};
+for(let run=0;run<100;run++){
+ const qs=generateExamQuestions({...base,cultureItems:taggedItems,blueprint:taggedBlueprint,questionCount:2});
+ if(qs.length!==2)throw new Error("Concept tag two-question generation failed");
+ const ids=qs.map(q=>Number(q.id.split(":")[1]));
+ if(ids.every(id=>id<=102)||ids.every(id=>id>=103))throw new Error("Two questions share a concept tag");
+}
+console.log("Optional culture concept tags: 100 randomized paired selections passed");
