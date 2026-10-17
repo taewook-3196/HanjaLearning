@@ -37,12 +37,20 @@ for(const grade of ["5","4","PRE3","3"] as const){
  if(!count)throw new Error(`No culture questions required in grade ${grade}`);
  const cultureBlueprint={...blueprint,questionCount:count,items:blueprint.items.filter(x=>x.type==="CULTURE_ETIQUETTE")};
  const items=drafts.filter(x=>x.grade===grade).map(({grade:_,...item})=>item);
+ // Three consecutive culture-only exams need a sufficient pool of distinct drafts.
+ // This checks source inventory separately from generator behavior; a small pool can
+ // otherwise pass by silently reusing questions when the recent cache is exhausted.
+ const requiredForThree=count*3;
+ if(items.length<requiredForThree){
+  console.log(`Grade ${grade}: draft inventory ${items.length}/${requiredForThree}; three non-repeating culture-only exams are NOT supported by drafts alone`);
+ }
  const used=new Set<string>();
  for(let run=0;run<3;run++){
   const questions=generateExamQuestions({pool,words,relations:[],wordRelations:[],metadata:[],wordContexts:[],wordStructures:[],commonCharacterSets:[],idioms:[],cultureItems:items,usageItems:[],specialReadings:[],imageItems:[],characterById,questionCount:count,blueprint:cultureBlueprint,recentQuestionKeys:used});
   const errors=validateExamQuestions(questions,count,cultureBlueprint);
   if(errors.length)throw new Error(`Grade ${grade} run ${run+1}: ${errors.join("; ")}`);
   for(const q of questions){
+   if(used.has(q.id)&&items.length>=requiredForThree)throw new Error(`Repeated culture question despite sufficient draft pool: ${q.id}`);
    if(!q.id.startsWith("culture:")||q.choices.length!==4||new Set(q.choices).size!==4||!q.choices.includes(q.correct))throw new Error(`Invalid culture question in grade ${grade}`);
    const source=items.find(item=>`culture:${item.id}`===q.id);
    if(!source||q.explanation!==source.correct_explanation)throw new Error(`Missing or mismatched explanation for ${q.id}`);
