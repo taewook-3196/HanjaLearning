@@ -80,7 +80,7 @@ export function fieldExamReadinessIssues(input:ExamReadinessInput,blueprint:Exam
  const required=new Map<string,number>();
  const add=(type:string,count:number)=>required.set(type,(required.get(type)??0)+count);
  for(const item of blueprint.items){
-  if(item.type==="VARIABLE_VERIFIED")continue;
+  if(item.type==="VARIABLE_VERIFIED")continue; // Variable slots are assessed separately from guaranteed fixed-type demand.
   add(item.type,item.count);
  }
  const variableCount=blueprint.items.filter(x=>x.type==="VARIABLE_VERIFIED").reduce((n,x)=>n+x.count,0);
@@ -120,6 +120,17 @@ export function examRotationShortages(input:ExamReadinessInput,blueprint:ExamBlu
  for(const item of blueprint.items){
   if(item.type==="VARIABLE_VERIFIED")continue;
   required.set(item.type,(required.get(item.type)??0)+item.count*examCount);
+ }
+ // PRE3 has a verified variable slot that can be CULTURE_ETIQUETTE.
+ // Report the conservative culture inventory requirement separately from fixed slots.
+ const variableCultureSlots=blueprint.gradeCode==="PRE3"?blueprint.items.filter(item=>item.type==="VARIABLE_VERIFIED").reduce((n,item)=>n+item.count,0):0;
+ if(variableCultureSlots>0){
+  const cultureDemand=(required.get("CULTURE_ETIQUETTE")??0)+variableCultureSlots*examCount;
+  if((available.CULTURE_ETIQUETTE??0)<cultureDemand){
+   // A distinct issue type avoids misrepresenting optional slots as mandatory.
+   required.set("CULTURE_VARIABLE_WORST_CASE",cultureDemand);
+   available.CULTURE_VARIABLE_WORST_CASE=available.CULTURE_ETIQUETTE??0;
+  }
  }
  const issues=[...required].flatMap(([type,needed])=>(available[type]??0)<needed?[{type,required:needed,available:available[type]??0}]:[]);
  const sharedContextDemand=(required.get("CONTEXT_READING")??0)+(required.get("CONTEXT_TO_HANJA")??0);
