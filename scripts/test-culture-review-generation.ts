@@ -42,7 +42,7 @@ for(const grade of ["5","4","PRE3","3"] as const){
  // otherwise pass by silently reusing questions when the recent cache is exhausted.
  const requiredForThree=count*3;
  if(items.length<requiredForThree){
-  console.log(`Grade ${grade}: draft inventory ${items.length}/${requiredForThree}; three non-repeating culture-only exams are NOT supported by drafts alone`);
+  console.log(`Grade ${grade}: draft inventory ${items.length}/${requiredForThree}; three non-repeating culture-only exams (including possible variable culture slots) are NOT supported by drafts alone`);
  }
  const used=new Set<string>();
  for(let run=0;run<3;run++){
