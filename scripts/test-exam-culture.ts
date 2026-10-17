@@ -27,3 +27,17 @@ for(let run=0;run<100;run++){
 }
 if(used.size<2)throw new Error("Recent-question prioritization failed to rotate culture items");
 console.log("Culture exam generation: 100 runs passed; unique items visited:",used.size);
+
+const pre4=DAEHAN_FIELD_BLUEPRINTS.PRE4;
+const pre4CultureBlueprint={...pre4,questionCount:2,items:pre4.items.filter(x=>x.type==="CULTURE_ETIQUETTE")};
+const auditedIds=[13,22,46,14,41,42,43,5,6,44,45];
+const auditedCulture=auditedIds.map((id,i)=>({id,prompt_summary:`준4급 검토 항목 ${id}`,choice_a:`정답 ${i}`,choice_b:`오답1 ${i}`,choice_c:`오답2 ${i}`,choice_d:`오답3 ${i}`,correct_choice:1}));
+const conceptGroups=[[13,22],[22,46],[14,41],[42,43]];
+for(let run=0;run<200;run++){
+ const qs=generateExamQuestions({...base,cultureItems:auditedCulture,blueprint:pre4CultureBlueprint,questionCount:2});
+ const issues=validateExamQuestions(qs,2,pre4CultureBlueprint);
+ if(issues.length)throw new Error(`PRE4 concept run ${run}: ${issues.join("; ")}`);
+ const ids=new Set(qs.map(q=>Number(q.id.replace("culture:",""))));
+ for(const group of conceptGroups)if(group.every(id=>ids.has(id)))throw new Error(`PRE4 repeated culture concept: ${group.join(",")}`);
+}
+console.log("PRE4 culture concept exclusion: 200 randomized runs passed");
