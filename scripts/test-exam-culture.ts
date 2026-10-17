@@ -1,3 +1,4 @@
+import {normalizeCultureItems} from "../src/lib/exam-culture-tags.ts";
 import {DAEHAN_FIELD_BLUEPRINTS} from "../src/lib/exam-blueprints.ts";
 import {generateExamQuestions,validateExamQuestions,type HanjaPoolItem,type PublishedWord} from "../src/lib/exam-generator.ts";
 
@@ -82,3 +83,14 @@ for(let run=0;run<100;run++){
  if(ids.has(13)&&ids.has(22)||ids.has(22)&&ids.has(46))throw new Error("NULL tags bypassed legacy fallback");
 }
 console.log("PRE4 missing/NULL concept tags: 200 fallback runs passed");
+
+const normalizedLegacy=normalizeCultureItems(pre4Fallback);
+if(normalizedLegacy.some(item=>item.concept_tags!==null))throw new Error("Legacy rows must normalize to NULL tags");
+const normalizedTagged=normalizeCultureItems([{...pre4Fallback[0],concept_tags:[" sangwon ","sangwon","", "chuseok"]}]);
+if(JSON.stringify(normalizedTagged[0].concept_tags)!==JSON.stringify(["sangwon","chuseok"]))throw new Error("Culture tag normalization failed");
+for(let run=0;run<100;run++){
+ const qs=generateExamQuestions({...base,cultureItems:normalizedLegacy,blueprint:pre4CultureBlueprint,questionCount:2});
+ const ids=new Set(qs.map(q=>Number(q.id.slice("culture:".length))));
+ if(ids.has(13)&&ids.has(22)||ids.has(22)&&ids.has(46))throw new Error("Normalized legacy culture bypassed fallback");
+}
+console.log("Culture DB row adapter: legacy and tagged rows passed");
