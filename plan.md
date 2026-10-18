@@ -136,3 +136,17 @@
 - 과거 대화의 '완료' 보고를 무조건 신뢰하지 말고 GitHub 커밋·CI·운영 DB·배포 상태를 재확인.
 - 운영 배포·운영 DB 수정·검증되지 않은 문제 공개는 서로 다른 승인/검증 단계다.
 - 개발 중 에러를 감추거나 시험 문항을 무리하게 채우지 말고 **검증 실패를 명확히 표시**한다.
+
+## 10. 2026-10-18 추가 점검 (이번 개발 세션)
+- GitHub `main`의 plan.md를 직접 재조회하고 작업 기준으로 채택함.
+- Vercel `hanja-learning` 최신 조회 production 배포 READY, SHA `7f2663e8d1c5ee40894d8b8546973665ca1fc850` 확인. 이는 문서에 기록된 #631 병합 SHA 이후의 문서 갱신 커밋임. 실제 사용자 동작 검증과는 별개.
+- Supabase `HanjaLearning` (`ehaibfemacjsqzsidlye`) ACTIVE_HEALTHY 재확인. 읽기 전용 SQL로 `exam_grades`/`grade_hanja` 재확인: 8급(id 1) 30자, 7급(id 2) 50자, 6급(id 3) 70자. DB 변경 없음.
+- `src/lib/exam-generator.ts` 확인: `ORIGINAL_IMAGES` 준비 수량은 단순 이미지 수가 아니라 급수별 pool의 유효 한자, `/exam-images/` 경로, alt_text 및 정답과 다른 오답 후보 3개 조건으로 산출됨. 따라서 이미지 9개만으로 준비 완료 판정 불가.
+- 다음 실행 항목: 운영 RPC의 그림 item 반환값을 실제 readiness 입력 형식으로 재현해 `fieldExamReadinessIssues` 및 `examRotationShortages`를 급수별로 계산하고 UI 경고와 대조. 미검증 DRAFT 공개 금지.
+- 이번 단계는 **운영 상태 및 코드 확인 + 문서 업데이트**이며 문제은행 기능 수정/자동 테스트/실기기 검증은 미완료. 후속 PR에서 최소 수정 및 테스트를 수행한다.
+
+### 10.1 후속 확인 — 급수별 그림 후보와 화면 경고 경로
+- 운영 DB 추가 읽기 전용 집계: 8급 9개 이미지/서로 다른 한자 9개/전체 30자, 7급 9/9/50, 6급 9/9/70. `PUBLISHED` 및 `/exam-images/` 경로 조건 기준이며 `alt_text`, 라이선스, RPC 결과를 모두 대체하지는 않음.
+- `src/app/exam/page.tsx` 확인: `list_grade_hanja_core` 반환의 뜻·음이 있는 행만 pool로 구성, `list_grade_exam_hanja_support`의 image_items를 해당 급수 ID로 재필터링, `fieldExamReadinessIssues`에 부족 유형이 있으면 **시험 시작을 차단**, `examRotationShortages`만 있으면 **시험은 허용하고 반복 가능성 경고**. 이 두 경고는 코드상 분리됨.
+- 8급 공식 blueprint는 그림 3/총 25, 7급은 그림 1/총 25, 6급은 총 50이며 그림 필수 여부는 blueprint 상세 항목 기준. 현재 9개 이미지로 8급 그림 3회 분량의 단순 개수 조건은 충족하나 실제 유효 후보/출제 성공 여부는 미확인.
+- 남은 P0: RPC 반환 실제 항목별 검증, 데이터 전체 유형별 readiness 계산 및 실제 브라우저 오류 재현. 사용자 데이터 및 공개 상태는 변경하지 않음.
