@@ -14,4 +14,14 @@ assert.deepEqual(find("3",4,"CULTURE_ETIQUETTE"),{type:"CULTURE_ETIQUETTE",requi
 assert.equal(find("PRE3",4,"CULTURE_ETIQUETTE"),undefined);
 assert.deepEqual(find("PRE3",4,"CULTURE_VARIABLE_WORST_CASE"),{type:"CULTURE_VARIABLE_WORST_CASE",required:6,available:4});
 assert.equal(find("PRE3",6,"CULTURE_VARIABLE_WORST_CASE"),undefined);
-console.log("Exam rotation culture readiness assertions passed");
+// Only fully valid four-choice questions may count toward exam readiness.
+const validCulture=culture(6);
+const invalidDuplicate={...validCulture[0],id:100,choice_d:"가"};
+const invalidAnswer={...validCulture[1],id:101,correct_choice:5};
+const invalidPrompt={...validCulture[2],id:102,prompt_summary:"  "};
+const invalidMissing={...validCulture[3],id:103,choice_c:""};
+const invalidInput={...empty,cultureItems:[...validCulture,invalidDuplicate,invalidAnswer,invalidPrompt,invalidMissing]};
+const invalidIssues=examRotationShortages(invalidInput,DAEHAN_FIELD_BLUEPRINTS["5"],3);
+assert.equal(invalidIssues.find(x=>x.type==="CULTURE_ETIQUETTE"),undefined);
+assert.deepEqual(examRotationShortages({...invalidInput,cultureItems:[...validCulture.slice(0,5),invalidDuplicate,invalidAnswer,invalidPrompt,invalidMissing]},DAEHAN_FIELD_BLUEPRINTS["5"],3).find(x=>x.type==="CULTURE_ETIQUETTE"),{type:"CULTURE_ETIQUETTE",required:6,available:5});
+console.log("Exam rotation culture readiness and invalid-choice assertions passed");
