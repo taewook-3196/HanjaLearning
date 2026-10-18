@@ -136,3 +136,11 @@
 - 과거 대화의 '완료' 보고를 무조건 신뢰하지 말고 GitHub 커밋·CI·운영 DB·배포 상태를 재확인.
 - 운영 배포·운영 DB 수정·검증되지 않은 문제 공개는 서로 다른 승인/검증 단계다.
 - 개발 중 에러를 감추거나 시험 문항을 무리하게 채우지 말고 **검증 실패를 명확히 표시**한다.
+
+## 10. 2026-10-18 추가 점검 (이번 개발 세션)
+- GitHub `main`의 plan.md를 직접 재조회하고 작업 기준으로 채택함.
+- Vercel `hanja-learning` 최신 조회 production 배포 READY, SHA `7f2663e8d1c5ee40894d8b8546973665ca1fc850` 확인. 이는 문서에 기록된 #631 병합 SHA 이후의 문서 갱신 커밋임. 실제 사용자 동작 검증과는 별개.
+- Supabase `HanjaLearning` (`ehaibfemacjsqzsidlye`) ACTIVE_HEALTHY 재확인. 읽기 전용 SQL로 `exam_grades`/`grade_hanja` 재확인: 8급(id 1) 30자, 7급(id 2) 50자, 6급(id 3) 70자. DB 변경 없음.
+- `src/lib/exam-generator.ts` 확인: `ORIGINAL_IMAGES` 준비 수량은 단순 이미지 수가 아니라 급수별 pool의 유효 한자, `/exam-images/` 경로, alt_text 및 정답과 다른 오답 후보 3개 조건으로 산출됨. 따라서 이미지 9개만으로 준비 완료 판정 불가.
+- 다음 실행 항목: 운영 RPC의 그림 item 반환값을 실제 readiness 입력 형식으로 재현해 `fieldExamReadinessIssues` 및 `examRotationShortages`를 급수별로 계산하고 UI 경고와 대조. 미검증 DRAFT 공개 금지.
+- 이번 단계는 **운영 상태 및 코드 확인 + 문서 업데이트**이며 문제은행 기능 수정/자동 테스트/실기기 검증은 미완료. 후속 PR에서 최소 수정 및 테스트를 수행한다.
