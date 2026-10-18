@@ -29,7 +29,9 @@ export default async function Home() {
   if (!profile?.target_provider || !profile?.target_grade) redirect("/onboarding");
   const avatarUrl=profile.avatar_type==="PHOTO"&&profile.avatar_path?await profileAvatarUrl(supabase,profile.avatar_path):null;
   const profileAvatar=avatarUrl?<img className="profile-photo" src={avatarUrl} width={48} height={48} alt="" />:<ProfileAvatarArt avatarKey={profile.avatar_key} size={48} />;
-  const stickerKeys=(profile.featured_sticker_keys??(profile.representative_sticker_key?[profile.representative_sticker_key]:[])).slice(0,3) as GrowthStickerKind[];
+  const knownStickerKeys=new Set<GrowthStickerKind>(["first","stack","write","retry","master","week","streak3","streak7","streak14","streak30","learn50","learn100","learn250","write50","write100","recover5","recover20","accuracy80","quiz50","review10","levelUp","nightOwl","daily20","weeklyChallenge"]);
+  const savedStickerKeys=profile.featured_sticker_keys??(profile.representative_sticker_key?[profile.representative_sticker_key]:[]);
+  const stickerKeys=[...new Set(savedStickerKeys)].filter((key):key is GrowthStickerKind=>knownStickerKeys.has(key as GrowthStickerKind)).slice(0,3);
   const featuredStickers=<div className="home-featured-stickers" aria-label="대표 스티커">{stickerKeys.map(key=><span key={key} className="home-featured-sticker"><GrowthStickerArt kind={key} showCaption/></span>)}</div>;
 
   let gradeQuery = supabase.from("exam_grades").select("id,name,cumulative_hanja_count").eq("code", profile.target_grade);
