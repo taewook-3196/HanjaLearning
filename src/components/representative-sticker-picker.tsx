@@ -1,10 +1,12 @@
 "use client";
 import {useState} from "react";
+import {useRouter} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
 import {GrowthStickerArt} from "@/components/growth-sticker-art";
 import type {GrowthStickerDefinition} from "@/lib/growth-stickers";
 
 export function RepresentativeStickerPicker({stickers,initialKeys}:{stickers:GrowthStickerDefinition[];initialKeys:string[]}){
+ const router=useRouter();
  const earnedKeys=new Set<string>(stickers.filter(sticker=>sticker.earned).map(sticker=>sticker.kind));
  const [selected,setSelected]=useState<string[]>(()=>[...new Set(initialKeys)].filter(key=>earnedKeys.has(key)).slice(0,3));
  const [saving,setSaving]=useState(false);
@@ -20,7 +22,7 @@ export function RepresentativeStickerPicker({stickers,initialKeys}:{stickers:Gro
   if(authError||!user){setError("로그인 상태를 확인하지 못했어요.");setSaving(false);return;}
   const {error:saveError}=await client.rpc("set_featured_stickers",{p_keys:next});
   if(saveError)setError("스티커 선택을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.");
-  else setSelected(next);
+  else {setSelected(next);router.refresh();}
   setSaving(false);
  }
 
