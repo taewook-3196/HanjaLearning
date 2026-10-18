@@ -5,11 +5,13 @@ import {GrowthStickerArt} from "@/components/growth-sticker-art";
 import type {GrowthStickerDefinition} from "@/lib/growth-stickers";
 
 export function RepresentativeStickerPicker({stickers,initialKeys}:{stickers:GrowthStickerDefinition[];initialKeys:string[]}){
- const [selected,setSelected]=useState<string[]>(initialKeys.slice(0,3));
+ const earnedKeys=new Set(stickers.filter(sticker=>sticker.earned).map(sticker=>sticker.kind));
+ const [selected,setSelected]=useState<string[]>(()=>[...new Set(initialKeys)].filter(key=>earnedKeys.has(key)).slice(0,3));
  const [saving,setSaving]=useState(false);
  const [error,setError]=useState("");
  async function save(key:string){
   if(saving)return;
+  if(!earnedKeys.has(key)){setError("획득한 스티커만 대표로 선택할 수 있어요.");return;}
   const next=selected.includes(key)?selected.filter(x=>x!==key):[...selected,key];
   if(next.length>3){setError("대표 스티커는 최대 3개까지 선택할 수 있어요.");return;}
   setSaving(true);setError("");
@@ -23,7 +25,7 @@ export function RepresentativeStickerPicker({stickers,initialKeys}:{stickers:Gro
  }
 
  return <>
-  <p className="subtitle representative-sticker-hint">획득한 스티커를 최대 3개 선택할 수 있어요. 다시 누르면 해제됩니다. 선택한 스티커는 홈과 친구 목록에 표시돼요.</p>
+  <p className="subtitle representative-sticker-hint">획득한 스티커를 최대 3개 선택할 수 있어요. 다시 누르면 해제됩니다. 선택한 스티커는 홈과 친구 목록에 표시돼요. 현재 {selected.length}/3개 선택했어요.</p>
   <div className="sticker-grid">
    {stickers.map(s=>s.earned?
     <button key={s.kind} type="button" className="sticker-item earned representative-growth-option" aria-pressed={selected.includes(s.kind)} aria-label={`${s.name}, ${selected.includes(s.kind)?"선택됨, 다시 누르면 해제":"대표 스티커로 선택"}`} disabled={saving} onClick={()=>void save(s.kind)}>
