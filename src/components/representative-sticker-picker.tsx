@@ -5,7 +5,7 @@ import {GrowthStickerArt} from "@/components/growth-sticker-art";
 import type {GrowthStickerDefinition} from "@/lib/growth-stickers";
 
 export function RepresentativeStickerPicker({stickers,initialKeys}:{stickers:GrowthStickerDefinition[];initialKeys:string[]}){
- const earnedKeys=new Set(stickers.filter(sticker=>sticker.earned).map(sticker=>sticker.kind));
+ const earnedKeys=new Set<string>(stickers.filter(sticker=>sticker.earned).map(sticker=>sticker.kind));
  const [selected,setSelected]=useState<string[]>(()=>[...new Set(initialKeys)].filter(key=>earnedKeys.has(key)).slice(0,3));
  const [saving,setSaving]=useState(false);
  const [error,setError]=useState("");
