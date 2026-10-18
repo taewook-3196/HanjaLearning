@@ -10,6 +10,8 @@ const sections=body.split(/^### /m).slice(1);
 if(sections.length!==10)throw new Error(`Expected 10 draft questions, got ${sections.length}`);
 const distribution=[0,0,0,0];
 const seen=new Set<string>();
+const seenPrompts=new Set<string>();
+const normalize=(value:string)=>value.normalize("NFKC").replace(/\s+/g,"").replace(/[.,!?？。]/g,"").toLowerCase();
 const expected:Record<string,string[]>={"5":["信用","共同","平和"],"4":["交通","孝道"],"PRE3":["信用","共同","孝道"],"3":["共同","平和"]};
 for(const section of sections){
  const [heading,...rest]=section.split("\n");
@@ -20,9 +22,15 @@ for(const section of sections){
  if(seen.has(heading))throw new Error(`Repeated grade term: ${heading}`);
  seen.add(heading);
  const text=rest.join("\n");
+ const prompt=rest.find(line=>line.trim().endsWith("?"))?.trim();
+ if(!prompt)throw new Error(`Missing question prompt: ${heading}`);
+ const normalizedPrompt=normalize(prompt);
+ if(seenPrompts.has(normalizedPrompt))throw new Error(`Repeated question scenario: ${heading}`);
+ seenPrompts.add(normalizedPrompt);
  const choices=[...text.matchAll(/^([1-4])\. (.+)$/gm)];
  if(choices.length!==4||choices.some((m,i)=>Number(m[1])!==i+1))throw new Error(`Invalid four-choice list: ${heading}`);
- if(new Set(choices.map(m=>m[2].trim())).size!==4)throw new Error(`Duplicate choices: ${heading}`);
+ if(new Set(choices.map(m=>normalize(m[2]))).size!==4)throw new Error(`Duplicate or whitespace-variant choices: ${heading}`);
+ if(choices.some(m=>normalize(m[2])===normalizedPrompt))throw new Error(`Choice repeats prompt: ${heading}`);
  const answer=text.match(/^정답: ([1-4])번\./m);
  if(!answer)throw new Error(`Missing answer: ${heading}`);
  distribution[Number(answer[1])-1]++;
