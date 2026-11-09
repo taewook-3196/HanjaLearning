@@ -47,9 +47,11 @@ export default function HanjaCardStudy({cards,targetGradeHanjaIds=[]}:{cards:Car
     <strong className="free-study-character">{card.character}</strong>
     {revealed?<span style={{display:"block",marginTop:8}}><strong style={{display:"block",fontSize:"1.35rem"}}>{card.meaning} · {card.reading}</strong>{card.example?<span style={{display:"block",marginTop:16}}>예시 단어: {card.example.hanja_form||card.example.word}({card.example.reading||card.example.word}){card.example.meaning? ` · ${card.example.meaning}`:""}</span>:null}{card.relation?<span style={{display:"block",marginTop:10}}>{card.relation.label}: {card.relation.word}</span>:null}{card.idiom?<span style={{display:"block",marginTop:10}}>사자성어: {card.idiom.idiom}({card.idiom.reading}){card.idiom.meaning? ` · ${card.idiom.meaning}`:""}</span>:null}</span>:<span style={{display:"block",marginTop:8}}>눌러서 확인</span>}
    </button>
-   <div className="free-study-actions" style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8}}>
+   <div className="free-study-actions" style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginBottom:8}}>
     <button type="button" className="secondary-button" style={{marginTop:0}} onClick={()=>move(-1)}>← 이전</button>
     <button type="button" className="primary-button" style={{marginTop:0}} onClick={()=>move(1)}>다음 →</button>
+   </div>
+   <div className="free-study-actions" style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8}}>
     <button type="button" className="secondary-button" style={{marginTop:0}} onClick={()=>move(-100)}>−100</button>
     <button type="button" className="secondary-button" style={{marginTop:0}} onClick={()=>move(-10)}>−10</button>
     <button type="button" className="secondary-button" style={{marginTop:0}} onClick={()=>move(10)}>+10</button>
