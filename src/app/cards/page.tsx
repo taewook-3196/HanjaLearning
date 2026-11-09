@@ -13,6 +13,8 @@ export default async function HanjaCardsPage(){
  const {data:grades}=await gq;
  if(!grades?.length)return <main className="app-shell"><section className="study-card"><h1>한자 카드</h1><p>목표 급수를 먼저 설정해 주세요.</p><Link href="/settings">설정하기</Link></section></main>;
  const scope=(await Promise.all(grades.map(g=>s.rpc("list_grade_hanja_ids",{target_grade_id:g.id})))).flatMap(x=>x.data??[]);
+ const {data:targetGradeRows}=await s.from("grade_hanja").select("hanja_id,sequence_no").eq("grade_id",grades[0].id).eq("is_new_at_grade",true).order("sequence_no");
+ const targetGradeHanjaIds=(targetGradeRows??[]).map(x=>x.hanja_id);
  const ids=[...new Set(scope.map(x=>x.hanja_id))];
  const [{data:h},{data:r},{data:prog}]=await Promise.all([
   s.from("hanja").select("id,character").in("id",ids),
@@ -51,5 +53,5 @@ export default async function HanjaCardsPage(){
  const relationByWord=new Map<number,{label:string;word:string}>();
  for(const x of relations??[]){const word=relatedById.get(x.to_word_id);if(word&&!relationByWord.has(x.from_word_id))relationByWord.set(x.from_word_id,{label:x.relation_type==="OPPOSITE"?"반의어":"유의어",word});}
  const cards=(h??[]).map(x=>({id:x.id,character:x.character,reading:rm.get(x.id)?.reading??"",meaning:rm.get(x.id)?.meaning??"",learned:learned.has(x.id),example:wordMap.get(x.id)??null,relation:relationByWord.get(wordMap.get(x.id)?.id??-1)??null,idiom:idiomMap.get(x.id)??null}));
- return <main className="app-shell hanja-cards-page"><div className="page-top-actions"><Link className="settings-link" href="/">← 홈</Link></div><section className="hero-card"><p className="eyebrow">{grades[0]?.name??"목표 급수"}</p><h1>한자 카드</h1><p className="subtitle">한자를 보고 뜻과 소리를 떠올린 뒤 눌러서 확인해 보세요.</p></section><HanjaCardStudy cards={cards}/></main>;
+ return <main className="app-shell hanja-cards-page"><div className="page-top-actions"><Link className="settings-link" href="/">← 홈</Link></div><section className="hero-card"><p className="eyebrow">{grades[0]?.name??"목표 급수"}</p><h1>한자 카드</h1><p className="subtitle">한자를 보고 뜻과 소리를 떠올린 뒤 눌러서 확인해 보세요.</p></section><HanjaCardStudy cards={cards} targetGradeHanjaIds={targetGradeHanjaIds}/></main>;
 }
