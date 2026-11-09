@@ -4,15 +4,15 @@ import {createClient} from "@/lib/supabase/client";
 
 type Card={id:number;character:string;reading:string;meaning:string;learned:boolean;example:{word:string;reading:string|null;meaning:string|null;hanja_form:string|null}|null;relation:{label:string;word:string}|null;idiom:{idiom:string;reading:string|null;meaning:string|null}|null};
 
-export default function HanjaCardStudy({cards}:{cards:Card[]}){
- const [onlyLearned,setOnlyLearned]=useState(false);
+export default function HanjaCardStudy({cards,targetGradeHanjaIds=[]}:{cards:Card[];targetGradeHanjaIds?:number[]}){
+ const [onlyLearned,setOnlyLearned]=useState(false);\n const [targetFirst,setTargetFirst]=useState(true);
  const [index,setIndex]=useState(0);
  const [revealed,setRevealed]=useState(false);
  const touchX=useRef<number|null>(null);
  const skipClick=useRef(false);
  const recorded=useRef(new Set<number>());
  const pending=useRef(new Set<number>());
- const visible=useMemo(()=>onlyLearned?cards.filter(x=>x.learned):cards,[cards,onlyLearned]);
+ const ordered=useMemo(()=>targetFirst&&targetGradeHanjaIds.length?[...cards.filter(x=>targetGradeHanjaIds.includes(x.id)),...cards.filter(x=>!targetGradeHanjaIds.includes(x.id))]:cards,[cards,targetFirst,targetGradeHanjaIds]);\n const visible=useMemo(()=>onlyLearned?ordered.filter(x=>x.learned):ordered,[ordered,onlyLearned]);
  const card=visible[index%Math.max(visible.length,1)];
  function move(delta:number){if(!visible.length)return;setIndex(i=>(i+delta+visible.length)%visible.length);setRevealed(false);}
  async function reveal(){
@@ -27,14 +27,14 @@ export default function HanjaCardStudy({cards}:{cards:Card[]}){
    if(!error)recorded.current.add(id);
   }finally{pending.current.delete(id);}
  }
- function changeMode(v:boolean){setOnlyLearned(v);setIndex(0);setRevealed(false);}
+ function changeMode(v:boolean){setOnlyLearned(v);setIndex(0);setRevealed(false);}\n function changeOrder(v:boolean){setTargetFirst(v);setIndex(0);setRevealed(false);}
  if(!cards.length)return <section className="study-card free-study-card"><p>카드로 공부할 한자가 아직 없습니다.</p></section>;
  return <section className="study-card hanja-cards-study">
   <div className="card-mode-selector" style={{display:"flex",gap:8,marginBottom:8}}>
    <button type="button" className={!onlyLearned?"primary-button":"secondary-button"} onClick={()=>changeMode(false)}>전체 한자</button>
    <button type="button" className={onlyLearned?"primary-button":"secondary-button"} onClick={()=>changeMode(true)}>배운 한자만</button>
   </div>
-  {!visible.length?<p>아직 배운 한자가 없습니다. 오늘 학습을 먼저 해보세요.</p>:<>
+  {targetGradeHanjaIds.length>0&&<div className="card-mode-selector" style={{display:"flex",gap:8,marginBottom:12,flexWrap:"wrap"}}><button type="button" className={targetFirst?"primary-button":"secondary-button"} onClick={()=>changeOrder(true)}>목표 급수부터 보기</button><button type="button" className={!targetFirst?"primary-button":"secondary-button"} onClick={()=>changeOrder(false)}>기존 급수 순서</button></div>}\n  {!visible.length?<p>아직 배운 한자가 없습니다. 오늘 학습을 먼저 해보세요.</p>:<>
    <p className="free-study-counter" style={{textAlign:"center"}}>{index+1} / {visible.length}</p>
    <button type="button" className="free-study-reveal hanja-main-card" onClick={reveal} onTouchStart={e=>{touchX.current=e.touches[0]?.clientX??null}} onTouchCancel={()=>{touchX.current=null}} onTouchEnd={e=>{if(touchX.current===null)return;const dx=(e.changedTouches[0]?.clientX??touchX.current)-touchX.current;touchX.current=null;if(Math.abs(dx)>55){skipClick.current=true;move(dx<0?1:-1)}}}>
     <strong className="free-study-character">{card.character}</strong>
