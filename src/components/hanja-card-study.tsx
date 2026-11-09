@@ -16,6 +16,7 @@ export default function HanjaCardStudy({cards,targetGradeHanjaIds=[]}:{cards:Car
  const ordered=useMemo(()=>targetFirst&&targetGradeHanjaIds.length?[...cards.filter(x=>targetGradeHanjaIds.includes(x.id)),...cards.filter(x=>!targetGradeHanjaIds.includes(x.id))]:cards,[cards,targetFirst,targetGradeHanjaIds]);
  const visible=useMemo(()=>onlyLearned?ordered.filter(x=>x.learned):ordered,[ordered,onlyLearned]);
  const card=visible[index%Math.max(visible.length,1)];
+ const originalPosition=card?cards.findIndex(x=>x.id===card.id)+1:0;
  function move(delta:number){if(!visible.length)return;setIndex(i=>((i+delta)%visible.length+visible.length)%visible.length);setRevealed(false);}
  async function reveal(){
   if(skipClick.current){skipClick.current=false;return;}
@@ -41,20 +42,18 @@ export default function HanjaCardStudy({cards,targetGradeHanjaIds=[]}:{cards:Car
   </div>
   {targetGradeHanjaIds.length>0&&<div className="card-mode-selector" style={{display:"flex",gap:8,marginBottom:12,flexWrap:"wrap"}}><button type="button" className={targetFirst?"primary-button":"secondary-button"} onClick={()=>changeOrder(true)}>목표 급수부터 보기</button><button type="button" className={!targetFirst?"primary-button":"secondary-button"} onClick={()=>changeOrder(false)}>기존 급수 순서</button></div>}
   {!visible.length?<p>아직 배운 한자가 없습니다. 오늘 학습을 먼저 해보세요.</p>:<>
-   <p className="free-study-counter" style={{textAlign:"center"}}>{index+1} / {visible.length}</p>
+   <p className="free-study-counter" style={{textAlign:"center"}}>{originalPosition} / {cards.length}</p>
    <button type="button" className="free-study-reveal hanja-main-card" onClick={reveal} onTouchStart={e=>{touchX.current=e.touches[0]?.clientX??null}} onTouchCancel={()=>{touchX.current=null}} onTouchEnd={e=>{if(touchX.current===null)return;const dx=(e.changedTouches[0]?.clientX??touchX.current)-touchX.current;touchX.current=null;if(Math.abs(dx)>55){skipClick.current=true;move(dx<0?1:-1)}}}>
     <strong className="free-study-character">{card.character}</strong>
-    {revealed?<span style={{display:"block",marginTop:8}}><strong style={{display:"block",fontSize:"1.35rem"}}>{card.meaning} · {card.reading}</strong>{card.example?<span style={{display:"block",marginTop:16}}>예시 단어: {card.example.hanja_form||card.example.word}({card.example.reading||card.example.word}){card.example.meaning?` · ${card.example.meaning}`:""}</span>:null}{card.relation?<span style={{display:"block",marginTop:10}}>{card.relation.label}: {card.relation.word}</span>:null}{card.idiom?<span style={{display:"block",marginTop:10}}>사자성어: {card.idiom.idiom}({card.idiom.reading}){card.idiom.meaning?` · ${card.idiom.meaning}`:""}</span>:null}</span>:<span style={{display:"block",marginTop:8}}>눌러서 확인</span>}
+    {revealed?<span style={{display:"block",marginTop:8}}><strong style={{display:"block",fontSize:"1.35rem"}}>{card.meaning} · {card.reading}</strong>{card.example?<span style={{display:"block",marginTop:16}}>예시 단어: {card.example.hanja_form||card.example.word}({card.example.reading||card.example.word}){card.example.meaning? ` · ${card.example.meaning}`:""}</span>:null}{card.relation?<span style={{display:"block",marginTop:10}}>{card.relation.label}: {card.relation.word}</span>:null}{card.idiom?<span style={{display:"block",marginTop:10}}>사자성어: {card.idiom.idiom}({card.idiom.reading}){card.idiom.meaning? ` · ${card.idiom.meaning}`:""}</span>:null}</span>:<span style={{display:"block",marginTop:8}}>눌러서 확인</span>}
    </button>
-   <div className="free-study-actions" style={{display:"flex",flexWrap:"wrap",gap:8,justifyContent:"center"}}>
-    <button type="button" className="secondary-button" onClick={()=>move(-1)}>← 이전</button>
-    <button type="button" className="secondary-button" onClick={()=>move(-100)}>−100</button>
-    <button type="button" className="secondary-button" onClick={()=>move(-10)}>−10</button>
-    <button type="button" className="secondary-button" onClick={()=>move(-1)}>−1</button>
-    <button type="button" className="secondary-button" onClick={()=>move(1)}>+1</button>
-    <button type="button" className="secondary-button" onClick={()=>move(10)}>+10</button>
-    <button type="button" className="secondary-button" onClick={()=>move(100)}>+100</button>
-    <button type="button" className="primary-button" onClick={()=>move(1)}>다음 →</button>
+   <div className="free-study-actions" style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8}}>
+    <button type="button" className="secondary-button" style={{marginTop:0}} onClick={()=>move(-1)}>← 이전</button>
+    <button type="button" className="primary-button" style={{marginTop:0}} onClick={()=>move(1)}>다음 →</button>
+    <button type="button" className="secondary-button" style={{marginTop:0}} onClick={()=>move(-100)}>−100</button>
+    <button type="button" className="secondary-button" style={{marginTop:0}} onClick={()=>move(-10)}>−10</button>
+    <button type="button" className="secondary-button" style={{marginTop:0}} onClick={()=>move(10)}>+10</button>
+    <button type="button" className="secondary-button" style={{marginTop:0}} onClick={()=>move(100)}>+100</button>
    </div>
    <p className="hanja-swipe-hint">좌우로 밀어서 넘길 수도 있어요.</p>
   </>}
