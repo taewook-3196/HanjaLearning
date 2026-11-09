@@ -150,3 +150,10 @@
 - 이동: −100, −10, −1, +1, +10, +100 버튼을 추가. 리스트 끝을 넘으면 기존 카드 순환 동작에 따라 순환.
 - 변경 파일: `src/app/cards/page.tsx`, `src/components/hanja-card-study.tsx`.
 - 상태: **완료** — PR [#634](https://github.com/taewook-3196/HanjaLearning/pull/634) squash 병합, main commit `490102b9da70ea69ce7bd8b6fce2ebb6ffc7e82e`. GitHub Actions CI 성공, Vercel production deployment READY 및 production SHA가 위 merge SHA와 일치함을 확인(2026-11-09). 운영 URL: https://hanja-learning.vercel.app. 실기기 UX 검증은 별도 미실시. 목표 급수 우선은 목표 급수의 `is_new_at_grade` 한자들부터 보여주며 전체 한자 카드는 뒤이어 이어진다.
+
+
+## 2026-11-09 — 한자 카드 탭 반응 보완
+- 사용자 신고: 운영 한자 카드에서 카드 탭 시 아무 동작이 없음.
+- 코드 검토: reveal handler가 이미 펼쳐진 카드에 대해 `if(revealed)return`로 탭을 무시함. 따라서 탭으로 펼치기/접기를 반복할 수 없는 UX였음. 이 조건을 토글로 변경: 탭 시 뜻/읽기/예시를 펼치고, 다시 탭하면 한자만 보이도록 접는다. 학습 기록 RPC는 펼치는 최초 탭에만 호출하고 접을 때는 중복 기록하지 않는다.
+- 변경 파일: `src/components/hanja-card-study.tsx`.
+- 상태: 코드 수정 커밋 `e903585d63a35dc233ad2b09b5c7d16c1020685d` (PR/CI/배포/실기기 검증 대기). iPhone 터치 이벤트 및 스와이프 동작은 병합 후 운영에서 추가 확인.
