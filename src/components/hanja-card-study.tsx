@@ -19,8 +19,10 @@ export default function HanjaCardStudy({cards,targetGradeHanjaIds=[]}:{cards:Car
  function move(delta:number){if(!visible.length)return;setIndex(i=>((i+delta)%visible.length+visible.length)%visible.length);setRevealed(false);}
  async function reveal(){
   if(skipClick.current){skipClick.current=false;return;}
-  if(!card||revealed)return;
-  setRevealed(true);
+  if(!card)return;
+  const wasRevealed=revealed;
+  setRevealed(!wasRevealed);
+  if(wasRevealed)return;
   const id=card.id;
   if(recorded.current.has(id)||pending.current.has(id))return;
   pending.current.add(id);
