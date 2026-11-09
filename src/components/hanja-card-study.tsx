@@ -16,7 +16,7 @@ export default function HanjaCardStudy({cards,targetGradeHanjaIds=[]}:{cards:Car
  const ordered=useMemo(()=>targetFirst&&targetGradeHanjaIds.length?[...cards.filter(x=>targetGradeHanjaIds.includes(x.id)),...cards.filter(x=>!targetGradeHanjaIds.includes(x.id))]:cards,[cards,targetFirst,targetGradeHanjaIds]);
  const visible=useMemo(()=>onlyLearned?ordered.filter(x=>x.learned):ordered,[ordered,onlyLearned]);
  const card=visible[index%Math.max(visible.length,1)];
- function move(delta:number){if(!visible.length)return;setIndex(i=>(i+delta+visible.length)%visible.length);setRevealed(false);}
+ function move(delta:number){if(!visible.length)return;setIndex(i=>((i+delta)%visible.length+visible.length)%visible.length);setRevealed(false);}
  async function reveal(){
   if(skipClick.current){skipClick.current=false;return;}
   if(!card||revealed)return;
